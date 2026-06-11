@@ -9,7 +9,7 @@ def main():
     
     # CRIA A TELA DO JOGO 
     tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
-    pygame.display.set_caption("Neymar Simulator - Teste de Movimentação")
+    pygame.display.set_caption("Neymar Jr - Rumo ao Hexa 2026")
     
     # RELOGIO DO FPS DO JOGO
     relogio = pygame.time.Clock()
