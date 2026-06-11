@@ -35,15 +35,15 @@ class Neymar(pygame.sprite.Sprite):
         
         # PRA OS LADOS:
         if teclas[pygame.K_a]:
-            dx = -self.velocidade
+            dx += -self.velocidade
         if teclas[pygame.K_d]:
-            dx = self.velocidade
+            dx += self.velocidade
         
         # PRA CIMA E PRA BAIXO:
         if teclas[pygame.K_w]:
-            dy = -self.velocidade 
+            dy += -self.velocidade 
         if teclas[pygame.K_s]:
-            dy = self.velocidade    
+            dy += self.velocidade    
             
         # MOVENDO O OBJETO DEPOIS DE APERTAR UMA TECLA
         self.rect.x += dx
