@@ -1,7 +1,7 @@
 # =-=-=-=-= ARQUIVO MAIN TEMPORARIO PARA TESTES =-=-=-=-=
 import pygame
 import sys
-from constants import LARGURA_TELA, ALTURA_TELA, COR_GRAMADO, FPS
+from constants import LARGURA_TELA, ALTURA_TELA, COR_GRAMADO, FPS, LARGURA_GOL, ALTURA_GOL, ALTURA_AREA, LARGURA_AREA, COR_TRAVE, POS_GOL_X, POS_GOL_Y, POSICAO_X_AREA, COR_LINHA
 from neymar import Neymar
 
 def main():
@@ -30,6 +30,16 @@ def main():
         
         # DESENHA A COR DO GRAMADO
         tela.fill(COR_GRAMADO)
+        
+        # DESENHANDO AS LINHAS DO CAMPO
+        # LINHA DE FUNDO
+        pygame.draw.line(tela, COR_LINHA, (0, POS_GOL_Y), (LARGURA_TELA, POS_GOL_Y), 3)
+        
+        # DESENHANDO A GRANDE AREA
+        pygame.draw.rect(tela, COR_LINHA, (POSICAO_X_AREA, POS_GOL_Y, LARGURA_AREA, ALTURA_AREA), 3)
+        
+        # DESENHANDO O GOL, NO CASO AS SUAS TRAVES
+        pygame.draw.rect(tela, COR_TRAVE, (POS_GOL_X, POS_GOL_Y - ALTURA_GOL, LARGURA_GOL, ALTURA_GOL), 4)
         
         # O NEYMAR AQUI AGORA É DESENHADO POR CIMA DO GRAMADO
         tela.blit(neymar.image, neymar.rect)
