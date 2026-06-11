@@ -1,0 +1,56 @@
+import pygame
+from constants import (LARGURA_TELA, ALTURA_TELA, VELOCIDADE_NEY, COR_NEYMAR, CONFIANCA_POR_DIFICULDADE, DRIBLES_CONFIG, META_ESTRELA, FORCA_CHUTE, POS_GOL_X, POS_GOL_Y)
+
+#teclas = pygame.keys.get_pressed()
+
+class Neymar(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        
+        # DEFININDO O RETANGULO DO NEYMAR
+        self.image = pygame.Surface((45,40))
+        self.image.fill(COR_NEYMAR)
+        self.rect = self.image.get_rect()
+        
+        # ONDE ELE VAI SPAWNAR INICIALMENTE PRA TESTES
+        self.rect.centerx = LARGURA_TELA // 2
+        self.rect.centery = ALTURA_TELA - 100
+        
+        self.velocidade = VELOCIDADE_NEY # A VELOCIDADE QUE ELE VAI ANDAR
+        
+        # OBS.: AINDA FALTA IMPLEMENTAR AQUI DEPOIS O SISTEMA PRA QUANDO O USUARIO ESCOLHER A
+        # DIFICULDADE, QUE, A DEPENDER DELA, VAI TER CONFIANÇAS DIFERENTES
+        
+        
+        # isso daqui por enquanto nao vai servir muito
+        # por enquanto eu so quero ver o neymar andando no campo
+        self.barra_estrela = 0
+        self.tem_bola = False
+        
+    def mover(self, teclas):
+        dx = 0
+        dy = 0
+        
+        # TECLAS DE MOVIMENTO SÃO: W-A-S-D
+        
+        # PRA OS LADOS:
+        if teclas[pygame.K_a]:
+            dx = -self.velocidade
+        if teclas[pygame.K_d]:
+            dx = self.velocidade
+        
+        # PRA CIMA E PRA BAIXO:
+        if teclas[pygame.K_w]:
+            dy = -self.velocidade 
+        if teclas[pygame.K_s]:
+            dy = self.velocidade    
+            
+        # MOVENDO O OBJETO DEPOIS DE APERTAR UMA TECLA
+        self.rect.x += dx
+        self.rect.y += dy   
+        
+        # NAO VAI DEIXAR O NEY SAIR DA TELA
+        self.rect.clamp_ip(pygame.Rect(0, 0, LARGURA_TELA, ALTURA_TELA)) 
+        
+        
+            
