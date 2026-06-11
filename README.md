@@ -1,4 +1,3 @@
-BRANCH DE DESENVOLVIMENTO DO PROJETO
 # Jogo do Projeto Final de IP
 https://docs.google.com/document/d/1SNAlg9n5pRUbYihomY0YJYzg-TBxjXq7mLdqfHWCqBc/edit?usp=sharing
 
