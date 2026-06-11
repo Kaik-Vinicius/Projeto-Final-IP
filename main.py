@@ -1,7 +1,8 @@
 # =-=-=-=-= ARQUIVO MAIN TEMPORARIO PARA TESTES =-=-=-=-=
 import pygame
 import sys
-from constants import LARGURA_TELA, ALTURA_TELA, COR_GRAMADO, FPS, LARGURA_GOL, ALTURA_GOL, ALTURA_AREA, LARGURA_AREA, COR_TRAVE, POS_GOL_X, POS_GOL_Y, POSICAO_X_AREA, COR_LINHA
+import math
+from constants import *
 from neymar import Neymar
 from zagueiro import Zagueiro
 
@@ -44,6 +45,14 @@ def main():
         tela.fill(COR_GRAMADO)
         
         # DESENHANDO AS LINHAS DO CAMPO
+        
+        #LINHA DO MEIO DE CAMPO
+        posicao_y_meio_campo = ALTURA_TELA - 5
+        pygame.draw.line(tela, COR_LINHA, (0, posicao_y_meio_campo), (LARGURA_TELA, posicao_y_meio_campo), 3)
+        
+        # ARCO DO MEIO DE CAMPO (A MEIA LUA)
+        pygame.draw.arc(tela, COR_LINHA, (ARCO_X, ARCO_Y, LARGURA_ARCO, ALTURA_ARCO), 0, math.pi, 3)
+        
         # LINHA DE FUNDO
         pygame.draw.line(tela, COR_LINHA, (0, POS_GOL_Y), (LARGURA_TELA, POS_GOL_Y), 3)
         
