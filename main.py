@@ -1,9 +1,11 @@
 # =-=-=-=-= ARQUIVO MAIN TEMPORARIO PARA TESTES =-=-=-=-=
 import pygame
 import sys
+import random #spawn aleatorio dos coletaveis
 from constants import LARGURA_TELA, ALTURA_TELA, COR_GRAMADO, FPS, LARGURA_GOL, ALTURA_GOL, ALTURA_AREA, LARGURA_AREA, COR_TRAVE, POS_GOL_X, POS_GOL_Y, POSICAO_X_AREA, COR_LINHA
 from neymar import Neymar
 from zagueiro import Zagueiro
+from coletaveis import Coletavel # 
 
 def main():
     pygame.init()
@@ -17,6 +19,11 @@ def main():
     
     neymar = Neymar() # CRIA O NEYMAR COMO OBJETO
     zagueiro1 = Zagueiro()
+    
+    #inicialização dos coletaveis
+    grupo_coletaveis = pygame.sprite.Group()
+    grupo_coletaveis.add(Coletavel('bola'))
+    tempo_ultima_chuteira = 0
     
     rodando = True
     while rodando:
@@ -40,8 +47,30 @@ def main():
         if(distancia < 250):
             zagueiro1.perseguir(neymar)
         
+        #logica dos itens colataveis
+        grupo_coletaveis.update()
+        itens_tocados = pygame.sprite.spritecollide(neymar, grupo_coletaveis, False)
+        for item in itens_tocados:
+            if item.tipo == 'bola':
+                neymar.tem_bola = True
+                item.kill()
+            elif item.tipo == 'chuteira':
+                item.kill()
+                tempo_ultima_chuteira = pygame.time.get_ticks()
+            elif item.tipo == 'estrela':
+                item.kill()
+        
+        if pygame.time.get_ticks() - tempo_ultima_chuteira > 2000:
+            if not any(i.tipo == 'chuteira' for i in grupo_coletaveis):
+                grupo_coletaveis.add(Coletavel('chuteira'))
+                if random.random() < 0.3:
+                    grupo_coletaveis.add(Coletavel('estrela'))
+        
         # DESENHA A COR DO GRAMADO
         tela.fill(COR_GRAMADO)
+        
+        # DESENHO DOS ITENS
+        grupo_coletaveis.draw(tela)
         
         # DESENHANDO AS LINHAS DO CAMPO
         # LINHA DE FUNDO
@@ -70,7 +99,5 @@ def main():
 # começa o jogo aqui
 if __name__ == '__main__':
     main()
-            
-        
         
         
