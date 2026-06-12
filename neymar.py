@@ -50,7 +50,7 @@ class Neymar(pygame.sprite.Sprite):
         self.rect.y += dy   
         
         # NAO VAI DEIXAR O NEY SAIR DA TELA
-        self.rect.clamp_ip(pygame.Rect(0, 0, LARGURA_TELA, ALTURA_TELA)) 
+        self.rect.clamp_ip(pygame.Rect(60, POS_GOL_Y, 1300, ALTURA_TELA)) 
         
         
             

@@ -16,7 +16,7 @@ def main():
     relogio = pygame.time.Clock()
     
     neymar = Neymar() # CRIA O NEYMAR COMO OBJETO
-    zagueiro1 = Zagueiro()
+    zagueiro1 = Zagueiro(400, 300)
     
     rodando = True
     while rodando:
@@ -39,6 +39,8 @@ def main():
         # MOVE O ZAGUEIRO NA DIRECAO DO NEYMAR
         if(distancia < 250):
             zagueiro1.perseguir(neymar)
+        else:
+            zagueiro1.idle()
         
         # DESENHA A COR DO GRAMADO
         tela.fill(COR_GRAMADO)
@@ -46,6 +48,8 @@ def main():
         # DESENHANDO AS LINHAS DO CAMPO
         # LINHA DE FUNDO
         pygame.draw.line(tela, COR_LINHA, (0, POS_GOL_Y), (LARGURA_TELA, POS_GOL_Y), 3)
+        pygame.draw.line(tela, COR_LINHA, (60, POS_GOL_Y), (60, ALTURA_TELA), 3)
+        pygame.draw.line(tela, COR_LINHA, (1300, POS_GOL_Y), (1300, ALTURA_TELA), 3)
         
         # DESENHANDO A GRANDE AREA
         pygame.draw.rect(tela, COR_LINHA, (POSICAO_X_AREA, POS_GOL_Y, LARGURA_AREA, ALTURA_AREA), 3)
