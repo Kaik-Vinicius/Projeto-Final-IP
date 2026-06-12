@@ -1,7 +1,6 @@
 import pygame
 from constants import (LARGURA_TELA, ALTURA_TELA, VELOCIDADE_NEY, COR_NEYMAR, CONFIANCA_POR_DIFICULDADE, DRIBLES_CONFIG, META_ESTRELA, FORCA_CHUTE, POS_GOL_X, POS_GOL_Y)
 
-#teclas = pygame.keys.get_pressed()
 
 class Neymar(pygame.sprite.Sprite):
     def __init__(self):
