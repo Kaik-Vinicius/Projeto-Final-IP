@@ -3,7 +3,7 @@ import pygame
 import sys
 import math
 from constants import *
-from neymar import Neymar
+from neymar import Neymar   
 from zagueiro import Zagueiro
 from aliado import Aliado
 import random
