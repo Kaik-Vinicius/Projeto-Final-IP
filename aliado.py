@@ -1,6 +1,5 @@
 import pygame
 
-
 # =-=-=-= CLASSE APENAS PRA COLOCAR O ALIADO NO CMAPO =-=-=-=
 class Aliado(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):

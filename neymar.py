@@ -1,4 +1,5 @@
 import pygame
+import math
 from constants import (LARGURA_TELA, ALTURA_TELA, VELOCIDADE_NEY, COR_NEYMAR, CONFIANCA_POR_DIFICULDADE, DRIBLES_CONFIG, META_ESTRELA, FORCA_CHUTE, POS_GOL_X, POS_GOL_Y)
 
 
@@ -50,6 +51,28 @@ class Neymar(pygame.sprite.Sprite):
         
         # NAO VAI DEIXAR O NEY SAIR DA TELA
         self.rect.clamp_ip(pygame.Rect(0, 0, LARGURA_TELA, ALTURA_TELA)) 
+    
+    def dar_passe(self, bola, grupo_aliados):
+        """ PROCURA O ALIADO MAIS PROXIMO PRA DAR O PASSE """
         
+        if self.tem_bola == True and len(grupo_aliados) > 0:
+            aliado_mais_proximo = None
+            distancia_minima = float('inf')  # coloca um valor infinito logo de cara pra fazer a comparacao
+            
+            # ESSE FOR VAI "VARRER" TODOS OS ALIADOS DO GRUPO DE ALIADOS
+            # E VER QUAL É O QUE ESTÁ MAIS PRÓXIMO
+            for aliado in grupo_aliados:
+                
+                dx = aliado.rect.centerx - self.rect.centerx
+                dy = aliado.rect.centery - self.rect.centery
+                distancia = math.hypot(dx, dy)
+                
+                if distancia < distancia_minima:
+                    distancia_minima = distancia
+                    aliado_mais_proximo = aliado
+                    
+            if aliado_mais_proximo:
+                bola.passar()
+            
         
             

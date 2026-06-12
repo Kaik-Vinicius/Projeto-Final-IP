@@ -6,6 +6,8 @@ from constants import *
 from neymar import Neymar
 from zagueiro import Zagueiro
 from aliado import Aliado
+import random
+from coletaveis import Coletavel
 
 def main():
     pygame.init()
@@ -20,6 +22,10 @@ def main():
     neymar = Neymar() # CRIA O NEYMAR COMO OBJETO
     aliado1 = Aliado(300, 500) # POSICIONA O ALIADO APENAS PRA VER ELE NA TELA
     zagueiro1 = Zagueiro()
+    
+    grupo_coletaveis = pygame.sprite.Group()
+    grupo_coletaveis.add(Coletavel('bola'))
+    tempo_ultima_chuteira = 0
     
     rodando = True
     while rodando:
@@ -43,8 +49,37 @@ def main():
         if(distancia < 250):
             zagueiro1.perseguir(neymar)
         
+        #logica dos itens coletaveis
+        grupo_coletaveis.update()
+        itens_tocados = pygame.sprite.spritecollide(neymar, grupo_coletaveis, False)
+        for item in itens_tocados:
+            if item.tipo == 'bola':
+                neymar.tem_bola = True
+                item.kill()
+            elif item.tipo == 'chuteira':
+                item.kill()
+                tempo_ultima_chuteira = pygame.time.get_ticks()
+            elif item.tipo == 'estrela':
+                item.kill()
+        
+        
+        if pygame.time.get_ticks() - tempo_ultima_chuteira > 2000:
+            if not any(i.tipo == 'chuteira' for i in grupo_coletaveis):
+                
+                # Pega a posição exata do Neymar
+                pos_atual_neymar = neymar.rect.center
+                
+                # item nasce no raio proximo dele
+                grupo_coletaveis.add(Coletavel('chuteira', pos_atual_neymar))
+                
+                if random.random() < 0.3:
+                    grupo_coletaveis.add(Coletavel('estrela', pos_atual_neymar))
+        
         # DESENHA A COR DO GRAMADO
         tela.fill(COR_GRAMADO)
+        
+        # DESENHO DOS ITENS
+        grupo_coletaveis.draw(tela)
         
         # DESENHANDO AS LINHAS DO CAMPO
         
