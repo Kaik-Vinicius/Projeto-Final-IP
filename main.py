@@ -3,10 +3,11 @@ import pygame
 import sys
 import math
 from constants import *
-from neymar import Neymar
+from neymar import Neymar   
 from zagueiro import Zagueiro
+from aliado import Aliado
 import random
-from coletaveis import Coletavel 
+from coletaveis import Coletavel
 
 def main():
     pygame.init()
@@ -19,13 +20,13 @@ def main():
     relogio = pygame.time.Clock()
     
     neymar = Neymar() # CRIA O NEYMAR COMO OBJETO
+    aliado1 = Aliado(300, 500) # POSICIONA O ALIADO APENAS PRA VER ELE NA TELA
     zagueiro1 = Zagueiro()
     
-    #inicialização dos coletaveis
     grupo_coletaveis = pygame.sprite.Group()
     grupo_coletaveis.add(Coletavel('bola'))
     tempo_ultima_chuteira = 0
-
+    
     rodando = True
     while rodando:
         
@@ -79,7 +80,7 @@ def main():
         
         # DESENHO DOS ITENS
         grupo_coletaveis.draw(tela)
-
+        
         # DESENHANDO AS LINHAS DO CAMPO
         
         #LINHA DO MEIO DE CAMPO
@@ -101,6 +102,7 @@ def main():
         # O NEYMAR AQUI AGORA É DESENHADO POR CIMA DO GRAMADO
         tela.blit(zagueiro1.image, zagueiro1.rect)
         tela.blit(neymar.image, neymar.rect)
+        tela.blit(aliado1.image, aliado1.rect)
         
         # AQUI ATUALIZA O JOGO COM TUDO QUE ESTÁ DESENHADO NAQUELE MOMENTO
         pygame.display.flip()
