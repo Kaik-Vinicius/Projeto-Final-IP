@@ -62,9 +62,3 @@ COR_ESTRELA = (255, 255, 0)   # Amarelo Ney Prime
 COR_CHUTEIRA = (255, 128, 0)  # Laranja Energia
 TAMANHO_ITEM = 20             # Largura e altura do retangulo do item
 TEMPO_CHUTEIRA = 4000          # Tempo de sumiço 0.5 milisegundos
-
-###---coletaveis---###
-COR_ESTRELA = (255, 255, 0)   # Amarelo Ney Prime
-COR_CHUTEIRA = (255, 128, 0)  # Laranja Energia
-TAMANHO_ITEM = 20             # Largura e altura do retangulo do item
-TEMPO_CHUTEIRA = 4000          # Tempo de sumiço 0.5 milisegundos
