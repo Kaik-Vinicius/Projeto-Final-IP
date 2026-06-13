@@ -21,7 +21,7 @@ def main():
     relogio = pygame.time.Clock()
     
     neymar = Neymar() # CRIA O NEYMAR COMO OBJETO
-    #zagueiro1 = Zagueiro()
+    zagueiro1 = Zagueiro(400, 300)
     
     # COLOCANDO CADA ALIADO EM UM GRUPO
     aliado_1 = Aliado(300, 500)
@@ -101,21 +101,15 @@ def main():
 
         # CALCULA A DISTANCIA ENTRE O NEYMAR E O ZAGUEIRO, EPOIS VOU ACESSAR PARA DECIDIR AS ESCOLHAS DOS ZAGUEIROS
         pos_neymar = pygame.math.Vector2(neymar.rect.center)
-        #pos_zagueiro = pygame.math.Vector2(zagueiro1.rect.center)
-        #distancia = pos_zagueiro.distance_to(pos_neymar)
+        pos_zagueiro = pygame.math.Vector2(zagueiro1.rect.center)
+        distancia = pos_zagueiro.distance_to(pos_neymar)
 
         # MOVE O ZAGUEIRO NA DIRECAO DO NEYMAR
-<<<<<<< HEAD
         if(distancia < 250):
             zagueiro1.perseguir(neymar)
         else:
             zagueiro1.idle()
-
-=======
-       # if(distancia < 250):
-            #zagueiro1.perseguir(neymar)
         
->>>>>>> jogador-e-chute
         #logica dos itens coletaveis
         grupo_coletaveis.update()
         itens_tocados = pygame.sprite.spritecollide(neymar, grupo_coletaveis, False)
@@ -146,10 +140,6 @@ def main():
         grupo_coletaveis.draw(tela)
         
         # DESENHANDO AS LINHAS DO CAMPO
-<<<<<<< HEAD
-        #LINHA DO MEIO DE CAMPO
-=======
->>>>>>> jogador-e-chute
         posicao_y_meio_campo = ALTURA_TELA - 5
         pygame.draw.line(tela, COR_LINHA, (0, posicao_y_meio_campo), (LARGURA_TELA, posicao_y_meio_campo), 3) #LINHA DO MEIO DE CAMPO
         pygame.draw.arc(tela, COR_LINHA, (ARCO_X, ARCO_Y, LARGURA_ARCO, ALTURA_ARCO), 0, math.pi, 3) # ARCO DO MEIO DE CAMPO (A MEIA LUA)
@@ -157,27 +147,11 @@ def main():
         pygame.draw.rect(tela, COR_LINHA, (POSICAO_X_AREA, POS_GOL_Y, LARGURA_AREA, ALTURA_AREA), 3) # DESENHANDO A GRANDE AREA
         pygame.draw.rect(tela, COR_TRAVE, (POS_GOL_X, POS_GOL_Y - ALTURA_GOL, LARGURA_GOL, ALTURA_GOL), 4) # DESENHANDO O GOL, NO CASO AS SUAS TRAVES
         
-<<<<<<< HEAD
-        # ARCO DO MEIO DE CAMPO (A MEIA LUA)
-        pygame.draw.arc(tela, COR_LINHA, (ARCO_X, ARCO_Y, LARGURA_ARCO, ALTURA_ARCO), 0, math.pi, 3)
-        
-        # LINHA DE FUNDO
-        pygame.draw.line(tela, COR_LINHA, (0, POS_GOL_Y), (LARGURA_TELA, POS_GOL_Y), 3)
-        pygame.draw.line(tela, COR_LINHA, (60, POS_GOL_Y), (60, ALTURA_TELA), 3)
-        pygame.draw.line(tela, COR_LINHA, (1300, POS_GOL_Y), (1300, ALTURA_TELA), 3)
-        
-        # DESENHANDO A GRANDE AREA
-        pygame.draw.rect(tela, COR_LINHA, (POSICAO_X_AREA, POS_GOL_Y, LARGURA_AREA, ALTURA_AREA), 3)
-        
-        # DESENHANDO O GOL, NO CASO AS SUAS TRAVES
-        pygame.draw.rect(tela, COR_TRAVE, (POS_GOL_X, POS_GOL_Y - ALTURA_GOL, LARGURA_GOL, ALTURA_GOL), 4)
-=======
         # DESENHA OO GRUPO DE ALIADOS NA TELA
         grupo_aliados.draw(tela)
->>>>>>> jogador-e-chute
         
         # O NEYMAR AQUI AGORA É DESENHADO POR CIMA DO GRAMADO
-        #tela.blit(zagueiro1.image, zagueiro1.rect)
+        tela.blit(zagueiro1.image, zagueiro1.rect)
         tela.blit(neymar.image, neymar.rect)
         
         # DESENHA A BOLA POR CIMA DO NEYMAR
