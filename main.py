@@ -10,6 +10,7 @@ from bola import Bola
 import random
 from coletaveis import Coletavel
 from interface.menu import MenuInicial
+from interface.pause import BotaoPause, MenuPause
 
 def main():
     
@@ -21,6 +22,12 @@ def main():
 
     #ADICIONANDO O MENU INICIAL
     menu_inicial = MenuInicial(LARGURA_TELA, ALTURA_TELA)
+
+    #ADICIONANDO O BOTAO DE PAUSE
+    botao_pause = BotaoPause(LARGURA_TELA, ALTURA_TELA)
+
+    #ADICIONANDO O MENU DE PAUSE
+    menu_pause = MenuPause(LARGURA_TELA, ALTURA_TELA)
 
     #ADICIONANDO O CAMPO:
     campo_jogo=pygame.image.load("assets/campo/campo_1280x1080.png").convert()
@@ -67,6 +74,10 @@ def main():
                 if acao == "jogar":
                     estado = "jogando"
 
+                #ADICIONANDO A AÇÃO DE QUITAR O JOGO
+                elif acao == "quit":
+                    rodando = False
+
             #SE ESTADO FOR JOGANDO, VERIFICA OS EVENTOS
             elif estado == "jogando":
                 # SE O EVENTO FOR ALGUMA TECLA PRESSIONADA
@@ -76,6 +87,11 @@ def main():
                     
                     elif evento.key == pygame.K_f: # SE FOR PRA ELE DAR O PASSE
                         neymar.dar_passe(bola, grupo_aliados)
+
+                # VERIFICA SE O EVENTO FOI DE CLICAR NO BOTAO DE PAUSE
+                acao_pause = botao_pause.tratar_eventos(evento)
+                if acao_pause == "pause":
+                    estado = "pause"
         
         #SE O ESTADO DO JOGO FOR JOGANDO, ENTÃO ELE VAI ATUALIZAR AS LÓGICAS DE JOGO
         if estado == "jogando":
@@ -158,6 +174,14 @@ def main():
                     
                     if random.random() < 0.3:
                         grupo_coletaveis.add(Coletavel('estrela', pos_atual_neymar))
+
+        #VERIFICA SE APERTOU EM RETOMAR OU MENU INICIAL NO MENU DE PAUSE
+        elif estado == "pause":
+            acao_menu_pause = menu_pause.tratar_eventos(evento)
+            if acao_menu_pause == "retomar":
+                estado = "jogando"
+            elif acao_menu_pause == "menu_inicial":
+                estado = "menu"
         
         if estado == "menu":
             menu_inicial.desenhar(tela)
@@ -187,6 +211,13 @@ def main():
             
             # DESENHA A BOLA POR CIMA DO NEYMAR
             tela.blit(bola.image, bola.rect)
+
+            # DESENHA O BOTAO DE PAUSE POR CIMA DE TUDO
+            botao_pause.desenhar(tela)
+
+        #DESENHANDO MENU DE PAUSE
+        elif estado == "pause":
+            menu_pause.desenhar(tela)
         
         # AQUI ATUALIZA O JOGO COM TUDO QUE ESTÁ DESENHADO NAQUELE MOMENTO
         pygame.display.flip()
