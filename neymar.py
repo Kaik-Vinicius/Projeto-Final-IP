@@ -1,5 +1,6 @@
 import pygame
 import math
+from bola import Bola
 from constants import (LARGURA_TELA, ALTURA_TELA, VELOCIDADE_NEY, COR_NEYMAR, CONFIANCA_POR_DIFICULDADE, DRIBLES_CONFIG, META_ESTRELA, FORCA_CHUTE, POS_GOL_X, POS_GOL_Y)
 
 
@@ -27,7 +28,14 @@ class Neymar(pygame.sprite.Sprite):
         self.barra_estrela = 0
         self.tem_bola = False
         
+        # ATRIBUTO DE SEGURANÇA PRA O PASSE
+        self.tempo_ultimo_passe = 0
+        
     def mover(self, teclas):
+        """
+        MOVE O NEYMAR COM AS TECLAS W-A-S-D
+        """
+        
         dx = 0
         dy = 0
         
@@ -72,7 +80,23 @@ class Neymar(pygame.sprite.Sprite):
                     aliado_mais_proximo = aliado
                     
             if aliado_mais_proximo:
-                bola.passar()
+                
+                # REGISTRA O TEMPO DO PASSE DO NEYMAR
+                self.tempo_ultimo_passe = pygame.time.get_ticks()
+                
+                self.tem_bola = False # NEYMAR DEPOIS QUE PASSA A BOLA, ELE PERDE A POSSE DELA
+                
+                # ESSE 12 É A VELOCIDADE DO PASSE, MAS DEPOIS É SO MUDAR O VALOR OU ATRIBUIR UMA VARIAVEL NAS CONSTANTES
+                bola.passar(self.rect.centerx, self.rect.centery, aliado_mais_proximo.rect.centerx, aliado_mais_proximo.rect.centery, 12)
+                
+                
+    def chutar_pro_gol(self, bola):
+        """ FAZ O NEYMAR MANDAR UMA BOMBA DIRETO EM DIREÇÃO AO GOL """
+        if self.tem_bola:
+            # CHAMA O METODO DA BOLA PRA CHUTAR
+            bola.chutar(FORCA_CHUTE)
             
+            #NEYMAR PERDE A POSSE DA BOLA
+            self.tem_bola = False
         
             
