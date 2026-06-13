@@ -11,6 +11,7 @@ import random
 from coletaveis import Coletavel
 
 def main():
+    
     pygame.init()
     
     # CRIA A TELA DO JOGO 
