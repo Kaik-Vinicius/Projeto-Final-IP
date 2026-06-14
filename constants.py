@@ -1,78 +1,89 @@
+# ==========================================
+# CONFIGURAÇÕES DE TELA (RESOLUÇÃO TOTAL)
+# ==========================================
 LARGURA_TELA = 1920
 ALTURA_TELA = 1080
-
-#Galera, a área jogável começa em x=320 e termina em x=1600. Criei constantes para os limites do campo
-
-LARGURA_CAMPO = 1280
-                        # ESSAS DUAS AQUI AIDA VAMOS MUDAR PQ PRECISAMOS CENTRALIZAR O CAMPO TUDO CERTINHO
-ALTURA_CAMPO = 1080
-
-CAMPO_X = (LARGURA_TELA - LARGURA_CAMPO) // 2
-CAMPO_Y = 0
-
-#LIMITES DO CAMPO
-LIMITE_ESQUERDO = CAMPO_X
-LIMITE_DIREITO = CAMPO_X + LARGURA_CAMPO
-LIMITE_SUPERIOR = CAMPO_Y
-LIMITE_INFERIOR = CAMPO_Y + ALTURA_CAMPO
-
 FPS = 30
 
-COR_GRAMADO = (55, 111, 50) # UM VERDE MEIO ESCURO PRA O GRAMADO
-COR_LINHA = (255, 255, 255) # BRANCO PARA AS LINHAS
-COR_TRAVE = (255, 255, 255) # BRANCO PARA AS TRAVES
-COR_NEYMAR = (255, 255, 0)  # COR DO RETANGULO AMARELO PRA SER O NEY
-COR_ZAGUEIRO = (255, 0, 0)  # COR DO RETANGULO VERMELHO ZAGUEIRO
-COR_BOLA = (255, 255, 255)  # BRANCO DA BOLA
+# ==========================================
+# PROPORÇÕES DO CAMPO DE JOGO
+# ==========================================
+LARGURA_CAMPO_JOGAVEL = 1280
+ALTURA_CAMPO_JOGAVEL = 1080
 
-# CONFIGURAÇÕES PARA O GOL
+# Deslocamento horizontal (Arquibancadas de 320px em cada lado)
+OFFSET_X = (LARGURA_TELA - LARGURA_CAMPO_JOGAVEL) // 2  # 320
+
+# Recuo das linhas de fundo (Linha horizontal onde fica o gol)
+RECUO_LINHA_FUNDO = 40 
+
+# ==========================================
+# LIMITES DAS QUATRO LINHAS BRANCAS (TRAVAS)
+# ==========================================
+# Use estas constantes para prender o Neymar dentro do retângulo de cal
+LIMITE_ESQUERDO = OFFSET_X                              # 320
+LIMITE_DIREITO  = OFFSET_X + LARGURA_CAMPO_JOGAVEL      # 1600
+LIMITE_SUPERIOR = RECUO_LINHA_FUNDO                    # 40
+LIMITE_INFERIOR = ALTURA_CAMPO_JOGAVEL - RECUO_LINHA_FUNDO  # 1040
+
+# Altura real do retângulo de cal (1080 - 40 - 40 = 1000)
+ALTURA_REAL_RETANGULO = LIMITE_INFERIOR - LIMITE_SUPERIOR
+
+# ==========================================
+# CONFIGURAÇÕES GEOMÉTRICAS DOS ELEMENTOS
+# ==========================================
+
+# CONFIGURAÇÕES PARA O GOL (Centralizado no topo sobre a linha dos 40px)
 LARGURA_GOL = 120
 ALTURA_GOL = 40
-POS_GOL_Y = 50
-POS_GOL_X = (LARGURA_TELA // 2) - (LARGURA_GOL // 2) # PRA ELE FICAR EXATAMENTE NO CENTRO
+POS_GOL_X = OFFSET_X + (LARGURA_CAMPO_JOGAVEL // 2) - (LARGURA_GOL // 2)
+POS_GOL_Y = LIMITE_SUPERIOR
 
-# CONFIGURAÇÕES DA GRANDE ÁREA
+# CONFIGURAÇÕES DA GRANDE ÁREA (Baseada na linha superior de fundo)
 LARGURA_AREA = 806
 ALTURA_AREA = 330
-POSICAO_X_AREA = (LARGURA_TELA // 2) - (LARGURA_AREA // 2)
+POSICAO_X_AREA = OFFSET_X + (LARGURA_CAMPO_JOGAVEL // 2) - (LARGURA_AREA // 2)
+POSICAO_Y_AREA = LIMITE_SUPERIOR
 
-# MEIA LUA DO CAMPO
-POS_MEIO_CAMPO_Y = ALTURA_TELA - 5
+# MEIA LUA E LINHA DO MEIO CAMPO
+POS_MEIO_CAMPO_Y = LIMITE_SUPERIOR + (ALTURA_REAL_RETANGULO // 2) # 540
+
 LARGURA_ARCO = 180
 ALTURA_ARCO = 140
-
-ARCO_X = (LARGURA_TELA // 2) - (LARGURA_ARCO // 2)
+ARCO_X = OFFSET_X + (LARGURA_CAMPO_JOGAVEL // 2) - (LARGURA_ARCO // 2)
 ARCO_Y = POS_MEIO_CAMPO_Y - (ALTURA_ARCO // 2)
 
-# VELOCIDADE DO NEYMAR
+# ==========================================
+# CORES DO JOGO
+# ==========================================
+COR_GRAMADO = (55, 111, 50) 
+COR_LINHA = (255, 255, 255) 
+COR_TRAVE = (255, 255, 255) 
+COR_NEYMAR = (255, 255, 0)  
+COR_ZAGUEIRO = (255, 0, 0)  
+COR_BOLA = (255, 255, 255)  
+COR_ESTRELA = (255, 255, 0)   
+COR_CHUTEIRA = (255, 128, 0)  
+
+# ==========================================
+# VELOCIDADES E GAMEPLAY
+# ==========================================
 VELOCIDADE_NEY = 5
-# VELOCIDADE DO ZAGUEIRO
 VELOCIDADE_ZAG = 3
+FORCA_CHUTE = 15 
+
+TAMANHO_ITEM = 20 
+TEMPO_CHUTEIRA = 4000 
+META_ESTRELA = 100
 
 CONFIANCA_POR_DIFICULDADE = {
-    
     'FACIL': 30,
-    'MEDIO':20,       # ESSAS CONFIANCAS AQUI PODEM MUDAR DEPOIS CASO NECESSARIO
+    'MEDIO': 20,
     'DIFICIL': 10
 }
 
 DRIBLES_CONFIG = {
-    
     'PEDALADA': {'ganho': 15, 'chance_inicial': 0.70, 'chance_max': 0.90},
-    '360': {'ganho': 25, 'chance_inicial': 0.50, 'chance_max': 0.80},    # MAIS OUTROS DADOS QUE PODEM MUDAR
+    '360': {'ganho': 25, 'chance_inicial': 0.50, 'chance_max': 0.80},
     'LAMBRETA': {'ganho': 40, 'chance_inicial': 0.25, 'chance_max': 0.75}
 }
-
-# META PRA ACUMULAR A ESTRELA DURANTE A PARTIDA
-META_ESTRELA = 100
-
-# OBS.: DEPOIS PODEMOS IMPLEMENTAR UM SISTEMA PRA UMA PARTE DA ESTRELA DO 'NEY PRIME' JA VIM
-# UM POUCO CARREGADA A DEPENDER DA DIFICULDADE
-
-FORCA_CHUTE = 15 # A VELOCIDADE QUE A BOLA VAI SE MOVER NA TELA
-
-###---coletaveis---###
-COR_ESTRELA = (255, 255, 0)   # Amarelo Ney Prime
-COR_CHUTEIRA = (255, 128, 0)  # Laranja Energia
-TAMANHO_ITEM = 20             # Largura e altura do retangulo do item
-TEMPO_CHUTEIRA = 4000          # Tempo de sumiço 0.5 milisegundos
