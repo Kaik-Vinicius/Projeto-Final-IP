@@ -1,7 +1,7 @@
 import pygame
 import random
 import math
-from constants import (LARGURA_TELA, ALTURA_TELA, COR_BOLA, 
+from gerenciamento.constants import (LARGURA_TELA, ALTURA_TELA, COR_BOLA, 
                        COR_ESTRELA, COR_CHUTEIRA, TAMANHO_ITEM, TEMPO_CHUTEIRA)
 
 class Coletavel(pygame.sprite.Sprite):

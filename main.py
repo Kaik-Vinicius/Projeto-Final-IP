@@ -1,28 +1,29 @@
-# =-=-=-=-= ARQUIVO MAIN COM BUG DO 'GROUP' CORRIGIDO =-=-=-=-=
+# =-=-=-=-= ARQUIVO MAIN TEMPORARIO =-=-=-=-=
 import pygame
 import sys
 import math
 import ctypes  
-from constants import *
-from neymar import Neymar   
-from zagueiro import Zagueiro
-from aliado import Aliado
-from bola import Bola
+from gerenciamento.constants import *
+from entidades.neymar import Neymar   
+from entidades.zagueiro import Zagueiro
+from entidades.aliado import Aliado
+from entidades.bola import Bola
+from gerenciamento.funcoes_importantes import *
 import random
-from coletaveis import Coletavel
+from entidades.coletaveis import Coletavel
 from interface.menu import MenuInicial
 from interface.pause import BotaoPause, MenuPause
 
-def evitar_zoom_do_sistema():
-    """ Evita que o Windows aplique escala de 125% ou 150% e corte o jogo """
+
+def main():
+    # ISSO DAQUI TIRA O ZOOM DO SISTEMA NOS PC's com proporcao 16:10, MAS AINDA ASSIM NAO FICA TAO BOM
     try:
         ctypes.windll.user32.SetProcessDPIAware()
     except:
         pass 
-
-def main():
-    evitar_zoom_do_sistema()
     
+    # =-=-=-=-=-=-=-=-=-=-=
+    # INICIAÇÃO DO JOGO
     pygame.init()
     
     # CRIA A TELA UTILIZANDO A FLAG 'pygame.SCALED'
@@ -67,17 +68,19 @@ def main():
     rodando = True
     while rodando:
         
+        # REGISTRA EVENTO POR EVENTO DO JOGO
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 rodando = False
-                
+            
+            # SE APERTAR EM MENU ELE ABRE O MENU DO JOGO
             if estado == "menu":
                 acao = menu_inicial.tratar_eventos(evento)
                 if acao == "jogar":
                     estado = "jogando"
                 elif acao == "quit":
                     rodando = False
-
+            
             elif estado == "jogando":
                 if evento.type == pygame.KEYDOWN:
                     if evento.key == pygame.K_SPACE: 
@@ -89,41 +92,88 @@ def main():
                 if acao_pause == "pause":
                     estado = "pause"
         
+        # SE O ESTADO FOR JOGANDO, VAI SEGUIR O FLUXO NORMALMENTE DO JOGO
         if estado == "jogando":
             teclas = pygame.key.get_pressed()
             neymar.mover(teclas)
             bola.atualizar_posicao(neymar)
+            tempo_atual = pygame.time.get_ticks()
             
+            # CHECA A SITUAÇÃO DE CADA ALIADO SEMPRE
             for aliado in grupo_aliados:
                 aliado.atualizar_cronometro(neymar, bola)
-                tempo_atual = pygame.time.get_ticks()
-                
-                if bola.em_movimento and not neymar.tem_bola and not aliado.tem_bola:
-                    if tempo_atual - aliado.tempo_ultimo_passe > 500:
-                        if bola.rect.colliderect(aliado.rect):
-                            aliado.receber_bola()
-                            bola.velocidade_x = 0
-                            bola.velocidade_y = 0
+
+            tempo_atual = pygame.time.get_ticks()
+
+            # RECEBIMENTO DA BOLA PELOS ALIADOS COM COLISÃO CONTÍNUA
+            for aliado in grupo_aliados:
+
+                # SE ELE JA TIVR COM A BOLA NAO PODE DOMINAR ELA 
+                if aliado.tem_bola:
+                    continue
+
+                # SE O NEY TEM BOLA O ZAGUEIRO NAO PODE DOMINAR A BOLA
+                if neymar.tem_bola:
+                    continue
+
+                # EVITA QUE A BOLA FIQUE PRESA NELE
+                if tempo_atual - aliado.tempo_ultimo_passe <= 500:
+                    continue
+
+                # bola parada ou em movimento
+                if bola.no_chao_esperando or bola.em_movimento:
+
+                    if bola_tocou_jogador_continua(bola, aliado):
+
+                        aliado.receber_bola()
+
+                        bola.em_movimento = False
+                        bola.no_chao_esperando = False
+
+                        bola.velocidade_x = 0
+                        bola.velocidade_y = 0
+
+                        # VAI DEIXAR A BOLA EXATAMENTE NO CENTRO DO ALIADO
+                        bola.rect.center = aliado.rect.center
+
+                        break
                     
-            # CORREÇÃO AQUI: Linha limpa e corrigida sem o "group" fantasma
-            if neymar.rect.colliderect(bola.rect):
+            # COLISÃO CONTÍNUA COM O NEYMAR
+            if bola_tocou_jogador_continua(bola, neymar):
+
+                # SO DOMINA SE NENHUM ALIADO TIVER SEGURANDO A BOLA
                 if not neymar.tem_bola and not any(aliado.tem_bola for aliado in grupo_aliados):
+
                     tempo_atual = pygame.time.get_ticks()
+
+                    # TRAVA O RE-DOMINIO DA BOLA
                     if tempo_atual - neymar.tempo_ultimo_passe > 500:
-                        if bola.no_chao_esperando or (bola.em_movimento and hasattr(bola, 'destino_x')):
+
+                        if bola.no_chao_esperando or bola.em_movimento:
+
                             if hasattr(bola, 'destino_x'):
                                 del bola.destino_x
-                                del bola.destino_y
-                            bola.dominar(neymar)
 
+                            if hasattr(bola, 'destino_y'):
+                                del bola.destino_y
+
+                            bola.dominar(neymar)
+                            
+            # ISSO DAQUI É O SISTEMA PRA O ZAGUEIRO MEIO QUE PERSEGUIR O NEYMAR
             pos_neymar = pygame.math.Vector2(neymar.rect.center)
             pos_zagueiro = pygame.math.Vector2(zagueiro1.rect.center)
             distancia = pos_zagueiro.distance_to(pos_neymar)
-
+            
+            # CONDICIONAL QUE FAZ O ZAGUEIRO PERSEGUIR O NEYMAR
             if distancia < 250:
                 zagueiro1.perseguir(neymar)
             else:
                 zagueiro1.idle()
+            
+            # ========================
+            # DEFINE AQUI O GRUPO DOS COLETAVEIS
+            # ========================
+            #OBS.: TIREI A "bola" PQ ELA PRECISOU SER PROGRAMADA A PARTE
             
             grupo_coletaveis.update()
             itens_tocados = pygame.sprite.spritecollide(neymar, grupo_coletaveis, False)

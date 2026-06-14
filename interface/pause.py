@@ -1,7 +1,7 @@
 import pygame
 
-from constants import LARGURA_TELA
-from constants import ALTURA_TELA
+from gerenciamento.constants import LARGURA_TELA
+from gerenciamento.constants import ALTURA_TELA
 
 class BotaoPause:
     def __init__(self, LARGURA_TELA, ALTURA_TELA):

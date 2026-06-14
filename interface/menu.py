@@ -1,5 +1,5 @@
 import pygame
-from constants import LARGURA_TELA, ALTURA_TELA
+from gerenciamento.constants import LARGURA_TELA, ALTURA_TELA
 class MenuInicial:
     def __init__(self, largura_tela, altura_tela):
         self.LARGURA_TELA = largura_tela
