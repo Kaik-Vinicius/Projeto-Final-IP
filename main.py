@@ -1,17 +1,56 @@
-# =-=-=-=-= ARQUIVO MAIN TEMPORARIO PARA TESTES =-=-=-=-=
+# =-=-=-=-= ARQUIVO MAIN TEMPORARIO =-=-=-=-=
 import pygame
 import sys
-from constants import LARGURA_TELA, ALTURA_TELA, COR_GRAMADO, FPS, LARGURA_GOL, ALTURA_GOL, ALTURA_AREA, LARGURA_AREA, COR_TRAVE, POS_GOL_X, POS_GOL_Y, POSICAO_X_AREA, COR_LINHA
-from neymar import Neymar
-from zagueiro import Zagueiro
+import math
+import ctypes 
+from gerenciamento.constants import *
+from entidades.neymar import Neymar  
+from entidades.zagueiro import Zagueiro
+from entidades.aliado import Aliado
+from entidades.bola import Bola
+from gerenciamento.funcoes_importantes import *
+import random
+from entidades.coletaveis import Coletavel
+from interface.menu import MenuInicial, MenuDificuldade
+from interface.pause import BotaoPause, MenuPause
 
 def main():
+    # ISSO DAQUI TIRA O ZOOM DO SISTEMA NOS PC's com proporcao 16:10, MAS AINDA ASSIM NAO FICA TAO BOM
+    try:
+        ctypes.windll.user32.SetProcessDPIAware()
+    except:
+        pass
+  
+    # =-=-=-=-=-=-=-=-=-=-=
+    # INICIAÇÃO DO JOGO
     pygame.init()
     
-    # CRIA A TELA DO JOGO 
-    tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
-    pygame.display.set_caption("Neymar Jr - Rumo ao Hexa 2026")
-    
+    # CRIA A TELA UTILIZANDO A FLAG 'pygame.SCALED'
+    tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA), pygame.SCALED)
+    pygame.display.set_caption("Neymar Jr: The Last Dance")
+
+    # ADICIONANDO OS MENUS E INTERFACES
+    menu_inicial = MenuInicial(LARGURA_TELA, ALTURA_TELA)
+    menu_dificuldade = MenuDificuldade(LARGURA_TELA, ALTURA_TELA)
+    botao_pause = BotaoPause(LARGURA_TELA, ALTURA_TELA)
+    menu_pause = MenuPause(LARGURA_TELA, ALTURA_TELA)
+
+
+    # CONTROLE DE ESCALA DO SPRITE DO CAMPO
+    campo_original = pygame.image.load("assets/campo/campo_1280x1080.png").convert()
+    campo_jogo = pygame.transform.smoothscale(campo_original, (LARGURA_CAMPO_JOGAVEL, ALTURA_CAMPO_JOGAVEL))
+  
+    CAMPO_X = OFFSET_X
+    CAMPO_Y = 0
+
+
+    # ESTADO INICIAL DO JOGO
+    estado = "menu"
+
+
+    #ESTADO DA DIFICULDADE INICIAL DO JOGO
+    dificuldade = None
+  
     # RELOGIO DO FPS DO JOGO
     relogio = pygame.time.Clock()
     
@@ -20,8 +59,8 @@ def main():
     
     rodando = True
     while rodando:
-        
-        # VERIFICA SE EU NAO FECHEI A JANELA
+      
+        # REGISTRA EVENTO POR EVENTO DO JOGO
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 rodando = False
@@ -63,18 +102,10 @@ def main():
         
         # AQUI ATUALIZA O JOGO COM TUDO QUE ESTÁ DESENHADO NAQUELE MOMENTO
         pygame.display.flip()
-        
-        # JOGO RODANDO A 30 FPS
         relogio.tick(FPS)
 
-    # FECHA O JOGO
     pygame.quit()
     sys.exit()
 
-# começa o jogo aqui
 if __name__ == '__main__':
     main()
-            
-        
-        
-        
