@@ -335,6 +335,27 @@ def main():
             tela.blit(neymar.image, neymar.rect)
             tela.blit(bola.image, bola.rect)
 
+            # Barra superior translúcida do Placar
+            barra_superior = pygame.Surface((LARGURA_TELA, 50), pygame.SRCALPHA)
+            barra_superior.fill((0, 0, 0, 180)) 
+            tela.blit(barra_superior, (0, 0))
+            
+            txt_chuteiras = fonte_pequena.render(f" 👟 Chuteiras: {chuteiras_coletadas}", True, (255, 255, 255))
+            txt_estrelas = fonte_pequena.render(f" ⭐ Estrelas: {estrelas_coletadas}", True, (255, 255, 255))
+            txt_chances = fonte_pequena.render(f" Chances Restantes: {oportunidades_restantes}", True, (255, 215, 0))
+            
+            tela.blit(txt_chuteiras, (20, 15))
+            tela.blit(txt_estrelas, (200, 15))
+            tela.blit(txt_chances, (LARGURA_TELA - 260, 15))
+            
+            # Barra inferior translúcida do Cronômetro
+            barra_inferior = pygame.Surface((LARGURA_TELA, 60), pygame.SRCALPHA)
+            barra_inferior.fill((0, 0, 0, 180))
+            tela.blit(barra_inferior, (0, ALTURA_TELA - 60))
+            
+            txt_relogio = fonte_jogo.render(f" ⏱️ {minuto_atual}' MIN", True, (255, 255, 255))
+            tela.blit(txt_relogio, (20, ALTURA_TELA - 45))
+
             botao_pause.desenhar(tela)
 
         elif estado == "pause":
