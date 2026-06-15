@@ -11,7 +11,7 @@ from entidades.bola import Bola
 from gerenciamento.funcoes_importantes import *
 import random
 from entidades.coletaveis import Coletavel
-from interface.menu import MenuInicial
+from interface.menu import MenuInicial, MenuDificuldade
 from interface.pause import BotaoPause, MenuPause
 
 
@@ -32,6 +32,7 @@ def main():
 
     # ADICIONANDO OS MENUS E INTERFACES
     menu_inicial = MenuInicial(LARGURA_TELA, ALTURA_TELA)
+    menu_dificuldade = MenuDificuldade(LARGURA_TELA, ALTURA_TELA)
     botao_pause = BotaoPause(LARGURA_TELA, ALTURA_TELA)
     menu_pause = MenuPause(LARGURA_TELA, ALTURA_TELA)
 
@@ -44,6 +45,9 @@ def main():
 
     # ESTADO INICIAL DO JOGO
     estado = "menu"
+
+    #ESTADO DA DIFICULDADE INICIAL DO JOGO
+    dificuldade = None
     
     # RELOGIO DO FPS DO JOGO
     relogio = pygame.time.Clock()
@@ -77,10 +81,26 @@ def main():
             if estado == "menu":
                 acao = menu_inicial.tratar_eventos(evento)
                 if acao == "jogar":
-                    estado = "jogando"
+                    estado = "dificuldade"
                 elif acao == "quit":
                     rodando = False
             
+            #SELECIONANDO AS DIFICULDADES DO JOGO
+            elif estado == "dificuldade":
+                acao = menu_dificuldade.tratar_eventos(evento)
+
+                if acao == "facil":
+                    dificuldade = "facil"
+                    estado = "jogando"
+
+                elif acao == "medio":
+                    dificuldade = "medio"
+                    estado = "jogando"
+
+                elif acao == "dificil":
+                    dificuldade = "dificil"
+                    estado = "jogando"
+
             elif estado == "jogando":
                 if evento.type == pygame.KEYDOWN:
                     if evento.key == pygame.K_SPACE: 
@@ -202,6 +222,9 @@ def main():
         # RENDERIZAÇÃO
         if estado == "menu":
             menu_inicial.desenhar(tela)
+
+        elif estado == "dificuldade":
+            menu_dificuldade.desenhar(tela)
         
         elif estado == "jogando":
             tela.fill((20, 20, 20))
