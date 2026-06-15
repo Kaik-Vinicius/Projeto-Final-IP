@@ -6,9 +6,28 @@ from gerenciamento.constants import COR_BOLA
 class Bola(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.Surface((15, 15))
-        self.image.fill(COR_BOLA)
+
+        #ADICIONANDO OS SPRITES DA BOLA
+        # ADICIONANDO OS SPRITES DA BOLA
+        self.frames_bola = [
+            pygame.image.load("assets/bola/bola1.png").convert_alpha(),
+            pygame.image.load("assets/bola/bola2.png").convert_alpha(),
+            pygame.image.load("assets/bola/bola3.png").convert_alpha(),
+            pygame.image.load("assets/bola/bola4.png").convert_alpha()
+        ]
+
+        # Ajusta o tamanho da bola
+        self.frames_bola = [
+            pygame.transform.scale(frame, (16, 16))
+            for frame in self.frames_bola
+        ]
+
+        self.frame_atual = 0
+        self.image = self.frames_bola[self.frame_atual]
         self.rect = self.image.get_rect()
+
+        self.tempo_ultima_animacao = 0
+        self.intervalo_animacao = 80
 
         # CONTROLE DO MOVIMENTO
         self.velocidade_x = 0.0
@@ -48,6 +67,32 @@ class Bola(pygame.sprite.Sprite):
         self.destino_x = None
         self.destino_y = None
 
+    def animar(self):
+        centro_atual = self.rect.center
+
+        # Se a bola estiver parada, deixa no primeiro frame
+        if not self.em_movimento:
+            self.frame_atual = 0
+            self.image = self.frames_bola[self.frame_atual]
+            self.rect = self.image.get_rect(center=centro_atual)
+            return
+
+        tempo_atual = pygame.time.get_ticks()
+
+        if tempo_atual - self.tempo_ultima_animacao > self.intervalo_animacao:
+            self.tempo_ultima_animacao = tempo_atual
+
+            # Se estiver indo para a esquerda, roda ao contrário
+            if self.velocidade_x < 0:
+                self.frame_atual -= 1
+            else:
+                self.frame_atual += 1
+
+            self.frame_atual %= len(self.frames_bola)
+
+            self.image = self.frames_bola[self.frame_atual]
+            self.rect = self.image.get_rect(center=centro_atual)
+
     def iniciar_lancamento(self, x_inicial, y_inicial, x_destino, y_destino, velocidade_lancamento):
         """
         LANÇAMENTO INICIAL DA BOLA
@@ -81,6 +126,7 @@ class Bola(pygame.sprite.Sprite):
             self.rect.center = self.dono.rect.center
             self.sincronizar_coordenadas_float()
             self._registrar_prev_center()
+            self.animar()
             return
 
         if self.em_movimento:
@@ -108,6 +154,8 @@ class Bola(pygame.sprite.Sprite):
             self.rect.center = neymar.rect.center
             self.sincronizar_coordenadas_float()
             self._registrar_prev_center()
+
+        self.animar()
 
     def ficar_no_chao(self):
         """
