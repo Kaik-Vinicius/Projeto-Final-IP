@@ -158,7 +158,7 @@ class Zagueiro(pygame.sprite.Sprite):
 
 
         # CONTROLE MOVIMENTAÇÃO BÁSICA DO ZAGUEIRO
-        if distancia_bola < 80 and not neymar.tem_bola and not alguem_com_bola:
+        if distancia_bola < 80 and not bola.em_movimento:
             self.preparo_pro_bote = True
         elif distancia_bola < 80 and neymar.tem_bola:
             self.preparo_pro_bote = True
