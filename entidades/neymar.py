@@ -1,9 +1,10 @@
 import pygame
 import math
+import random
 from gerenciamento.funcoes_importantes import prender_neymar_campo
 from entidades.bola import Bola
 from gerenciamento.constants import (LARGURA_TELA, ALTURA_TELA, VELOCIDADE_NEY, 
-            COR_NEYMAR, FORCA_CHUTE, TUPLA_LIMITES_CAMPO)
+            COR_NEYMAR, FORCA_CHUTE, TUPLA_LIMITES_CAMPO, DRIBLES_CONFIG)
 
 
 class Neymar(pygame.sprite.Sprite):
@@ -21,6 +22,10 @@ class Neymar(pygame.sprite.Sprite):
         self.barra_estrela = 0
         self.tem_bola = False
         self.tempo_ultimo_passe = 0
+
+        # ISSO DAQUI É A PARTE QUE VAI ENTRAR O DRIBLE DO NEY
+        self.bola_em_drible = False
+        self.tempo_inicio_drible = 0
 
     def mover(self, teclas):
         dx = 0
@@ -71,3 +76,20 @@ class Neymar(pygame.sprite.Sprite):
             self.tempo_ultimo_passe = pygame.time.get_ticks()
             bola.chutar(FORCA_CHUTE)
             self.tem_bola = False
+
+    def driblar(self, tipo_drible, grupo_zagueiros):
+        """
+        RECEBE COMO PARAMETRO O TIPO DE DRIBLE QUE O NEY EXECUTOU E O GRUPO DE ZAGUEIROS QUE VAI SER PERCORRIDO
+        """
+        if not self.tem_bola:
+            return
+        
+        tipo_drible = tipo_drible.lower()
+
+        # VERIFICA SE TODOS ESTAO EM IDLE PRA PODER EXECUTAR ALGUM DRIBLE
+        todos_em_idle = all(zagueiro.esta_em_idle() for zagueiro in grupo_zagueiros)
+
+        #if todos_em_idle:
+            ####################################
+
+

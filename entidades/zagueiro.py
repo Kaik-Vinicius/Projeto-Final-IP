@@ -168,3 +168,9 @@ class Zagueiro(pygame.sprite.Sprite):
             self.perseguir_neymar(neymar)
         else:
             self.idle()
+    
+    def esta_em_idle(self):
+        # RETORNA TRUE SE O ZAGUEIRO ESTIVER EM IDLE, SE ESTIVER FAZENDO QUALQUER OUTRA COISA ELE RETORNA FALSE
+        if not self.preparo_pro_bote and not self.atordoamento_bote and self.frames_do_dash == 0:
+            return True
+        return False
