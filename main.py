@@ -56,7 +56,11 @@ def main():
   
     # INSTANCIANDO JOGADORES
     neymar = Neymar()
+    
+    #GRUPO DOS ZAGUEIROS
     zagueiro1 = Zagueiro(OFFSET_X + 400, 300)
+    grupo_zagueiros = pygame.sprite.Group()
+    grupo_zagueiros.add(zagueiro1) # Adiciona o zagueiro atual ao grupo
   
     aliado_1 = Aliado(OFFSET_X + 300, 500)
     grupo_aliados = pygame.sprite.Group()
@@ -109,6 +113,14 @@ def main():
                         neymar.chutar_pro_gol(bola)
                     elif evento.key == pygame.K_f:
                         neymar.dar_passe(bola, grupo_aliados)
+                    
+                    # MAPEANDO OS BOTOES DOS DRIBLES DO NEYMAR
+                    elif evento.key == pygame.K_j:
+                        neymar.driblar("pedalada", bola, grupo_zagueiros)
+                    elif evento.key == pygame.K_k:
+                        neymar.driblar("360", bola, grupo_zagueiros)
+                    elif evento.key == pygame.K_l:
+                        neymar.driblar("lambreta", bola, grupo_zagueiros)
 
                 acao_pause = botao_pause.tratar_eventos(evento)
                 if acao_pause == "pause":
@@ -117,9 +129,14 @@ def main():
         # SE O ESTADO FOR JOGANDO, VAI SEGUIR O FLUXO NORMALMENTE DO JOGO
         if estado == "jogando":
             teclas = pygame.key.get_pressed()
-            neymar.mover(teclas)
+            neymar.mover(teclas, bola, grupo_zagueiros)
             bola.atualizar_posicao(neymar)
             tempo_atual = pygame.time.get_ticks()
+            
+            # ISSO DAQUI VAI TIRAR A BOLA DO ESTADO TRAVADO DE EM DRIBLE
+            if neymar.bola_em_drible:
+                if tempo_atual - neymar.tempo_inicio_drible > 400:
+                    neymar.bola_em_drible = False
           
             # CHECA A SITUAÇÃO DE CADA ALIADO SEMPRE
             for aliado in grupo_aliados:
@@ -202,6 +219,7 @@ def main():
                 if item.tipo == 'chuteira':
                     item.kill()
                     tempo_ultima_chuteira = pygame.time.get_ticks()
+                    neymar.atualizar_confianca(15) # ATUALIZA A CONFIANCA DO NEYMAR
                 elif item.tipo == 'estrela':
                     item.kill()
           

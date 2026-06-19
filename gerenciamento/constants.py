@@ -89,7 +89,7 @@ CONFIANCA_POR_DIFICULDADE = {
 }
 
 DRIBLES_CONFIG = {
-    'PEDALADA': {'ganho': 15, 'chance_inicial': 0.70, 'chance_max': 0.90},
+    'pedalada': {'ganho': 15, 'chance_inicial': 0.70, 'chance_max': 0.90},
     '360': {'ganho': 25, 'chance_inicial': 0.50, 'chance_max': 0.80},
-    'LAMBRETA': {'ganho': 40, 'chance_inicial': 0.25, 'chance_max': 0.75}
+    'lambreta': {'ganho': 40, 'chance_inicial': 0.25, 'chance_max': 0.75}
 }
