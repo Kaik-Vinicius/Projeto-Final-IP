@@ -13,6 +13,7 @@ import random
 from entidades.coletaveis import Coletavel
 from interface.menu import MenuInicial, MenuDificuldade
 from interface.pause import BotaoPause, MenuPause
+from interface.tela_espera import desenhar_tela_espera, desenhar_placar_superior, atualizar_logica_espera
 
 
 def main():
@@ -25,6 +26,10 @@ def main():
     # =-=-=-=-=-=-=-=-=-=-=
     # INICIAÇÃO DO JOGO
     pygame.init()
+    #Fonte para o placar e cronometro
+    #Estou adicionando porque não encontrei se já tava definido em algum outro lugar
+    fonte_pequena = pygame.font.SysFont("Arial", 20, bold=True)
+    fonte_jogo = pygame.font.SysFont("Arial", 30, bold=True)
     
     # CRIA A TELA UTILIZANDO A FLAG 'pygame.SCALED'
     tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA), pygame.SCALED)
@@ -45,12 +50,21 @@ def main():
 
     # ESTADO INICIAL DO JOGO
     estado = "menu"
+    estado_anterior = "menu"
 
     #ESTADO DA DIFICULDADE INICIAL DO JOGO
     dificuldade = None
     
     # RELOGIO DO FPS DO JOGO
     relogio = pygame.time.Clock()
+
+    # Crônometro para a tela de espera
+    minuto_atual, minuto_proximo_ataque, ultimo_tick_relogio, intervalo_minuto_ms = 0, 0, 0, 300
+    #Oportunidades totais e restantes para cada dificuldade
+    oportunidades_totais, oportunidades_restantes, tamanho_bloco, bloco_atual = 0, 0, 0, 0
+    #Contadores para o placar
+    chuteiras_coletadas, estrelas_coletadas = 0, 0
+
     
     # INSTANCIANDO JOGADORES
     neymar = Neymar() 
@@ -71,7 +85,9 @@ def main():
     
     rodando = True
     while rodando:
-        
+
+        tempo_atual = pygame.time.get_ticks()
+
         # REGISTRA EVENTO POR EVENTO DO JOGO
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
@@ -91,15 +107,27 @@ def main():
 
                 if acao == "facil":
                     dificuldade = "facil"
-                    estado = "jogando"
+                    oportunidades_totais = 5
 
                 elif acao == "medio":
                     dificuldade = "medio"
-                    estado = "jogando"
+                    oportunidades_totais = 3
 
                 elif acao == "dificil":
                     dificuldade = "dificil"
-                    estado = "jogando"
+                    oportunidades_totais = 2
+
+                if acao in ["facil", "medio", "dificil"]:
+                    tamanho_bloco = 90 // oportunidades_totais
+                    oportunidades_restantes = oportunidades_totais
+                    bloco_atual = 0
+
+                    #Sorteio da minutagem das oportunidades de gols
+                    minuto_proximo_ataque = random.randint(2, tamanho_bloco - 2)
+
+                    minuto_atual = 0
+                    ultimo_tick_relogio = pygame.time.get_ticks()
+                    estado = "espera"
 
             elif estado == "jogando":
                 if evento.type == pygame.KEYDOWN:
@@ -110,14 +138,26 @@ def main():
 
                 acao_pause = botao_pause.tratar_eventos(evento)
                 if acao_pause == "pause":
+                    estado_anterior = estado
                     estado = "pause"
-        
+            elif estado == "espera":
+                acao_pause = botao_pause.tratar_eventos(evento)
+                if acao_pause == "pause":
+                    estado_anterior = estado
+                    estado = "pause"
+
+        if estado == "espera":
+            estado, minuto_atual, ultimo_tick_relogio = atualizar_logica_espera(
+                tempo_atual, ultimo_tick_relogio, minuto_atual, 
+                minuto_proximo_ataque, oportunidades_restantes, intervalo_minuto_ms
+            )
+            
         # SE O ESTADO FOR JOGANDO, VAI SEGUIR O FLUXO NORMALMENTE DO JOGO
         if estado == "jogando":
             teclas = pygame.key.get_pressed()
             neymar.mover(teclas)
             bola.atualizar_posicao(neymar)
-            tempo_atual = pygame.time.get_ticks()
+            
             
             # CHECA A SITUAÇÃO DE CADA ALIADO SEMPRE
             for aliado in grupo_aliados:
@@ -211,13 +251,24 @@ def main():
                     
                     if random.random() < 0.3:
                         grupo_coletaveis.add(Coletavel('estrela', pos_atual_neymar))
+            if(teclas[pygame.K_k]): #Provisorio,depois mudar para um evento de gol ou chance perdida
+                oportunidades_restantes -= 1
+                bloco_atual += 1
 
+                estado = "espera"
+                ultimo_tick_relogio = tempo_atual
+
+                if oportunidades_restantes > 0:
+                    minuto_inicio_bloco = bloco_atual * tamanho_bloco
+                    minuto_fim_bloco = minuto_inicio_bloco + tamanho_bloco
+
+                    minuto_proximo_ataque = random.randint(minuto_inicio_bloco + 2, minuto_fim_bloco - 2)
         elif estado == "pause":
             acao_menu_pause = menu_pause.tratar_eventos(evento)
             if acao_menu_pause == "retomar":
-                estado = "jogando"
+                estado = estado_anterior  # Retorna ao estado anterior (espera ou jogando)
             elif acao_menu_pause == "menu_inicial":
-                estado = "menu"
+                estado = "menu"  
         
         # RENDERIZAÇÃO
         if estado == "menu":
@@ -225,7 +276,14 @@ def main():
 
         elif estado == "dificuldade":
             menu_dificuldade.desenhar(tela)
-        
+        elif estado == "espera":
+            
+            desenhar_tela_espera(
+                tela, campo_jogo, (CAMPO_X, CAMPO_Y), fonte_jogo, fonte_pequena,
+                chuteiras_coletadas, estrelas_coletadas, oportunidades_restantes,
+                minuto_atual, tempo_atual, botao_pause
+            )
+            
         elif estado == "jogando":
             tela.fill((20, 20, 20))
             tela.blit(campo_jogo, (CAMPO_X, CAMPO_Y))
@@ -236,7 +294,8 @@ def main():
             tela.blit(zagueiro1.image, zagueiro1.rect)
             tela.blit(neymar.image, neymar.rect)
             tela.blit(bola.image, bola.rect)
-
+            desenhar_placar_superior(tela, fonte_pequena, chuteiras_coletadas, estrelas_coletadas, oportunidades_restantes)
+            
             botao_pause.desenhar(tela)
 
         elif estado == "pause":
