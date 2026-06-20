@@ -3,8 +3,7 @@ import math
 import random
 from gerenciamento.funcoes_importantes import prender_neymar_campo
 from entidades.bola import Bola
-from gerenciamento.constants import (LARGURA_TELA, ALTURA_TELA, VELOCIDADE_NEY, 
-            COR_NEYMAR, FORCA_CHUTE, TUPLA_LIMITES_CAMPO, DRIBLES_CONFIG)
+from gerenciamento.constants import (LARGURA_TELA, ALTURA_TELA, VELOCIDADE_NEY, COR_NEYMAR, FORCA_CHUTE, TUPLA_LIMITES_CAMPO, DRIBLES_CONFIG)
 
 
 class Neymar(pygame.sprite.Sprite):
@@ -82,7 +81,7 @@ class Neymar(pygame.sprite.Sprite):
         """FAZ O NEYMAR CHUTAR A BOLA"""
         if self.tem_bola:
             self.tempo_ultimo_passe = pygame.time.get_ticks()
-            bola.chutar(FORCA_CHUTE)
+            bola.chutar(self.rect.centerx, self.rect.centery, FORCA_CHUTE)
             self.tem_bola = False
     
     def atualizar_confianca(self, valor):

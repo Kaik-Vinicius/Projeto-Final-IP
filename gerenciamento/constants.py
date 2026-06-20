@@ -39,8 +39,8 @@ ALTURA_REAL_RETANGULO = LIMITE_INFERIOR - LIMITE_SUPERIOR
 # ==========================================
 
 # CONFIGURAÇÕES PARA O GOL (Centralizado no topo sobre a linha dos 40px)
-LARGURA_GOL = 120
-ALTURA_GOL = 40
+LARGURA_GOL = 224 #antes era 120 
+ALTURA_GOL = 54 #antes era 40
 POS_GOL_X = OFFSET_X + (LARGURA_CAMPO_JOGAVEL // 2) - (LARGURA_GOL // 2)
 POS_GOL_Y = LIMITE_SUPERIOR
 

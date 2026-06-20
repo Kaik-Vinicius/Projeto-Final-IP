@@ -1,6 +1,6 @@
 import pygame
 import math
-from gerenciamento.constants import COR_BOLA
+from gerenciamento.funcoes_importantes import direcao_bola
 
 
 class Bola(pygame.sprite.Sprite):
@@ -190,16 +190,19 @@ class Bola(pygame.sprite.Sprite):
         if hasattr(jogador, "tempo_recebeu_bola"):
             jogador.tempo_recebeu_bola = pygame.time.get_ticks()
 
-    def chutar(self, forca_chute):
+    def chutar(self, origem_x, origem_y, FORCA_CHUTE):
         """
         FAZ O NEYMAR CHUTAR A BOLA
         """
         self.dono = None
         self._limpar_destino()
+        self.rect.centerx = origem_x
+        self.rect.centery = origem_y
+        direcaox, direcaoy = direcao_bola(origem_x, origem_y)
+        self.velocidade_x = direcaox * FORCA_CHUTE
+        self.velocidade_y = direcaoy * FORCA_CHUTE
         self.no_chao_esperando = False
         self.em_movimento = True
-        self.velocidade_x = 0.0
-        self.velocidade_y = -forca_chute
         self._registrar_prev_center()
 
     def passar(self, origem_x, origem_y, destino_x, destino_y, velocidade_passe):

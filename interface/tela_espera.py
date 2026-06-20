@@ -5,12 +5,12 @@ def desenhar_placar_superior(tela, fonte_pequena, chuteiras, estrelas, chances):
     Desenha a barra preta do topo e as informações de itens coletados e lances.
     Compartilhada entre a tela de espera e a tela de jogo ativo.
     """
-    # 1. Cria e desenha a barra superior escura semi-transparente
+    #Cria e desenha a barra superior escura semi-transparente
     barra_superior = pygame.Surface((tela.get_width(), 50), pygame.SRCALPHA)
     barra_superior.fill((0, 0, 0, 160)) 
     tela.blit(barra_superior, (0, 0))
     
-    # 2. Renderiza os textos com os valores atuais
+    #Renderiza os textos com os valores atuais
     txt_chuteiras = fonte_pequena.render(f"  Chuteiras: {chuteiras}", True, (255, 255, 255))
     txt_estrelas = fonte_pequena.render(f"  Estrelas: {estrelas}", True, (255, 255, 255))
     txt_chances = fonte_pequena.render(f"  Chances Restantes: {chances}", True, (255, 215, 0))
@@ -26,11 +26,11 @@ def desenhar_tela_espera(tela, campo_jogo, pos_campo, fonte_jogo, fonte_pequena,
     Função responsável por renderizar todo o visual da Tela de Espera Passiva.
     Isola o código para manter o arquivo main.py limpo.
     """
-    # 1. Desenha o gramado de fundo
+    #Desenha o gramado de fundo
     tela.fill((20, 20, 20))
     tela.blit(campo_jogo, pos_campo) # pos_campo deve ser uma tupla (CAMPO_X, CAMPO_Y)
     
-    # 2. Barra superior translúcida do Placar
+    #Barra superior translúcida do Placar
     barra_superior = pygame.Surface((tela.get_width(), 50), pygame.SRCALPHA)
     barra_superior.fill((0, 0, 0, 180)) 
     tela.blit(barra_superior, (0, 0))
@@ -45,7 +45,7 @@ def desenhar_tela_espera(tela, campo_jogo, pos_campo, fonte_jogo, fonte_pequena,
     tela.blit(txt_estrelas, (200, 15))
     tela.blit(txt_chances, (tela.get_width() - 380, 15)) # Afastado do canto do botão
     
-    # 3. Barra inferior translúcida do Cronômetro
+    #Barra inferior translúcida do Cronômetro
     barra_inferior = pygame.Surface((tela.get_width(), 60), pygame.SRCALPHA)
     barra_inferior.fill((0, 0, 0, 180))
     tela.blit(barra_inferior, (0, tela.get_height() - 60))
@@ -64,7 +64,7 @@ def desenhar_tela_espera(tela, campo_jogo, pos_campo, fonte_jogo, fonte_pequena,
         pos_x_texto = (tela.get_width() // 2) - (txt_aguardando.get_width() // 2)
         tela.blit(txt_aguardando, (pos_x_texto, tela.get_height() - 40))
     
-    # 4. Desenha o botão de pause por cima da barra superior
+    #Desenha o botão de pause por cima da barra superior
     botao_pause.desenhar(tela)
 
 def atualizar_logica_espera(tempo_atual, ultimo_tick_relogio, minuto_atual, 
@@ -80,7 +80,7 @@ def atualizar_logica_espera(tempo_atual, ultimo_tick_relogio, minuto_atual,
         print("Fim do jogo!")
         return "menu", minuto_atual, ultimo_tick_relogio
         
-    # Regra do Fast Forward (Aceleração do relógio)
+    # AQUI ACELERA O RELOGIO
     if oportunidades_restantes > 0:
         intervalo_dinamico = intervalo_minuto_ms
     else:
