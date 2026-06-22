@@ -248,9 +248,6 @@ def main():
             zagueiro1.atualizar(neymar, bola, distancia_neymar, distancia_bola, any(aliado.tem_bola for aliado in grupo_aliados))
 
 
-            # ==========================================
-            # SEU CÓDIGO: SISTEMA DE COLETÁVEIS E CONFIANÇA
-            # ==========================================
             
             # 1. DETECTA O DRIBLE E GERA A CHUTEIRA
             if getattr(neymar, 'bola_em_drible', False):
@@ -271,11 +268,11 @@ def main():
                 if item.tipo == 'chuteira':
                     item.kill()
                     neymar.atualizar_confianca(15) 
-                    chuteiras_coletadas += 1 # Integração com o placar dos seus colegas
+                    chuteiras_coletadas += 1 #
                     
                 elif item.tipo == 'estrela':
                     item.kill() 
-                    estrelas_coletadas += 1 # Integração com o placar dos seus colegas
+                    estrelas_coletadas += 1 
                     neymar.ney_prime = True
                     neymar.tempo_prime = pygame.time.get_ticks()
                     neymar.confianca = 0 
