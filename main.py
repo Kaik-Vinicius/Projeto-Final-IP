@@ -40,7 +40,6 @@ def main():
     botao_pause = BotaoPause(LARGURA_TELA, ALTURA_TELA)
     menu_pause = MenuPause(LARGURA_TELA, ALTURA_TELA)
 
-
     # CONTROLE DE ESCALA DO SPRITE DO CAMPO
     campo_original = pygame.image.load("assets/campo/campo_1280x1080.png").convert()
     campo_jogo = pygame.transform.smoothscale(campo_original, (LARGURA_CAMPO_JOGAVEL, ALTURA_CAMPO_JOGAVEL))
@@ -48,11 +47,9 @@ def main():
     CAMPO_X = OFFSET_X
     CAMPO_Y = 0
 
-
     # ESTADO INICIAL DO JOGO
     estado = "menu"
     estado_anterior = "menu"
-
 
     #ESTADO DA DIFICULDADE INICIAL DO JOGO
     dificuldade = None
@@ -87,10 +84,12 @@ def main():
   
     grupo_coletaveis = pygame.sprite.Group()
     tempo_ultima_chuteira = 0
+    
+    # --- VARIÁVEL DA SUA LÓGICA DE COLETÁVEIS ---
+    tempo_ultimo_drible_registrado = 0 
   
     rodando = True
     while rodando:
-
 
         tempo_atual = pygame.time.get_ticks()
 
@@ -167,13 +166,11 @@ def main():
                 minuto_proximo_ataque, oportunidades_restantes, intervalo_minuto_ms
             )
             
-
         # SE O ESTADO FOR JOGANDO, VAI SEGUIR O FLUXO NORMALMENTE DO JOGO
         if estado == "jogando":
             teclas = pygame.key.get_pressed()
             neymar.mover(teclas, bola, grupo_zagueiros)
             bola.atualizar_posicao(neymar)
-            
             
             # ISSO DAQUI VAI TIRAR A BOLA DO ESTADO TRAVADO DE EM DRIBLE
             if neymar.bola_em_drible:
@@ -250,28 +247,46 @@ def main():
             # CONDICIONAL QUE FAZ O ZAGUEIRO PERSEGUIR O NEYMAR
             zagueiro1.atualizar(neymar, bola, distancia_neymar, distancia_bola, any(aliado.tem_bola for aliado in grupo_aliados))
 
-            # ========================
-            # DEFINE AQUI O GRUPO DOS COLETAVEIS
-            # ========================
-            #OBS.: TIREI A "bola" PQ ELA PRECISOU SER PROGRAMADA A PARTE
-          
+
+            # ==========================================
+            # SEU CÓDIGO: SISTEMA DE COLETÁVEIS E CONFIANÇA
+            # ==========================================
+            
+            # 1. DETECTA O DRIBLE E GERA A CHUTEIRA
+            if getattr(neymar, 'bola_em_drible', False):
+                if neymar.tempo_inicio_drible != tempo_ultimo_drible_registrado:
+                    grupo_coletaveis.add(Coletavel('chuteira', pos_jogador=neymar.rect.center))
+                    tempo_ultimo_drible_registrado = neymar.tempo_inicio_drible
+
+            # 2. DETECTA A CONFIANÇA 100% E GERA A ESTRELA
+            if getattr(neymar, 'confianca', 0) >= META_ESTRELA:
+                if not any(i.tipo == 'estrela' for i in grupo_coletaveis) and not getattr(neymar, 'ney_prime', False):
+                    grupo_coletaveis.add(Coletavel('estrela', pos_jogador=neymar.rect.center))
+
+            # 3. LÓGICA DE PEGAR OS ITENS
             grupo_coletaveis.update()
             itens_tocados = pygame.sprite.spritecollide(neymar, grupo_coletaveis, False)
+            
             for item in itens_tocados:
                 if item.tipo == 'chuteira':
                     item.kill()
-                    tempo_ultima_chuteira = pygame.time.get_ticks()
-                    neymar.atualizar_confianca(15) # ATUALIZA A CONFIANCA DO NEYMAR
+                    neymar.atualizar_confianca(15) 
+                    chuteiras_coletadas += 1 # Integração com o placar dos seus colegas
+                    
                 elif item.tipo == 'estrela':
-                    item.kill()
-          
-            if pygame.time.get_ticks() - tempo_ultima_chuteira > 2000:
-                if not any(i.tipo == 'chuteira' for i in grupo_coletaveis):
-                    pos_atual_neymar = neymar.rect.center
-                    grupo_coletaveis.add(Coletavel('chuteira', pos_atual_neymar))
-                  
-                    if random.random() < 0.3:
-                        grupo_coletaveis.add(Coletavel('estrela', pos_atual_neymar))
+                    item.kill() 
+                    estrelas_coletadas += 1 # Integração com o placar dos seus colegas
+                    neymar.ney_prime = True
+                    neymar.tempo_prime = pygame.time.get_ticks()
+                    neymar.confianca = 0 
+
+            # 4. TEMPO DO MODO IMBATÍVEL (7 Segundos)
+            if getattr(neymar, 'ney_prime', False):
+                if pygame.time.get_ticks() - getattr(neymar, 'tempo_prime', 0) > 7000:
+                    neymar.ney_prime = False
+
+            # ==========================================
+            
             if(teclas[pygame.K_o]): #Provisorio,depois mudar para um evento de gol ou chance perdida
                 oportunidades_restantes -= 1
                 bloco_atual += 1
