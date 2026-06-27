@@ -19,7 +19,7 @@ class Coletavel(pygame.sprite.Sprite):
             
         self.rect = self.image.get_rect()
         
-        # --- LÓGICA DE SPAWN (NA FRENTE DO JOGADOR) ---
+        # O SPAWN DOS COLETAVEIS VAI OCORRER NA FRENTE DO JOGADOR
         if pos_jogador is not None:
             if self.tipo == 'chuteira':
                 distancia_min = 60  

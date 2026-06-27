@@ -83,9 +83,6 @@ def main():
     bola.iniciar_lancamento(pos_x_inicial_bola, ALTURA_CAMPO_JOGAVEL, pos_x_inicial_bola, ALTURA_CAMPO_JOGAVEL - 250, velocidade_lancamento=6)
   
     grupo_coletaveis = pygame.sprite.Group()
-    tempo_ultima_chuteira = 0
-    
-    # --- VARIÁVEL DA SUA LÓGICA DE COLETÁVEIS ---
     tempo_ultimo_drible_registrado = 0 
   
     rodando = True
@@ -250,18 +247,24 @@ def main():
 
         
             
-            # 1. DETECTA O DRIBLE E GERA A CHUTEIRA
-            if getattr(neymar, 'bola_em_drible', False):
+            # DETECTA O DRIBLE E GERA A CHUTEIRA
+            if getattr(neymar, 'drible_efetivo', False):
                 if neymar.tempo_inicio_drible != tempo_ultimo_drible_registrado:
                     grupo_coletaveis.add(Coletavel('chuteira', pos_jogador=neymar.rect.center))
                     tempo_ultimo_drible_registrado = neymar.tempo_inicio_drible
+            
+            # ISSO DAQUI VAI TIRAR A BOLA DO ESTADO TRAVADO DE EM DRIBLE
+            if neymar.bola_em_drible:
+                if tempo_atual - neymar.tempo_inicio_drible > 400:
+                    neymar.bola_em_drible = False
+                    neymar.drible_efetivo = False
 
-            # 2. DETECTA A CONFIANÇA 100% E GERA A ESTRELA
+            # DETECTA A CONFIANÇA 100% E GERA A ESTRELA (SISTEMA TEMPORARIO QUE DEPOIS VAI SER MUDADO)
             if getattr(neymar, 'confianca', 0) >= META_ESTRELA:
                 if not any(i.tipo == 'estrela' for i in grupo_coletaveis) and not getattr(neymar, 'ney_prime', False):
                     grupo_coletaveis.add(Coletavel('estrela', pos_jogador=neymar.rect.center))
 
-            # 3. LÓGICA DE PEGAR OS ITENS
+            # LÓGICA DE PEGAR OS ITENS
             grupo_coletaveis.update()
             itens_tocados = pygame.sprite.spritecollide(neymar, grupo_coletaveis, False)
             
