@@ -21,6 +21,7 @@ class Neymar(pygame.sprite.Sprite):
         self.barra_estrela = 0
         self.tem_bola = False
         self.tempo_ultimo_passe = 0
+        self.tempo_ultimo_chute = 0
 
         # ISSO DAQUI É A PARTE QUE VAI ENTRAR O DRIBLE DO NEY
         self.bola_em_drible = False
@@ -29,7 +30,7 @@ class Neymar(pygame.sprite.Sprite):
         
         # ATRIBUINDO A CONFIANCA DO NEYMAR
         self.confianca = 0
-
+    
 
     def mover(self, teclas, bola, grupo_zagueiros=None):
         dx = 0
@@ -80,11 +81,48 @@ class Neymar(pygame.sprite.Sprite):
 
     # metodo pra chutar pra o gol
     def chutar_pro_gol(self, bola):
-        """FAZ O NEYMAR CHUTAR A BOLA"""
-        if self.tem_bola:
-            self.tempo_ultimo_passe = pygame.time.get_ticks()
-            bola.chutar(self.rect.centerx, self.rect.centery, FORCA_CHUTE)
-            self.tem_bola = False
+        """
+        CALCULA A PROBABILIDADE DE GOL BASEADO NA DISTÂNCIA E CONFIANÇA DO NEYMAR,
+        E DISPARA A BOLA COM O DESTINO CORRETO.
+        """
+        if not self.tem_bola:
+            return
+        
+        # NEYMAR PERDE A POSSE DA BOLA
+        self.tem_bola = False
+        
+        # COORDENADAS QUE VAO GUIAR OS CHUTES PRA O GOL
+        centro_gol_x = 960
+        centro_gol_y = 70
+
+        # CÁLCULO DA DISTÂNCIA
+        distancia = math.hypot(centro_gol_x - self.rect.centerx, centro_gol_y - self.rect.centery)
+        
+        # QUANTO MAIS PERTO, MAIOR A CHANCE COM MAXIMO DE 0.95 E MINIMO DE 0.05
+        fator_distancia = max(0.05, min(0.95, 1.0 - (distancia / 1000.0)))
+
+        # CÁLCULO DA CONFIANÇA O MINIMO É ZERO E O MAXIMO É 100
+        fator_confianca = max(0.0, min(1.0, self.confianca / 100.0))
+
+        # PROBABILIDADE FINAL == UM PESO DE 60% PRA DISTANCIA E UM PESO DE 40% PRA CONFIANCA (talvez possamos mudar isso daqui)
+        probabilidade_gol = (fator_distancia * 0.6) + (fator_confianca * 0.4)
+
+        # DEFINIÇÃO DO RESULTADO DO CHUTE
+        # AQUI ENTRA A ALEATORIEDADE DE SE VAI SER GOL OU NAO
+        if random.random() <= probabilidade_gol: 
+            resultado = 'gol'
+        else:
+            # SE ELE ERRAR O GOL, AI É DEFINIDO 50/50 SE VAI PRA FORA OU SE O GOLEIRO PEGA
+            if random.random() < 0.5:
+                resultado = 'defesa'
+                
+            else:
+                resultado = 'fora'
+                
+        self.tempo_ultimo_chute = pygame.time.get_ticks() # REGISTRA O TEMPO DO ULTIMO CHUTE
+        
+        # CHAMA O METODO DE CHUTAR PRA BOLA SER CHUTADA
+        bola.chutar(self.rect.centerx, self.rect.centery, FORCA_CHUTE, resultado)
     
     def atualizar_confianca(self, valor):
         """
@@ -139,7 +177,7 @@ class Neymar(pygame.sprite.Sprite):
                     self.atualizar_confianca(5) # ganha +5 de confianca
 
                     
-    def driblar(self, tipo_drible, bola, grupo_zagueiros, grupo_coletaveis=None):
+    def driblar(self, tipo_drible, bola, grupo_zagueiros):
         """
         RECEBE COMO PARAMETRO O TIPO DE DRIBLE QUE O NEY EXECUTOU E O GRUPO DE ZAGUEIROS QUE VAI SER PERCORRIDO
         """
