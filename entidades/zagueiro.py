@@ -31,12 +31,16 @@ class Zagueiro(pygame.sprite.Sprite):
         # ATRIBUTOS DE ATORDOAMENTO DO ZAGUEIRO
         self.atordoado_por_drible = False
         self.tempo_atordoado_drible = 0
-
+        
+        # ATRIBUTOS PRA GERENCIAR O DRIBLE QUE ZAGUEIRO LEVOU
+        self.driblado = False
+        self.tempo_pos_drible = 0
+        
         # VARIÁVEIS PARA O DIVIDIDO POR FRAMES PRA FICAR MAIS ORGANICO
         self.frames_do_dash = 0
         self.direcao_dash = pygame.math.Vector2(0, 0)
         self.forca_total_dash = 100
-
+        
     def perseguir_bola(self, bola):
         # RECEBE A POSICAO X E Y DA BOLA
         bola_x = bola.rect.centerx
@@ -120,16 +124,20 @@ class Zagueiro(pygame.sprite.Sprite):
     # NOVO MÉTODO PRA O ZAGUEIRO FICAR ATORDOADO POR CAUSA DO DRIBLE
     def ficar_atordoado_por_drible(self, tempo):
         """METODO CHAMADO PELO NEYMAR PARA CONGELAR O MARCADOR APOS UM DRIBLE OU DESVIO"""
-        self.atordoado_por_drible = True
-        self.preparo_pro_bote = False
-        self.pausa = False
-        self.frames_do_dash = 0
-        self.tempo_atordoado_drible = pygame.time.get_ticks() + tempo
+        self.driblado = True
+        self.tempo_pos_drible = tempo
+       
+    # ESSE METODO VAI SER IMPORTANTE POR CAUSA DOO SISTEMA DE OPORTUNIDADES FUTURAMENTE
+    def colisao_ativa(self):
+        """METODO PRA VERIFICAR SE HOUVE COLISAO COM A BOLA OU NAO"""
+        if self.driblado or self.atordoado_por_drible:
+            return False
+        return True
+
 
     def atualizar(self, neymar, bola, distancia_neymar, distancia_bola, alguem_com_bola):
         tempo_atual = pygame.time.get_ticks()
         
-        # 
         if self.atordoado_por_drible:
             if tempo_atual >= self.tempo_atordoado_drible:
                 self.atordoado_por_drible = False
@@ -148,9 +156,16 @@ class Zagueiro(pygame.sprite.Sprite):
           
             # ACABOU O DASH, GUARDA O TEMPO EM QUE O DASH ACABOU
             if self.frames_do_dash == 0:
-                self.atordoamento_bote = True
-                self.tempo_pausa = pygame.time.get_ticks()
-            return #GARANTIR QUE NADA MAIS ACONTEÇA
+                if self.driblado:
+                    # SE FOI DRIBLADO O TEMPO DE 1.5s começa agora
+                    self.atordoado_por_drible = True
+                    self.tempo_atordoado_drible = pygame.time.get_ticks() + self.tempo_pos_drible
+                    self.driblado = False  #RESETA A VARIAVEL PRA O PROXIMO LANCE
+                else:
+                    # SE NAO FOI DRIBLADO, DÁ O BOTE MAS FICA ATORDOADO POR 1s só
+                    self.atordoamento_bote = True
+                    self.tempo_pausa = pygame.time.get_ticks()
+            return
 
 
         # FICA PARADO POR 1 SEGUNDO DEPOIS DO DASH

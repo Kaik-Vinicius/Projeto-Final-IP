@@ -2,7 +2,7 @@ import pygame
 import math
 import random
 from gerenciamento.funcoes_importantes import prender_neymar_campo
-from entidades.bola import Bola
+from entidades.coletaveis import Coletavel
 from gerenciamento.constants import (LARGURA_TELA, ALTURA_TELA, VELOCIDADE_NEY, COR_NEYMAR, FORCA_CHUTE, TUPLA_LIMITES_CAMPO, DRIBLES_CONFIG)
 
 
@@ -25,9 +25,12 @@ class Neymar(pygame.sprite.Sprite):
         # ISSO DAQUI É A PARTE QUE VAI ENTRAR O DRIBLE DO NEY
         self.bola_em_drible = False
         self.tempo_inicio_drible = 0
+        self.drible_efetivo = False
         
         # ATRIBUINDO A CONFIANCA DO NEYMAR
         self.confianca = 0
+        self.ultimo_tipo_drible = 'manual'
+
 
     def mover(self, teclas, bola, grupo_zagueiros=None):
         dx = 0
@@ -102,6 +105,9 @@ class Neymar(pygame.sprite.Sprite):
         
         chance = c_ini + ((self.confianca / 100.0) * (c_max - c_ini))
             
+        if getattr(self, 'ney_prime', False):
+            return 1.0
+
         return min(chance, c_max)
         
 
@@ -110,9 +116,19 @@ class Neymar(pygame.sprite.Sprite):
         VERIFICA SE O NEYMAR SE AFASTOU DO ZAGUEIRO ENQUANTO ELE ARMAVA O BOTE USANDO AS TECLAS 'WASD'
         """
         
+        tempo_atual = pygame.time.get_ticks()
+        
+        # SE PASSOU 1.5s DO ULTIMO DRIBLE, AI LIBERA A FLAG PRA PODER DRIBLAR DE NOVO
+        if self.drible_efetivo and tempo_atual - self.tempo_inicio_drible >= 1500:
+            self.drible_efetivo = False
+            
         # ITERA SOBRE CADA ZAGUEIRO
         for zagueiro in grupo_zagueiros:
-            if zagueiro.preparo_pro_bote:
+            preparo = getattr(zagueiro, 'preparo_pro_bote', False)
+            driblado = getattr(zagueiro, 'driblado', False)
+            atordoado = getattr(zagueiro, 'atordoado_por_drible', False)
+            
+            if preparo and not driblado and not atordoado:
                 dx = zagueiro.rect.centerx - bola.rect.centerx
                 dy = zagueiro.rect.centery - bola.rect.centery
                 
@@ -120,17 +136,24 @@ class Neymar(pygame.sprite.Sprite):
             
                # ESSA CONDICIONAL VERIFICA SE ESTA NA DISTANCIA IDEAL PRA APLICAR O DRIBLE
                 if 95 <= distancia_bola_zagueiro <= 140:
-                    zagueiro.ficar_atordoado_por_drible(tempo=1000)
+                    
+                    if self.drible_efetivo:
+                        break
+                    
+                    if hasattr(zagueiro, 'ficar_atordoado_por_drible'):
+                        zagueiro.ficar_atordoado_por_drible(tempo=1000)
                     self.bola_em_drible = True
+                    self.drible_efetivo = True
                     self.tempo_inicio_drible = pygame.time.get_ticks()
-                    self.atualizar_confianca(5) # ganha +5 de confianca
+                    self.ultimo_tipo_drible = 'manual'
 
-
-    def driblar(self, tipo_drible, bola, grupo_zagueiros):
+                    
+    def driblar(self, tipo_drible, bola, grupo_zagueiros, grupo_coletaveis=None):
         """
         RECEBE COMO PARAMETRO O TIPO DE DRIBLE QUE O NEY EXECUTOU E O GRUPO DE ZAGUEIROS QUE VAI SER PERCORRIDO
         """
-        if not self.tem_bola:
+        # SE NAO TIVER A BOLA OU SE JA TIVER EM UM DRIBLE EFETIVO, ELE BLOQUEIA
+        if not self.tem_bola or self.drible_efetivo:
             return
         
         tipo_drible = tipo_drible.lower()
@@ -157,7 +180,10 @@ class Neymar(pygame.sprite.Sprite):
         # AQUI O NEY SO FAZ FIRULA
         if todos_em_idle and dist_min > 120:
             self.bola_em_drible = True 
+            self.drible_efetivo = False # A FIRULA NAO É CONSIDERADA UM DRIBLE EFETIVO
             self.tempo_inicio_drible = pygame.time.get_ticks()
+            self.ultimo_tipo_drible = 'firula'
+            return
         
         # AQUI ELE VAI TENTAR DRIBLAR O ZAGUEIRO CASO ELE ESTEJA PREPARADO PRA UMM BOTE
         elif zagueiro_mais_proximo and dist_min <= 110:
@@ -165,13 +191,9 @@ class Neymar(pygame.sprite.Sprite):
                     chance_final = self.calcular_chance_drible(tipo_drible)
                     
                     if random.random() <= chance_final: # ISSO DAQUI RANDOMIZA A CHANCE DE DAR CERTO
-                        zagueiro_mais_proximo.ficar_atordoado_por_drible(tempo=1500) # ATORDOAMENTO DE 1.5s
+                        if hasattr(zagueiro_mais_proximo, 'ficar_atordoado_por_drible'):
+                            zagueiro_mais_proximo.ficar_atordoado_por_drible(tempo=1500) # ATORDOAMENTO DE 1.5s
                         self.bola_em_drible = True
+                        self.drible_efetivo = True
                         self.tempo_inicio_drible = pygame.time.get_ticks()
-                        
-                        self.atualizar_confianca(ganho_confianca)
-                    
-            
-            
-
-
+                        self.ultimo_tipo_drible = tipo_drible
