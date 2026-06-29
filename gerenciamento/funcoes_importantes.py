@@ -5,13 +5,13 @@ from entidades.zagueiro import Zagueiro
 from entidades.aliado import Aliado
 from gerenciamento.constants import *
 
-
-# =-=-=-=-=--=-= FUNCAO QUE PRENDE O NEY NO CAMPO =-=-=-=-=-=-=-=-=-=
 def prender_neymar_campo(neymar, campo_jogavel):
+    """
+    FUNÇÃO QUE PRENDE O NEYMAR NOS LIMITES DO CAMPO
+    """
     neymar.rect.clamp_ip(campo_jogavel)
     
 
-# =-=-=-=-=--=-= FUNCAO QUE VAI RETONAR SE A BOLA COLIDIU COM O JOGADOR =-=-=-=-=-=-=-=-=-=
 def bola_tocou_jogador_continua(bola, jogador):
     """
     EXPANDE BEM A HITBOX DA BOLA E DO JOGADOR E EVITA QUE O JOGAGOR ACABE NAO DOMINANDO A BOLA
@@ -61,6 +61,16 @@ def checar_conclusao_jogada(bola):
     """
     VERIFICA SE A BOLA PASSOU DA LINHA DE FUNDO, SE FOI GOL OU NAO
     """
+    
+    if (bola.rect.centerx < 320 or
+        bola.rect.centerx > 1600 or
+        bola.rect.centery > 1080 or
+        (bola.rect.centery < 65 and getattr(bola, 'resultado_chute', None) is None)):
+
+        bola.resultado_chute = 'fora'
+        return True
+        
+
     if bola.em_movimento and getattr(bola, 'resultado_chute', None) is not None:
         
         # DEFINE O LIMITE DA PARADA DA BOLA CONFORME OS PIXELS
@@ -85,39 +95,38 @@ def checar_conclusao_jogada(bola):
 
 def preparar_nova_oportunidade(dificuldade, indice_lance, neymar, bola, grupo_zagueiros, grupo_aliados):
     """
-    Limpa o campo e monta o cenário tático baseado na DIFICULDADE selecionada
-    e no número do LANCE atual.
+    FUNÇÃO QUE PREPARA NOVA OPORTUNIDADE, LIMPA O CAMPO E POSICIONA TUDO AONDE DEVE ESTAR
     """
-    # Fallback de segurança caso a string venha errada ou nula
+    # SEGURANÇA PRA EVITAR ERROS SE A STRING VIER NULA
     if dificuldade not in CENARIOS_TATICOS:
         dificuldade = "facil"
         
     cenarios_do_nivel = CENARIOS_TATICOS[dificuldade]
     
-    # Se o índice do lance passar do limite disponível para aquela dificuldade, reseta pro lance 1
+    # DEFININDO OS LANCES POR INDICE A COMECAR DO 1 PRA FACILITAR NA COMPARAÇÃO
     if indice_lance not in cenarios_do_nivel:
         indice_lance = 1
         
     cenario = cenarios_do_nivel[indice_lance]
     print(f"\n--- INICIANDO LANCE {indice_lance}: {cenario['nome']} ---")
 
-    # 1. Reposiciona o Neymar e remove posses antigas
+    # REPOSICIONA O NEYMAR NO PROXIMO CENARIO DE JOGADA
     neymar.rect.center = cenario["neymar_pos"]
     neymar.tem_bola = False
 
-    # 2. Desempacota as coordenadas e faz o lançamento no ponto futuro
+    # JOGA A BOLA DA ORIGEM ATE O DESTINO DELA
     origem_x, origem_y = cenario["bola_origem"]
     destino_x, destino_y = cenario["bola_destino"]
     
     bola.iniciar_lancamento(origem_x, origem_y, destino_x, destino_y, velocidade_lancamento=12)
 
-    # 3. Limpa e recria os Zagueiros específicos deste nível
+    # RECRIA OS ZAGUEIROS NA NOVA OPORTUNIDADE
     grupo_zagueiros.empty()
     for pos in cenario["zagueiros_pos"]:
         novo_zag = Zagueiro(pos[0], pos[1])
         grupo_zagueiros.add(novo_zag)
 
-    # 4. Limpa e recria os Aliados de suporte deste nível
+    # RECRIA OS ALIADOS NA NOVA OPORTUNIDADE
     grupo_aliados.empty()
     for pos in cenario["aliados_pos"]:
         novo_aliado = Aliado(pos[0], pos[1])

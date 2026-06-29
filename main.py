@@ -164,11 +164,25 @@ def main():
                 minuto_proximo_ataque, oportunidades_restantes, intervalo_minuto_ms
             )
             
+            # SE O JOGO ACABAR ELE FINALIZA E VOLTA PRA O MENU
+            if minuto_atual >= 90:
+
+                grupo_aliados.empty()
+                grupo_coletaveis.empty()
+                grupo_zagueiros.empty()
+                neymar.tem_bola = False
+
+                # ZERA OS GOLS
+                gols_brasil = 0
+                gols_argentina = 0
+
+                estado = 'menu'
+                continue
+            
             # INICIA A NOVA OPORTUNIDADE DE ATAQUE
-            if proximo_estado == "jogando":
-                # Determina o índice da oportunidade de 1 a 5 baseado no decréscimo das restantes
-                lance_atual = (5 - oportunidades_restantes) + 1
-                
+            if proximo_estado == "jogando" and oportunidades_restantes > 0:
+        
+                lance_atual = (oportunidades_totais - oportunidades_restantes) + 1
                 # SPAWNA OS NOVOS ALIADOS E ZAGUEIROS E LANÇA A BOLA DE LONGE
                 preparar_nova_oportunidade(dificuldade, lance_atual, neymar, bola, grupo_zagueiros, grupo_aliados)
                 estado = "jogando"
