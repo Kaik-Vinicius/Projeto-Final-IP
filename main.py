@@ -6,6 +6,7 @@ import ctypes
 from gerenciamento.constants import *
 from entidades.neymar import Neymar  
 from entidades.zagueiro import Zagueiro
+from entidades.goleiro import Goleiro
 from entidades.aliado import Aliado
 from entidades.bola import Bola
 from gerenciamento.funcoes_importantes import *
@@ -71,6 +72,7 @@ def main():
     
     # GRUPOS DOS JOGADORES TÁTICOS
     grupo_zagueiros = pygame.sprite.Group()
+    goleiro = Goleiro(960, 75)
     grupo_aliados = pygame.sprite.Group()
   
     # INSTANCIA A BOLA
@@ -232,6 +234,7 @@ def main():
             
             # ATUALIZA TODOS OS ZAGUEIROS DE UMA VEZ SÓ
             atualizar_ia_zagueiros(grupo_zagueiros, neymar, bola, grupo_aliados) 
+            goleiro.att_gol(neymar)
 
             # CHECA SE O NEYMAR TOMOU O CARRINHO OU NAO
             if verificar_desarme_zagueiros(grupo_zagueiros, bola, bola_tocou_jogador_continua):
@@ -355,6 +358,7 @@ def main():
             grupo_zagueiros.draw(tela) 
             
             tela.blit(neymar.image, neymar.rect)
+            tela.blit(goleiro.image, goleiro.rect)
             tela.blit(bola.image, bola.rect)
             desenhar_placar_superior(tela, fonte_pequena, chuteiras_coletadas, estrelas_coletadas, oportunidades_restantes, gols_brasil, gols_argentina)
             
