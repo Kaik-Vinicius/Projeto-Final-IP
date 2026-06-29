@@ -65,7 +65,8 @@ COR_GRAMADO = (55, 111, 50)
 COR_LINHA = (255, 255, 255) 
 COR_TRAVE = (255, 255, 255) 
 COR_NEYMAR = (255, 255, 0)  
-COR_ZAGUEIRO = (255, 0, 0)  
+COR_ZAGUEIRO = (255, 0, 0)
+COR_GOLEIRO = (0, 255, 100)
 COR_BOLA = (255, 255, 255)  
 COR_ESTRELA = (255, 255, 0)   
 COR_CHUTEIRA = (255, 128, 0)  
@@ -90,9 +91,9 @@ CONFIANCA_POR_DIFICULDADE = {
 }
 
 DRIBLES_CONFIG = {
-    'pedalada': {'ganho': 15, 'chance_inicial': 0.70, 'chance_max': 0.90},
-    '360': {'ganho': 25, 'chance_inicial': 0.50, 'chance_max': 0.80},
-    'lambreta': {'ganho': 40, 'chance_inicial': 0.25, 'chance_max': 0.75}
+    'pedalada': {'ganho': 15, 'chance_inicial': 0.70, 'chance_max': 0.95},
+    '360': {'ganho': 25, 'chance_inicial': 0.65, 'chance_max': 0.85},
+    'lambreta': {'ganho': 40, 'chance_inicial': 0.60, 'chance_max': 0.75}
 }
 
 # CONFIGURAÇÃO DE CENÁRIOS TÁTICOS (DIFICULDADE FÁCIL - BOLA EM ESPAÇO VAZIO)

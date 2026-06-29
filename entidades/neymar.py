@@ -229,7 +229,7 @@ class Neymar(pygame.sprite.Sprite):
                         self.drible_efetivo = True
                         self.tempo_inicio_drible = pygame.time.get_ticks()
                         self.ultimo_tipo_drible = tipo_drible
-                        
-            
+                    else:
+                        print('errou o drible')
 
 
