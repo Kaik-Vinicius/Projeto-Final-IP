@@ -1,9 +1,7 @@
 import pygame
 from gerenciamento.constants import (LARGURA_TELA, ALTURA_TELA, VELOCIDADE_ZAG, COR_ZAGUEIRO, CONFIANCA_POR_DIFICULDADE, DRIBLES_CONFIG, META_ESTRELA, FORCA_CHUTE, POS_GOL_X, POS_GOL_Y)
 
-
-pos_inicial = []
-
+# FIZ ALGUMAS MUDANÇAS NA CLASSE DO ZAGUEIRO, PRINCIPALMENTE PRA NAO BUGAR A POSICAO DE SPAWN DE CADA UM
 
 class Zagueiro(pygame.sprite.Sprite):
     def __init__(self, pos_inicial_x, pos_inicial_y):
@@ -18,8 +16,9 @@ class Zagueiro(pygame.sprite.Sprite):
         self.rect.centerx = pos_inicial_x
         self.rect.centery = pos_inicial_y
 
-        pos_inicial.append(pos_inicial_x)
-        pos_inicial.append(pos_inicial_y)
+        # AQUI CADA ZAGUEIRO GUARDA SUA POSICAO INICIAL INDEPENDENTEMENTE
+        self.spawn_x = pos_inicial_x
+        self.spawn_y = pos_inicial_y
       
         self.velocidade = VELOCIDADE_ZAG # A VELOCIDADE QUE ELE VAI ANDAR
 
@@ -29,11 +28,19 @@ class Zagueiro(pygame.sprite.Sprite):
         self.preparo_pro_bote = False
         self.atordoamento_bote = False
 
+        # ATRIBUTOS DE ATORDOAMENTO DO ZAGUEIRO
+        self.atordoado_por_drible = False
+        self.tempo_atordoado_drible = 0
+        
+        # ATRIBUTOS PRA GERENCIAR O DRIBLE QUE ZAGUEIRO LEVOU
+        self.driblado = False
+        self.tempo_pos_drible = 0
+        
         # VARIÁVEIS PARA O DIVIDIDO POR FRAMES PRA FICAR MAIS ORGANICO
         self.frames_do_dash = 0
         self.direcao_dash = pygame.math.Vector2(0, 0)
         self.forca_total_dash = 100
-
+        
     def perseguir_bola(self, bola):
         # RECEBE A POSICAO X E Y DA BOLA
         bola_x = bola.rect.centerx
@@ -81,10 +88,11 @@ class Zagueiro(pygame.sprite.Sprite):
         self.rect.clamp_ip(pygame.Rect(0, 0, LARGURA_TELA, ALTURA_TELA))
 
     def idle(self):
-        if(self.rect.centerx != pos_inicial[0] and self.rect.centery != pos_inicial[1]):
+        # MUDANÇA FEITA PRA ATUALIZAR AS VARIAVEIS DE SPAWN DE CADA ZAGUEIRO INDIVIDUALMENTE
+        if(self.rect.centerx != self.spawn_x and self.rect.centery != self.spawn_y):
             # RECUPERANDO A POSIÇÂO INICIAL DO ZAGUEIRO
-            pos_inicial_x = pos_inicial[0]
-            pos_inicial_y = pos_inicial[1]
+            pos_inicial_x = self.spawn_x
+            pos_inicial_y = self.spawn_y
 
             # CALCULA A DISTANCIA DO ZAGUEIRO PARA SUA POSIÇÃO INICIAL
             dist_x = self.rect.centerx - pos_inicial_x
@@ -113,9 +121,27 @@ class Zagueiro(pygame.sprite.Sprite):
         else:
            self.frames_do_dash = 0
 
+    # NOVO MÉTODO PRA O ZAGUEIRO FICAR ATORDOADO POR CAUSA DO DRIBLE
+    def ficar_atordoado_por_drible(self, tempo):
+        """METODO CHAMADO PELO NEYMAR PARA CONGELAR O MARCADOR APOS UM DRIBLE OU DESVIO"""
+        self.driblado = True
+        self.tempo_pos_drible = tempo
+       
+    # ESSE METODO VAI SER IMPORTANTE POR CAUSA DOO SISTEMA DE OPORTUNIDADES FUTURAMENTE
+    def colisao_ativa(self):
+        """METODO PRA VERIFICAR SE HOUVE COLISAO COM A BOLA OU NAO"""
+        if self.driblado or self.atordoado_por_drible:
+            return False
+        return True
+
+
     def atualizar(self, neymar, bola, distancia_neymar, distancia_bola, alguem_com_bola):
         tempo_atual = pygame.time.get_ticks()
-
+        
+        if self.atordoado_por_drible:
+            if tempo_atual >= self.tempo_atordoado_drible:
+                self.atordoado_por_drible = False
+            return
 
         if self.frames_do_dash > 0:
             # DIVIDE O COMPRIMENTO DO DASH PELA QUANTIDADE FIXA DE FRAMES (3)
@@ -130,9 +156,16 @@ class Zagueiro(pygame.sprite.Sprite):
           
             # ACABOU O DASH, GUARDA O TEMPO EM QUE O DASH ACABOU
             if self.frames_do_dash == 0:
-                self.atordoamento_bote = True
-                self.tempo_pausa = pygame.time.get_ticks()
-            return #GARANTIR QUE NADA MAIS ACONTEÇA
+                if self.driblado:
+                    # SE FOI DRIBLADO O TEMPO DE 1.5s começa agora
+                    self.atordoado_por_drible = True
+                    self.tempo_atordoado_drible = pygame.time.get_ticks() + self.tempo_pos_drible
+                    self.driblado = False  #RESETA A VARIAVEL PRA O PROXIMO LANCE
+                else:
+                    # SE NAO FOI DRIBLADO, DÁ O BOTE MAS FICA ATORDOADO POR 1s só
+                    self.atordoamento_bote = True
+                    self.tempo_pausa = pygame.time.get_ticks()
+            return
 
 
         # FICA PARADO POR 1 SEGUNDO DEPOIS DO DASH
@@ -158,7 +191,7 @@ class Zagueiro(pygame.sprite.Sprite):
 
 
         # CONTROLE MOVIMENTAÇÃO BÁSICA DO ZAGUEIRO
-        if distancia_bola < 80 and not neymar.tem_bola and not alguem_com_bola:
+        if distancia_bola < 80 and not bola.em_movimento:
             self.preparo_pro_bote = True
         elif distancia_bola < 80 and neymar.tem_bola:
             self.preparo_pro_bote = True
@@ -168,3 +201,10 @@ class Zagueiro(pygame.sprite.Sprite):
             self.perseguir_neymar(neymar)
         else:
             self.idle()
+    
+    def esta_em_idle(self):
+        # RETORNA TRUE SE O ZAGUEIRO ESTIVER EM IDLE, SE ESTIVER FAZENDO QUALQUER OUTRA COISA ELE RETORNA FALSE
+        # ALTERAÇÃO PRA CHECAR TAMBEM SE NAO ESTA EM DRIBLE
+        if not self.preparo_pro_bote and not self.atordoamento_bote and self.frames_do_dash == 0 and not self.atordoado_por_drible:
+            return True
+        return False
