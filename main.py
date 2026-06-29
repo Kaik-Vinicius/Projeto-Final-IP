@@ -237,15 +237,38 @@ def main():
             # DETECTA O DRIBLE E GERA A CHUTEIRA
             if getattr(neymar, 'drible_efetivo', False):
                 if neymar.tempo_inicio_drible != tempo_ultimo_drible_registrado:
-                    grupo_coletaveis.add(Coletavel('chuteira', pos_jogador=neymar.rect.center))
+                    ultimo_drible = getattr(neymar, 'ultimo_tipo_drible', 'manual')
+                    
+                    if ultimo_drible == 'manual':
+                        ganho_futuro = 5
+                    elif ultimo_drible == 'pedalada':
+                        ganho_futuro = 15
+                    elif ultimo_drible == '360':
+                        ganho_futuro = 25
+                    elif ultimo_drible == 'lambreta':
+                        ganho_futuro = 40
+                    else:
+                        ganho_futuro = 10 
+
+                    confianca_atual = getattr(neymar, 'confianca', 0)
+                    
+                    if confianca_atual + ganho_futuro >= META_ESTRELA and not getattr(neymar, 'ney_prime', False):
+                        if not any(i.tipo == 'estrela' for i in grupo_coletaveis):
+                            grupo_coletaveis.add(Coletavel('estrela', pos_jogador=neymar.rect.center))
+                    else:
+                        nova_chuteira = Coletavel('chuteira', pos_jogador=neymar.rect.center)
+                        nova_chuteira.valor_recompensa = ganho_futuro 
+                        grupo_coletaveis.add(nova_chuteira)
+                        
                     tempo_ultimo_drible_registrado = neymar.tempo_inicio_drible
             
+            # ISSO DAQUI VAI TIRAR A BOLA DO ESTADO TRAVADO DE EM DRIBLE
             if neymar.bola_em_drible:
                 if tempo_atual - neymar.tempo_inicio_drible > 400:
                     neymar.bola_em_drible = False
                     neymar.drible_efetivo = False
 
-            # DETECTA A CONFIANÇA 100% E GERA A ESTRELA
+            # DETECTA A CONFIANÇA 100% E GERA A ESTRELA (SISTEMA TEMPORÁRIO QUE DEPOIS VAI SER MUDADO)
             if getattr(neymar, 'confianca', 0) >= META_ESTRELA:
                 if not any(i.tipo == 'estrela' for i in grupo_coletaveis) and not getattr(neymar, 'ney_prime', False):
                     grupo_coletaveis.add(Coletavel('estrela', pos_jogador=neymar.rect.center))
@@ -257,7 +280,7 @@ def main():
             for item in itens_tocados:
                 if item.tipo == 'chuteira':
                     item.kill()
-                    neymar.atualizar_confianca(15) 
+                    neymar.atualizar_confianca(item.valor_recompensa) 
                     chuteiras_coletadas += 1 
                 elif item.tipo == 'estrela':
                     item.kill() 
@@ -321,6 +344,11 @@ def main():
             tela.blit(bola.image, bola.rect)
             desenhar_placar_superior(tela, fonte_pequena, chuteiras_coletadas, estrelas_coletadas, oportunidades_restantes, gols_brasil, gols_argentina)
             
+            # HUD DE TESTES VISUALIZADOR DE CONFIANÇA 
+            confianca_atual = int(getattr(neymar, 'confianca', 0)) 
+            texto_confianca = fonte_pequena.render(f"Confiança: {confianca_atual}/100", True, (255, 255, 255)) 
+            tela.blit(texto_confianca, (CAMPO_X + 20, 100))
+
             botao_pause.desenhar(tela)
 
         elif estado == "pause":

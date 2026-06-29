@@ -2,6 +2,7 @@ import pygame
 import math
 import random
 from gerenciamento.funcoes_importantes import prender_neymar_campo
+from entidades.bola import Bola
 from entidades.coletaveis import Coletavel
 from gerenciamento.constants import (LARGURA_TELA, ALTURA_TELA, VELOCIDADE_NEY, COR_NEYMAR, FORCA_CHUTE, TUPLA_LIMITES_CAMPO, DRIBLES_CONFIG)
 
@@ -30,7 +31,8 @@ class Neymar(pygame.sprite.Sprite):
         
         # ATRIBUINDO A CONFIANCA DO NEYMAR
         self.confianca = 0
-    
+        self.ultimo_tipo_drible = 'manual'
+
 
     def mover(self, teclas, bola, grupo_zagueiros=None):
         dx = 0
@@ -141,7 +143,9 @@ class Neymar(pygame.sprite.Sprite):
         c_max = DRIBLES_CONFIG[tipo_drible]['chance_max']
         
         chance = c_ini + ((self.confianca / 100.0) * (c_max - c_ini))
-            
+        
+        if getattr(self, 'ney_prime', False):
+            return 1.0
         return min(chance, c_max)
         
 
@@ -174,10 +178,10 @@ class Neymar(pygame.sprite.Sprite):
                     self.bola_em_drible = True
                     self.drible_efetivo = True
                     self.tempo_inicio_drible = pygame.time.get_ticks()
-                    self.atualizar_confianca(5) # ganha +5 de confianca
+                    self.ultimo_tipo_drible = 'manual'
 
                     
-    def driblar(self, tipo_drible, bola, grupo_zagueiros):
+    def driblar(self, tipo_drible, bola, grupo_zagueiros, grupo_coletaveis=None):
         """
         RECEBE COMO PARAMETRO O TIPO DE DRIBLE QUE O NEY EXECUTOU E O GRUPO DE ZAGUEIROS QUE VAI SER PERCORRIDO
         """
@@ -211,6 +215,7 @@ class Neymar(pygame.sprite.Sprite):
             self.bola_em_drible = True 
             self.drible_efetivo = False # A FIRULA NAO É CONSIDERADA UM DRIBLE EFETIVO
             self.tempo_inicio_drible = pygame.time.get_ticks()
+            self.ultimo_tipo_drible = 'firula'
             return
         
         # AQUI ELE VAI TENTAR DRIBLAR O ZAGUEIRO CASO ELE ESTEJA PREPARADO PRA UMM BOTE
@@ -223,8 +228,7 @@ class Neymar(pygame.sprite.Sprite):
                         self.bola_em_drible = True
                         self.drible_efetivo = True
                         self.tempo_inicio_drible = pygame.time.get_ticks()
-                        
-                        self.atualizar_confianca(ganho_confianca)
+                        self.ultimo_tipo_drible = tipo_drible
                         
             
 
