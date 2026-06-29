@@ -1,51 +1,50 @@
 import pygame
 
-def desenhar_placar_superior(tela, fonte_pequena, chuteiras, estrelas, chances):
+def desenhar_placar_superior(tela, fonte_pequena, chuteiras, estrelas, chances, gols_brasil=0, gols_argentina=0):
     """
-    Desenha a barra preta do topo e as informações de itens coletados e lances.
+    Desenha a barra preta do topo e as informações de itens coletados, lances e o Placar Real.
     Compartilhada entre a tela de espera e a tela de jogo ativo.
     """
-    #Cria e desenha a barra superior escura semi-transparente
+    # Cria e desenha a barra superior escura semi-transparente
     barra_superior = pygame.Surface((tela.get_width(), 50), pygame.SRCALPHA)
     barra_superior.fill((0, 0, 0, 160)) 
     tela.blit(barra_superior, (0, 0))
     
-    #Renderiza os textos com os valores atuais
+    # Renderiza os textos com os valores atuais
     txt_chuteiras = fonte_pequena.render(f"  Chuteiras: {chuteiras}", True, (255, 255, 255))
     txt_estrelas = fonte_pequena.render(f"  Estrelas: {estrelas}", True, (255, 255, 255))
     txt_chances = fonte_pequena.render(f"  Chances Restantes: {chances}", True, (255, 215, 0))
     
-    # 3. Desenha os textos nas posições corretas (afastados do botão de pause)
+    # --- NOVO: PLACAR CENTRALIZADO ---
+    # Renderiza o placar clássico BRA x ARG
+    texto_placar = f"BRA {gols_brasil} x {gols_argentina} ARG"
+    txt_placar = fonte_pequena.render(texto_placar, True, (255, 255, 255))
+    
+    # Calcula o X centralizado exato na tela
+    pos_x_placar = (tela.get_width() // 2) - (txt_placar.get_width() // 2)
+    # ---------------------------------
+
+    # Desenha os textos nas posições corretas
     tela.blit(txt_chuteiras, (20, 15))
     tela.blit(txt_estrelas, (200, 15))
+    tela.blit(txt_placar, (pos_x_placar, 15)) # Placar bem no centro
     tela.blit(txt_chances, (tela.get_width() - 380, 15))
 
 def desenhar_tela_espera(tela, campo_jogo, pos_campo, fonte_jogo, fonte_pequena, 
-                         chuteiras, estrelas, chances, minuto_atual, tempo_atual, botao_pause):
+                         chuteiras, estrelas, chances, minuto_atual, tempo_atual, botao_pause,
+                         gols_brasil=0, gols_argentina=0): # === ADICIONADO OS PARÂMETROS DE GOLS ===
     """
     Função responsável por renderizar todo o visual da Tela de Espera Passiva.
     Isola o código para manter o arquivo main.py limpo.
     """
-    #Desenha o gramado de fundo
+    # Desenha o gramado de fundo
     tela.fill((20, 20, 20))
-    tela.blit(campo_jogo, pos_campo) # pos_campo deve ser uma tupla (CAMPO_X, CAMPO_Y)
+    tela.blit(campo_jogo, pos_campo) 
     
-    #Barra superior translúcida do Placar
-    barra_superior = pygame.Surface((tela.get_width(), 50), pygame.SRCALPHA)
-    barra_superior.fill((0, 0, 0, 180)) 
-    tela.blit(barra_superior, (0, 0))
+    # Reaproveita a função modificada para desenhar o placar completo na tela de espera também!
+    desenhar_placar_superior(tela, fonte_pequena, chuteiras, estrelas, chances, gols_brasil, gols_argentina)
     
-    # Renderiza os textos do placar
-    txt_chuteiras = fonte_pequena.render(f"  Chuteiras: {chuteiras}", True, (255, 255, 255))
-    txt_estrelas = fonte_pequena.render(f"  Estrelas: {estrelas}", True, (255, 255, 255))
-    txt_chances = fonte_pequena.render(f"  Chances Restantes: {chances}", True, (255, 215, 0))
-    
-    # Desenha os textos (Já com o ajuste de posição para não cobrir o botão de pause)
-    tela.blit(txt_chuteiras, (20, 15))
-    tela.blit(txt_estrelas, (200, 15))
-    tela.blit(txt_chances, (tela.get_width() - 380, 15)) # Afastado do canto do botão
-    
-    #Barra inferior translúcida do Cronômetro
+    # Barra inferior translúcida do Cronômetro
     barra_inferior = pygame.Surface((tela.get_width(), 60), pygame.SRCALPHA)
     barra_inferior.fill((0, 0, 0, 180))
     tela.blit(barra_inferior, (0, tela.get_height() - 60))
@@ -64,7 +63,7 @@ def desenhar_tela_espera(tela, campo_jogo, pos_campo, fonte_jogo, fonte_pequena,
         pos_x_texto = (tela.get_width() // 2) - (txt_aguardando.get_width() // 2)
         tela.blit(txt_aguardando, (pos_x_texto, tela.get_height() - 40))
     
-    #Desenha o botão de pause por cima da barra superior
+    # Desenha o botão de pause por cima da barra superior
     botao_pause.desenhar(tela)
 
 def atualizar_logica_espera(tempo_atual, ultimo_tick_relogio, minuto_atual, 

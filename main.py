@@ -1,4 +1,4 @@
-# =-=-=-=-= ARQUIVO MAIN TEMPORARIO =-=-=-=-=
+# =-=-=-=-= ARQUIVO MAIN INTEGRADO =-=-=-=-=
 import pygame
 import sys
 import math
@@ -26,7 +26,6 @@ def main():
     # INICIAÇÃO DO JOGO
     pygame.init()
     #Fonte para o placar e cronometro
-    #Estou adicionando porque não encontrei se já tava definido em algum outro lugar
     fonte_pequena = pygame.font.SysFont("Arial", 20, bold=True)
     fonte_jogo = pygame.font.SysFont("Arial", 30, bold=True)
     
@@ -63,24 +62,19 @@ def main():
     oportunidades_totais, oportunidades_restantes, tamanho_bloco, bloco_atual = 0, 0, 0, 0
     #Contadores para o placar
     chuteiras_coletadas, estrelas_coletadas = 0, 0
+    
+    gols_brasil = 0
+    gols_argentina = 0
 
     # INSTANCIANDO JOGADORES
     neymar = Neymar()
     
-    #GRUPO DOS ZAGUEIROS
-    zagueiro1 = Zagueiro(OFFSET_X + 400, 300)
+    # GRUPOS DOS JOGADORES TÁTICOS
     grupo_zagueiros = pygame.sprite.Group()
-    grupo_zagueiros.add(zagueiro1) # Adiciona o zagueiro atual ao grupo
-  
-    aliado_1 = Aliado(OFFSET_X + 300, 500)
     grupo_aliados = pygame.sprite.Group()
-    grupo_aliados.add(aliado_1)
   
     # INSTANCIA A BOLA
     bola = Bola()
-  
-    pos_x_inicial_bola = OFFSET_X + (LARGURA_CAMPO_JOGAVEL // 2)
-    bola.iniciar_lancamento(pos_x_inicial_bola, ALTURA_CAMPO_JOGAVEL, pos_x_inicial_bola, ALTURA_CAMPO_JOGAVEL - 250, velocidade_lancamento=6)
   
     grupo_coletaveis = pygame.sprite.Group()
     tempo_ultimo_drible_registrado = 0 
@@ -110,14 +104,20 @@ def main():
                 if acao == "facil":
                     dificuldade = "facil"
                     oportunidades_totais = 5
-
+                    gols_brasil = 0
+                    gols_argentina = 0
+                    
                 elif acao == "medio":
                     dificuldade = "medio"
-                    oportunidades_totais = 3
+                    oportunidades_totais = 4
+                    gols_brasil = 0
+                    gols_argentina = 1
 
                 elif acao == "dificil":
                     dificuldade = "dificil"
-                    oportunidades_totais = 2
+                    oportunidades_totais = 3
+                    gols_brasil = 0
+                    gols_argentina = 2
 
                 if acao in ["facil", "medio", "dificil"]:
                     tamanho_bloco = 90 // oportunidades_totais
@@ -140,7 +140,7 @@ def main():
                     
                     # MAPEANDO OS BOTOES DOS DRIBLES DO NEYMAR
                     elif evento.key == pygame.K_j:
-                        neymar.driblar("pedalada", bola, grupo_zagueiros)
+                        neymar.driblar("pedalada", bola, grupo_zagueiros) 
                     elif evento.key == pygame.K_k:
                         neymar.driblar("360", bola, grupo_zagueiros)
                     elif evento.key == pygame.K_l:
@@ -157,19 +157,29 @@ def main():
                     estado_anterior = estado
                     estado = "pause"
 
+        # LÓGICA PASSA DA TELA DE ESPERA
         if estado == "espera":
-            estado, minuto_atual, ultimo_tick_relogio = atualizar_logica_espera(
+            proximo_estado, minuto_atual, ultimo_tick_relogio = atualizar_logica_espera(
                 tempo_atual, ultimo_tick_relogio, minuto_atual, 
                 minuto_proximo_ataque, oportunidades_restantes, intervalo_minuto_ms
             )
             
-        # SE O ESTADO FOR JOGANDO, VAI SEGUIR O FLUXO NORMALMENTE DO JOGO
+            # INICIA A NOVA OPORTUNIDADE DE ATAQUE
+            if proximo_estado == "jogando":
+                # Determina o índice da oportunidade de 1 a 5 baseado no decréscimo das restantes
+                lance_atual = (5 - oportunidades_restantes) + 1
+                
+                # SPAWNA OS NOVOS ALIADOS E ZAGUEIROS E LANÇA A BOLA DE LONGE
+                preparar_nova_oportunidade(dificuldade, lance_atual, neymar, bola, grupo_zagueiros, grupo_aliados)
+                estado = "jogando"
+            
+        # ATUALIZAÇÃO E FÍSICA ATIVA (JOGANDO)
         if estado == "jogando":
             teclas = pygame.key.get_pressed()
             neymar.mover(teclas, bola, grupo_zagueiros)
             bola.atualizar_posicao(neymar)
             
-            # ISSO DAQUI VAI TIRAR A BOLA DO ESTADO TRAVADO DE EM DRIBLE
+            # TIRA A BOLA DO ESTADO TRAVADO DE EM DRIBLE
             if neymar.bola_em_drible:
                 if tempo_atual - neymar.tempo_inicio_drible > 400:
                     neymar.bola_em_drible = False
@@ -178,52 +188,48 @@ def main():
             for aliado in grupo_aliados:
                 aliado.atualizar_cronometro(neymar, bola)
 
-            tempo_atual = pygame.time.get_ticks()
-
             # RECEBIMENTO DA BOLA PELOS ALIADOS COM COLISÃO CONTÍNUA
             for aliado in grupo_aliados:
-
-                # SE ELE JA TIVR COM A BOLA NAO PODE DOMINAR ELA
-                if aliado.tem_bola:
+                if aliado.tem_bola or neymar.tem_bola:
                     continue
 
-                # SE O NEY TEM BOLA O ZAGUEIRO NAO PODE DOMINAR A BOLA
-                if neymar.tem_bola:
-                    continue
-
-                # EVITA QUE A BOLA FIQUE PRESA NELE
                 if tempo_atual - aliado.tempo_ultimo_passe <= 500:
                     continue
 
-                # bola parada ou em movimento
                 if bola.no_chao_esperando or bola.em_movimento:
-
                     if bola_tocou_jogador_continua(bola, aliado):
-
                         aliado.receber_bola()
-
                         bola.em_movimento = False
                         bola.no_chao_esperando = False
-
                         bola.velocidade_x = 0
                         bola.velocidade_y = 0
-
-                        # VAI DEIXAR A BOLA EXATAMENTE NO CENTRO DO ALIADO
                         bola.rect.center = aliado.rect.center
-
                         break
                   
             # COLISÃO CONTÍNUA WITH THE NEYMAR (mantendo lógica de dominada intacta)
             if bola_tocou_jogador_continua(bola, neymar):
-
-                # SO DOMINA SE NENHUM ALIADO TIVER SEGURANDO A BOLA
                 if not neymar.tem_bola and not any(aliado.tem_bola for aliado in grupo_aliados):
+                    if tempo_atual - neymar.tempo_ultimo_chute > 350: 
+                        if tempo_atual - neymar.tempo_ultimo_passe > 500: 
+                            if bola.no_chao_esperando or bola.em_movimento:
+                                if hasattr(bola, 'destino_x'): del bola.destino_x
+                                if hasattr(bola, 'destino_y'): del bola.destino_y
+                                bola.dominar(neymar)
+            
+            # ATUALIZA TODOS OS ZAGUEIROS DE UMA VEZ SÓ
+            atualizar_ia_zagueiros(grupo_zagueiros, neymar, bola, grupo_aliados) 
 
-                    tempo_atual = pygame.time.get_ticks()
+            # CHECA SE O NEYMAR TOMOU O CARRINHO OU NAO
+            if verificar_desarme_zagueiros(grupo_zagueiros, bola, bola_tocou_jogador_continua):
+                neymar.tem_bola = False
+                bola.resultado_chute = None
 
-                    # TRAVA O RE-DOMINIO DA BOLA
-                    if tempo_atual - neymar.tempo_ultimo_passe > 500:
+                oportunidades_restantes -= 1
+                bloco_atual += 1
+                estado = "espera"
+                ultimo_tick_relogio = tempo_atual
 
+<<<<<<< HEAD
                         if bola.no_chao_esperando or bola.em_movimento:
 
                             if hasattr(bola, 'destino_x'):
@@ -244,6 +250,13 @@ def main():
             # CONDICIONAL QUE FAZ O ZAGUEIRO PERSEGUIR O NEYMAR
             zagueiro1.atualizar(neymar, bola, distancia_neymar, distancia_bola, any(aliado.tem_bola for aliado in grupo_aliados))
 
+=======
+                if oportunidades_restantes > 0:
+                    minuto_inicio_bloco = bloco_atual * tamanho_bloco
+                    minuto_fim_bloco = minuto_inicio_bloco + tamanho_bloco
+                    minuto_proximo_ataque = random.randint(minuto_inicio_bloco + 2, minuto_fim_bloco - 2)
+            
+>>>>>>> jogador-e-chute
             # DETECTA O DRIBLE E GERA A CHUTEIRA
             if getattr(neymar, 'drible_efetivo', False):
                 if neymar.tempo_inicio_drible != tempo_ultimo_drible_registrado:
@@ -278,7 +291,7 @@ def main():
                     neymar.bola_em_drible = False
                     neymar.drible_efetivo = False
 
-            # DETECTA A CONFIANÇA 100% E GERA A ESTRELA (SISTEMA TEMPORARIO QUE DEPOIS VAI SER MUDADO)
+            # DETECTA A CONFIANÇA 100% E GERA A ESTRELA (SISTEMA TEMPORÁRIO QUE DEPOIS VAI SER MUDADO)
             if getattr(neymar, 'confianca', 0) >= META_ESTRELA:
                 if not any(i.tipo == 'estrela' for i in grupo_coletaveis) and not getattr(neymar, 'ney_prime', False):
                     grupo_coletaveis.add(Coletavel('estrela', pos_jogador=neymar.rect.center))
@@ -290,10 +303,13 @@ def main():
             for item in itens_tocados:
                 if item.tipo == 'chuteira':
                     item.kill()
+<<<<<<< HEAD
                     ganho = getattr(item, 'valor_recompensa', 15) 
                     neymar.atualizar_confianca(ganho) 
+=======
+                    neymar.atualizar_confianca(item.valor_recompensa) 
+>>>>>>> jogador-e-chute
                     chuteiras_coletadas += 1 
-                    
                 elif item.tipo == 'estrela':
                     item.kill() 
                     estrelas_coletadas += 1 
@@ -301,35 +317,35 @@ def main():
                     neymar.tempo_prime = pygame.time.get_ticks()
                     neymar.confianca = 0 
 
-            # 4. TEMPO DO MODO IMBATÍVEL (7 Segundos)
             if getattr(neymar, 'ney_prime', False):
                 if pygame.time.get_ticks() - getattr(neymar, 'tempo_prime', 0) > 7000:
                     neymar.ney_prime = False
 
-            # ==========================================
-            
-            if(teclas[pygame.K_o]): #Provisorio,depois mudar para um evento de gol ou chance perdida
+            # DETECTA SE FOI GOL OU JOGADA PERDIDA NA LINHA DE FUNDO
+            if checar_conclusao_jogada(bola):
+                if bola.resultado_chute == 'gol':
+                    gols_brasil += 1
+
+                bola.resultado_chute = None
+
                 oportunidades_restantes -= 1
                 bloco_atual += 1
-
                 estado = "espera"
                 ultimo_tick_relogio = tempo_atual
 
                 if oportunidades_restantes > 0:
                     minuto_inicio_bloco = bloco_atual * tamanho_bloco
                     minuto_fim_bloco = minuto_inicio_bloco + tamanho_bloco
-
                     minuto_proximo_ataque = random.randint(minuto_inicio_bloco + 2, minuto_fim_bloco - 2)
+                    
         elif estado == "pause":
             acao_menu_pause = menu_pause.tratar_eventos(evento)
             if acao_menu_pause == "retomar":
-                estado = estado_anterior  # Retorna ao estado anterior (espera ou jogando)
+                estado = estado_anterior
             elif acao_menu_pause == "menu_inicial":
-
                 estado = "menu"
-      
 
-        # RENDERIZAÇÃO
+        # RENDERIZAÇÃO (DESENHO DOS ELEMENTOS GRÁFICOS)
         if estado == "menu":
             menu_inicial.desenhar(tela)
 
@@ -337,31 +353,36 @@ def main():
             menu_dificuldade.desenhar(tela)
 
         elif estado == "espera":
-            
             desenhar_tela_espera(
                 tela, campo_jogo, (CAMPO_X, CAMPO_Y), fonte_jogo, fonte_pequena,
                 chuteiras_coletadas, estrelas_coletadas, oportunidades_restantes,
-                minuto_atual, tempo_atual, botao_pause
+                minuto_atual, tempo_atual, botao_pause, gols_brasil, gols_argentina
             )
-            
 
         elif estado == "jogando":
+           
             tela.fill((20, 20, 20))
             tela.blit(campo_jogo, (CAMPO_X, CAMPO_Y))
 
             grupo_coletaveis.draw(tela)
             grupo_aliados.draw(tela)
-          
-            tela.blit(zagueiro1.image, zagueiro1.rect)
+            grupo_zagueiros.draw(tela) 
+            
             tela.blit(neymar.image, neymar.rect)
             tela.blit(bola.image, bola.rect)
-            desenhar_placar_superior(tela, fonte_pequena, chuteiras_coletadas, estrelas_coletadas, oportunidades_restantes)
+            desenhar_placar_superior(tela, fonte_pequena, chuteiras_coletadas, estrelas_coletadas, oportunidades_restantes, gols_brasil, gols_argentina)
             
             # HUD DE TESTES VISUALIZADOR DE CONFIANÇA 
             confianca_atual = int(getattr(neymar, 'confianca', 0)) 
+<<<<<<< HEAD
             texto_confianca = fonte_pequena.render(f"Confiança: {confianca_atual}/100", True, (255, 255, 0)) 
             tela.blit(texto_confianca, (CAMPO_X + 20, 70))
             
+=======
+            texto_confianca = fonte_pequena.render(f"Confiança: {confianca_atual}/100", True, (255, 255, 255)) 
+            tela.blit(texto_confianca, (CAMPO_X + 20, 100))
+
+>>>>>>> jogador-e-chute
             botao_pause.desenhar(tela)
 
         elif estado == "pause":

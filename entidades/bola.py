@@ -1,6 +1,6 @@
 import pygame
 import math
-from gerenciamento.funcoes_importantes import direcao_bola
+import random
 
 
 class Bola(pygame.sprite.Sprite):
@@ -21,7 +21,7 @@ class Bola(pygame.sprite.Sprite):
             pygame.transform.scale(frame, (16, 16))
             for frame in self.frames_bola
         ]
-
+        
         self.frame_atual = 0
         self.image = self.frames_bola[self.frame_atual]
         self.rect = self.image.get_rect()
@@ -47,10 +47,13 @@ class Bola(pygame.sprite.Sprite):
         # POSIÇÃO DO FRAME ANTERIOR PARA COLISÃO CONTÍNUA
         self.prev_center = pygame.math.Vector2(self.rect.center)
 
-        # DESTINO EXPLÍCITO (SEM USAR hasattr)
+        # DESTINO EXPLÍCITO
         self.tem_destino = False
         self.destino_x = None
         self.destino_y = None
+        
+        # ATRIBUTO QUE DIZ O RESULTADO DO CHUTE
+        self.resultado_chute = None
 
     def sincronizar_coordenadas_float(self):
         """
@@ -190,20 +193,49 @@ class Bola(pygame.sprite.Sprite):
         if hasattr(jogador, "tempo_recebeu_bola"):
             jogador.tempo_recebeu_bola = pygame.time.get_ticks()
 
-    def chutar(self, origem_x, origem_y, FORCA_CHUTE):
+    def chutar(self, origem_x, origem_y, FORCA_CHUTE, resultado='gol'):
         """
-        FAZ O NEYMAR CHUTAR A BOLA
+        FAZ O NEYMAR CHUTAR A BOLA (AGORA COM PRECISÃO DINÂMICA BASEADA NO RESULTADO)
         """
         self.dono = None
         self._limpar_destino()
         self.rect.centerx = origem_x
         self.rect.centery = origem_y
-        direcaox, direcaoy = direcao_bola(origem_x, origem_y)
-        self.velocidade_x = direcaox * FORCA_CHUTE
-        self.velocidade_y = direcaoy * FORCA_CHUTE
         self.no_chao_esperando = False
         self.em_movimento = True
         self._registrar_prev_center()
+        
+        # GUARDA O RESULTADO SE FOI GOL OU NAO
+        self.resultado_chute = resultado 
+
+        # DEFINICAO DO ALVO QUE É LA EM CIMA NO GOL
+        alvo_y = 70
+
+        if resultado == 'gol':
+            # MIRA EM QUALUQER PONTO DENTRO DO GOL 
+            alvo_x = random.randint(880, 1040) # dentro dessas coordenadas aqui
+        elif resultado == 'defesa':
+            # MIRA NO MEIO DO GOL PQ É ONDE O GOLEIRO VAI PEGAR A BOLA
+            alvo_x = random.randint(930, 990)
+            
+        else: # SE FOR FORA
+            # 50% DE CHANCE DE IR PRA ESQUERDA E 50% DE CHANCE DE IR PRA DIREITA
+            if random.random() < 0.5:
+                alvo_x = random.randint(730, 840)
+            else:
+                alvo_x = random.randint(1080, 1190)
+
+        # CALCULA A VELOCIDADE BASEADA NO ALVO PRA FICAR MAIS "REALISTA"
+        dx = alvo_x - origem_x
+        dy = alvo_y - origem_y
+        distancia_alvo = math.hypot(dx, dy)
+
+        if distancia_alvo > 0:
+            self.velocidade_x = (dx / distancia_alvo) * FORCA_CHUTE
+            self.velocidade_y = (dy / distancia_alvo) * FORCA_CHUTE
+        else:
+            self.velocidade_x = 0.0
+            self.velocidade_y = -FORCA_CHUTE
 
     def passar(self, origem_x, origem_y, destino_x, destino_y, velocidade_passe):
         """
@@ -253,18 +285,5 @@ class Bola(pygame.sprite.Sprite):
         self.velocidade_x = math.cos(angulo) * velocidade_passe
         self.velocidade_y = math.sin(angulo) * velocidade_passe
     
-    # PROVAVELMENTE VOU TIRAR ESSE METODO DEPOIS
-    def resetar(self, neymar):
-        """SEGURANÇA PRA EVITAR DA BOLA SAIR DO MAPA"""
-        self.velocidade_x = 0.0
-        self.velocidade_y = 0.0
-        self.em_movimento = False
-        self.no_chao_esperando = False
-        self.dono = neymar
-        self._limpar_destino()
-        neymar.tem_bola = True
-        self.rect.center = neymar.rect.center
-        self.sincronizar_coordenadas_float()
-        self._registrar_prev_center()
 
         

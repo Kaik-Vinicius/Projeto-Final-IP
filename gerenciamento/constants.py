@@ -77,6 +77,7 @@ VELOCIDADE_NEY = 5
 VELOCIDADE_ZAG = 3
 FORCA_CHUTE = 15 
 FORCA_LANCAMENTO_ALIADO = 16
+VELOCIDADE_LANCAMENTO_INICIAL = 8
 
 TAMANHO_ITEM = 20 
 TEMPO_CHUTEIRA = 4000 
@@ -85,11 +86,124 @@ META_ESTRELA = 100
 CONFIANCA_POR_DIFICULDADE = {
     'FACIL': 30,
     'MEDIO': 20,
-    'DIFICIL': 10
+    'DIFICIL': 10 
 }
 
 DRIBLES_CONFIG = {
     'pedalada': {'ganho': 15, 'chance_inicial': 0.70, 'chance_max': 0.90},
     '360': {'ganho': 25, 'chance_inicial': 0.50, 'chance_max': 0.80},
     'lambreta': {'ganho': 40, 'chance_inicial': 0.25, 'chance_max': 0.75}
+}
+
+# CONFIGURAÇÃO DE CENÁRIOS TÁTICOS (DIFICULDADE FÁCIL - BOLA EM ESPAÇO VAZIO)
+
+# =========================================================================
+# BANCO DE CENÁRIOS TÁTICOS COLETIVOS (TODAS AS DIFICULDADES)
+# Limites do campo jogável: X (320 até 1280) | Y (70 até 1080)
+# =========================================================================
+
+CENARIOS_TATICOS = {
+    "facil": {
+        1: {
+            "nome": "FÁCIL - Ataque Veloz pela Ponta Esquerda",
+            "neymar_pos": (450, 850),       
+            "bola_origem": (650, 1050),     
+            "bola_destino": (520, 750),     
+            "aliados_pos": [(750, 650), (1400, 450), (370, 500)], 
+            "zagueiros_pos": [(550, 450), (750, 400), (950, 370), (1200, 330)] 
+        },
+        2: {
+            "nome": "FÁCIL - Contra-Ataque Centralizado",
+            "neymar_pos": (800, 900),       
+            "bola_origem": (500, 1070),      
+            "bola_destino": (700, 750),     
+            "aliados_pos": [(1110, 550)], # CONTRA-ATAQUE SO COM UM ALIADO
+            "zagueiros_pos": [(1250, 600), (670, 570), (1000, 500)] 
+        },
+        3: {
+            "nome": "FÁCIL - Infiltração pela Direita",
+            "neymar_pos": (1550, 850),      
+            "bola_origem": (980, 1070),     
+            "bola_destino": (1420, 480),    
+            "aliados_pos": [(900, 470)],
+            "zagueiros_pos": [(1100, 280), (1200, 400), (900, 300)]
+        },
+        4: {
+            "nome": "FÁCIL - Pivô na Entrada da Área",
+            "neymar_pos": (960, 1000),       
+            "bola_origem": (1400, 1070),     
+            "bola_destino": (960, 860),     
+            "aliados_pos": [(450, 600), (1250, 420), (800, 850)],
+            "zagueiros_pos": [(700, 450), (1000, 580), (550, 650), (1190, 480)] 
+        },
+        5: {
+            "nome": "FÁCIL - Inversão de Jogada",
+            "neymar_pos": (900, 410),      
+            "bola_origem": (1580, 100),      
+            "bola_destino": (1450, 420),    
+            "aliados_pos": [(1450, 430), (1620, 120)],
+            "zagueiros_pos": [(650, 250), (850, 150), (1085, 350), (1120, 200)]
+        }
+        
+    },
+    "medio": {
+        1: {
+            "nome": "MÉDIO - Avanço Central",
+            "neymar_pos": (750, 800),       
+            "bola_origem": (500, 1050),     
+            "bola_destino": (700, 700), # Ponto futuro mais curto, zaga mais compacta     
+            "aliados_pos": [(400, 800), (1100, 800)], 
+            "zagueiros_pos": [(680, 450), (820, 450), (550, 550), (950, 550)] 
+        },
+        2: {
+            "nome": "MÉDIO - Linha de Fundo Direita",
+            "neymar_pos": (1100, 750),       
+            "bola_origem": (700, 950),      
+            "bola_destino": (1050, 650),     
+            "aliados_pos": [(600, 700), (800, 850)],
+            "zagueiros_pos": [(950, 380), (1100, 420), (750, 450), (500, 500)]
+        },
+        3: {
+            "nome": "MÉDIO - Ataque Flanco Esquerdo",
+            "neymar_pos": (400, 750),      
+            "bola_origem": (800, 1000),     
+            "bola_destino": (450, 650),    
+            "aliados_pos": [(700, 700), (950, 800)],
+            "zagueiros_pos": [(450, 400), (600, 380), (800, 450), (1050, 480)]
+        },
+        4: {
+            "nome": "MÉDIO - Bola Dividida no Meio",
+            "neymar_pos": (800, 700),       
+            "bola_origem": (800, 1050),     
+            "bola_destino": (800, 580), # Bola para perigosamente mais perto dos zagueiros     
+            "aliados_pos": [(500, 750), (1100, 750)],
+            "zagueiros_pos": [(740, 380), (860, 380), (620, 440), (980, 440)] 
+        }
+    },
+    "dificil": {
+        1: {
+            "nome": "DIFÍCIL - Pressão Total na Intermediária",
+            "neymar_pos": (700, 750),       
+            "bola_origem": (900, 1000),     
+            "bola_destino": (750, 640), # Pouquíssimo espaço para pensar antes do bote     
+            "aliados_pos": [(450, 800)], 
+            "zagueiros_pos": [(680, 480), (820, 480), (720, 580), (880, 580)] # Bloco defensivo ultra-fechado
+        },
+        2: {
+            "nome": "DIFÍCIL - Corredor Polonês na Ponta",
+            "neymar_pos": (400, 700),       
+            "bola_origem": (350, 950),      
+            "bola_destino": (420, 600),     
+            "aliados_pos": [(800, 750)],
+            "zagueiros_pos": [(420, 420), (550, 450), (400, 520), (680, 500)] # Dois zagueiros cercando o seu lado
+        },
+        3: {
+            "nome": "DIFÍCIL - Transição Rápida Abafada",
+            "neymar_pos": (1100, 700),      
+            "bola_origem": (750, 950),     
+            "bola_destino": (1050, 600),    
+            "aliados_pos": [(700, 750)],
+            "zagueiros_pos": [(1020, 420), (900, 450), (1080, 520), (800, 500)]
+        }
+    }
 }
