@@ -2,23 +2,38 @@ import pygame
 
 class NeymarAnimacao:
     def __init__(self):
-        # 1. Carrega os frames de frente
+        # CARREGA OS FRAMES DE FRENTE
         self.frames_parado_frente = [
-            pygame.image.load("assets/jogadores/ney/ney_idle/idle frente/idle frente1.png").convert_alpha(),
-            pygame.image.load("assets/jogadores/ney/ney_idle/idle frente/idle frente2.png").convert_alpha(),
-            pygame.image.load("assets/jogadores/ney/ney_idle/idle frente/idle frente3.png").convert_alpha(),
-            pygame.image.load("assets/jogadores/ney/ney_idle/idle frente/idle frente4.png").convert_alpha(),
+            pygame.image.load("assets/jogadores/ney/ney_idle/idle_frente/idle_frente1.png").convert_alpha(),
+            pygame.image.load("assets/jogadores/ney/ney_idle/idle_frente/idle_frente2.png").convert_alpha(),
+            pygame.image.load("assets/jogadores/ney/ney_idle/idle_frente/idle_frente3.png").convert_alpha(),
+            pygame.image.load("assets/jogadores/ney/ney_idle/idle_frente/idle_frente4.png").convert_alpha(),
+            
         ]
         
-        # 2. Carrega os frames de costas
+        # CARREGA OS FRAMES DE COSTAS
         self.frames_parado_costas = [
-           pygame.image.load("assets/jogadores/ney/ney_idle/idle costas/idle costas1.png").convert_alpha(),
-           pygame.image.load("assets/jogadores/ney/ney_idle/idle costas/idle costas2.png").convert_alpha(),
-           pygame.image.load("assets/jogadores/ney/ney_idle/idle costas/idle costas3.png").convert_alpha(),
-           pygame.image.load("assets/jogadores/ney/ney_idle/idle costas/idle costas4.png").convert_alpha(),
+           pygame.image.load("assets/jogadores/ney/ney_idle/idle_costas/idle_costas1.png").convert_alpha(),
+           pygame.image.load("assets/jogadores/ney/ney_idle/idle_costas/idle_costas2.png").convert_alpha(),
+           pygame.image.load("assets/jogadores/ney/ney_idle/idle_costas/idle_costas3.png").convert_alpha(),
+           pygame.image.load("assets/jogadores/ney/ney_idle/idle_costas/idle_costas4.png").convert_alpha(),
         ]
-        
-        # Estado Inicial
+
+        self.frames_parado_direita = [
+            pygame.image.load("assets/jogadores/ney/ney_idle/idle_direita/idle_direita1.png").convert_alpha(),
+            pygame.image.load("assets/jogadores/ney/ney_idle/idle_direita/idle_direita2.png").convert_alpha(),
+            pygame.image.load("assets/jogadores/ney/ney_idle/idle_direita/idle_direita3.png").convert_alpha(),
+            pygame.image.load("assets/jogadores/ney/ney_idle/idle_direita/idle_direita4.png").convert_alpha(),
+        ]
+
+        self.frames_parado_esquerda = [
+            pygame.image.load("assets/jogadores/ney/ney_idle/idle_esquerda/idle_esquerda1.png").convert_alpha(),
+            pygame.image.load("assets/jogadores/ney/ney_idle/idle_esquerda/idle_esquerda2.png").convert_alpha(),
+            pygame.image.load("assets/jogadores/ney/ney_idle/idle_esquerda/idle_esquerda3.png").convert_alpha(),
+            pygame.image.load("assets/jogadores/ney/ney_idle/idle_esquerda/idle_esquerda4.png").convert_alpha(),
+
+        ]
+
         self.lista_atual = self.frames_parado_frente
         self.frame_atual = 0
         self.velocidade_animacao = 200 # ms
@@ -33,7 +48,7 @@ class NeymarAnimacao:
         Recebe o estado atual do Neymar monitorado na movimentação 
         e atualiza a imagem correspondente.
         """
-        tempo_actual = pygame.time.get_ticks()
+        tempo_atual = pygame.time.get_ticks()
         
         # Define qual lista usar baseada no monitoramento de movimento
         if not em_movimento:
@@ -41,17 +56,21 @@ class NeymarAnimacao:
                 self.lista_atual = self.frames_parado_frente
             if olhando_para == "costas":
                 self.lista_atual = self.frames_parado_costas
+            if olhando_para == 'direita':
+                self.lista_atual = self.frames_parado_direita
+            if olhando_para == 'esquerda':
+                self.lista_atual = self.frames_parado_esquerda
         else:
-            # Se futuramente tiver animação de corrida, a troca de listas entra aqui!
+            # DEPOIS IMPLEMENTAR OS SPRITES CORRENDO AQUI
             pass
 
-        # Lógica do relógio para mudar o frame
-        if tempo_actual - self.ultimo_update > self.velocidade_animacao:
-            self.ultimo_update = tempo_actual
+        # LOGICA DO RELOGIO QUE ATUALIZA OS FRAMES
+        if tempo_atual - self.ultimo_update > self.velocidade_animacao:
+            self.ultimo_update = tempo_atual
             self.frame_atual += 1
             
             if self.frame_atual >= len(self.lista_atual):
                 self.frame_atual = 0
                 
-        # Retorna a imagem exata que deve ser desenhada nesse milissegundo
+        # RETORNA A IMAGEM QUE DEVE SER DESENHADA NESSE FRAME
         return self.lista_atual[self.frame_atual]

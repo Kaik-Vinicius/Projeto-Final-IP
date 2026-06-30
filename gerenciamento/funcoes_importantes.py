@@ -4,6 +4,7 @@ import random
 from entidades.zagueiro import Zagueiro
 from entidades.aliado import Aliado
 from gerenciamento.constants import *
+from entidades.goleiro import Goleiro
 
 def prender_neymar_campo(neymar, campo_jogavel):
     """
@@ -29,6 +30,15 @@ def limpar_campo(neymar, grupo_aliados, grupo_zagueiros, grupo_coletaveis):
     neymar.ultimo_tipo_drible = 'manual'
     
     return 0,0,0,0,0 # RETORNO DAS CHUTEIRAS, ESTRELAS, GOLS DO BRASIL E ARGENTINA E TEMPO DO ULTIMO DRIBLE
+
+def colisao_coletavel_customizada(jogador, coletavel):
+    """
+    CRIA UMA HITBOX MENOR PRA O NEYMAR COLIDIR COM OS ITENS DE FORMA MAIS NORMAL
+    """
+    hitbox_menor = jogador.rect.inflate(-30, -40)
+    
+    return hitbox_menor.colliderect(coletavel.rect)
+
 
 def bola_tocou_jogador_continua(bola, jogador):
     """
@@ -113,7 +123,7 @@ def checar_conclusao_jogada(bola, neymar):
     return False 
 
 
-def preparar_nova_oportunidade(dificuldade, indice_lance, neymar, bola, grupo_zagueiros, grupo_aliados):
+def preparar_nova_oportunidade(dificuldade, indice_lance, neymar, bola, grupo_zagueiros, grupo_aliados, grupo_goleiro):
     """
     FUNÇÃO QUE PREPARA NOVA OPORTUNIDADE, LIMPA O CAMPO E POSICIONA TUDO AONDE DEVE ESTAR
     """
@@ -151,3 +161,7 @@ def preparar_nova_oportunidade(dificuldade, indice_lance, neymar, bola, grupo_za
     for pos in cenario["aliados_pos"]:
         novo_aliado = Aliado(pos[0], pos[1])
         grupo_aliados.add(novo_aliado)
+
+    grupo_goleiro.empty()
+    goleiro = Goleiro(960, 70)
+    grupo_goleiro.add(goleiro)
