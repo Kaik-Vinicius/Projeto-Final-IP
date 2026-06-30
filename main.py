@@ -27,7 +27,7 @@ def main():
     # INICIAÇÃO DO JOGO
     pygame.init()
     #Fonte para o placar e cronometro
-    fonte_pequena = pygame.font.SysFont("Arial", 20, bold=True)
+    fonte_pequena = pygame.font.Font("assets/fontes/pressstart2p.ttf", 16) # FONTE MAIS BONITA PRA O JOGO
     fonte_jogo = pygame.font.SysFont("Arial", 30, bold=True)
     
     # CRIA A TELA UTILIZANDO A FLAG 'pygame.SCALED'
@@ -43,10 +43,30 @@ def main():
     # CONTROLE DE ESCALA DO SPRITE DO CAMPO
     campo_original = pygame.image.load("assets/campo/campo_1280x1080.png").convert()
     campo_jogo = pygame.transform.smoothscale(campo_original, (LARGURA_CAMPO_JOGAVEL, ALTURA_CAMPO_JOGAVEL))
-  
-    CAMPO_X = OFFSET_X
-    CAMPO_Y = 0
-
+    
+    # CONTROLE DE ESCALA DAS ARQUIBANCADAS
+    arqui_esq = pygame.image.load("assets/arquibancada/arquibancada_esquerda.png").convert()
+    arqui_dir = pygame.image.load("assets/arquibancada/arquibancada_direita.png").convert()
+    arquibancada_esquerda = pygame.transform.smoothscale(arqui_esq, (LARGURA_ARQUIBANCADA, ALTURA_ARQUIBANCADA))
+    arquibancada_direita = pygame.transform.smoothscale(arqui_dir, (LARGURA_ARQUIBANCADA, ALTURA_ARQUIBANCADA))
+    
+    # PLACAR DA CHUTEIRA
+    icone_chuteira_placar = pygame.image.load("assets/icones/icone_chuteira.png").convert_alpha()
+    asset_chuteira_placar = pygame.transform.smoothscale(icone_chuteira_placar, (55, 55))
+    
+    # PLACAR DA ESTRELA
+    icone_estrela_placar = pygame.image.load("assets/icones/icone_estrela.png").convert_alpha()
+    asset_estrela_placar = pygame.transform.smoothscale(icone_estrela_placar, (45, 45))
+    
+    # PLACAR BRASIL
+    icone_brasil = pygame.image.load("assets/icones/icone_brasil.png").convert_alpha()
+    asset_placar_brasil = pygame.transform.smoothscale(icone_brasil, (95, 95))
+    
+    # PLACAR ARGENTINA
+    icone_argentina = pygame.image.load("assets/icones/icone_argentina.png").convert_alpha()
+    asset_placar_argentina = pygame.transform.smoothscale(icone_argentina, (95, 95))
+    
+    
     # ESTADO INICIAL DO JOGO
     estado = "menu"
     estado_anterior = "menu"
@@ -70,13 +90,20 @@ def main():
     # INSTANCIANDO JOGADORES
     neymar = Neymar()
     
+    # INSTANCIA A BOLA
+    bola = Bola()
+    
+    #GRUPO DE SPRITES ANIMADOS
+    grupo_sprites = pygame.sprite.LayeredUpdates()
+    
+    neymar.layer = 5 
+    grupo_sprites.add(neymar)
+    grupo_sprites.add(bola)
+
     # GRUPOS DOS JOGADORES TÁTICOS
     grupo_zagueiros = pygame.sprite.Group()
     goleiro = Goleiro(960, 75)
     grupo_aliados = pygame.sprite.Group()
-  
-    # INSTANCIA A BOLA
-    bola = Bola()
   
     grupo_coletaveis = pygame.sprite.Group()
     tempo_ultimo_drible_registrado = 0 
@@ -168,22 +195,24 @@ def main():
             
             # SE O JOGO ACABAR ELE FINALIZA E VOLTA PRA O MENU
             if minuto_atual >= 90:
-
-                grupo_aliados.empty()
-                grupo_coletaveis.empty()
-                grupo_zagueiros.empty()
-                neymar.tem_bola = False
-
-                # ZERA OS GOLS
-                gols_brasil = 0
-                gols_argentina = 0
+                
+                # AQUI ELE CHAMA A FUNCAO QUE LIMPA TUDO NO CAMPO QUANDO O JOGO TERMINA
+                (chuteiras_coletadas, 
+                estrelas_coletadas, 
+                gols_brasil, 
+                gols_argentina, 
+                tempo_ultimo_drible_registrado) = limpar_campo(neymar, grupo_aliados, grupo_zagueiros, grupo_coletaveis)
 
                 estado = 'menu'
                 continue
             
             # INICIA A NOVA OPORTUNIDADE DE ATAQUE
             if proximo_estado == "jogando" and oportunidades_restantes > 0:
-        
+                
+                # DESATIVA O MODO NEY_PRIME
+                neymar.ney_prime = False
+                neymar.velocidade = VELOCIDADE_NEY
+                
                 lance_atual = (oportunidades_totais - oportunidades_restantes) + 1
                 # SPAWNA OS NOVOS ALIADOS E ZAGUEIROS E LANÇA A BOLA DE LONGE
                 preparar_nova_oportunidade(dificuldade, lance_atual, neymar, bola, grupo_zagueiros, grupo_aliados)
@@ -193,7 +222,14 @@ def main():
         if estado == "jogando":
             teclas = pygame.key.get_pressed()
             neymar.mover(teclas, bola, grupo_zagueiros)
+            neymar.update()
             bola.atualizar_posicao(neymar)
+            
+            # ATUALIZA A POSICAO DA BOLA NO PE DO NEYMAR
+            if neymar.tem_bola:
+                bola.atualizar_posicao(neymar)
+            else:
+                bola.update()
             
             # TIRA A BOLA DO ESTADO TRAVADO DE EM DRIBLE
             if neymar.bola_em_drible:
@@ -299,19 +335,25 @@ def main():
                     item.kill()
                     neymar.atualizar_confianca(item.valor_recompensa) 
                     chuteiras_coletadas += 1 
+                    
+                # SE COLETAR A ESTRELA ATIVA O MODO NEY PRIME
                 elif item.tipo == 'estrela':
                     item.kill() 
                     estrelas_coletadas += 1 
                     neymar.ney_prime = True
+                    
                     neymar.tempo_prime = pygame.time.get_ticks()
-                    neymar.confianca = 0 
-
-            if getattr(neymar, 'ney_prime', False):
-                if pygame.time.get_ticks() - getattr(neymar, 'tempo_prime', 0) > 7000:
-                    neymar.ney_prime = False
-
+                    neymar.confianca = 0
+                    neymar.velocidade = VELOCIDADE_NEY_PRIME
+                
+                # VERIFICA SE AINDA TA NO MODO NEY PRIME
+                if neymar.ney_prime:
+                    if pygame.time.get_ticks() - neymar.tempo_prime > 7000:
+                        neymar.ney_prime = False
+                        neymar.velocidade = VELOCIDADE_NEY
+                        
             # DETECTA SE FOI GOL OU JOGADA PERDIDA NA LINHA DE FUNDO
-            if checar_conclusao_jogada(bola):
+            if checar_conclusao_jogada(bola, neymar):
                 if bola.resultado_chute == 'gol':
                     gols_brasil += 1
 
@@ -342,30 +384,27 @@ def main():
             menu_dificuldade.desenhar(tela)
 
         elif estado == "espera":
-            desenhar_tela_espera(
-                tela, campo_jogo, (CAMPO_X, CAMPO_Y), fonte_jogo, fonte_pequena,
-                chuteiras_coletadas, estrelas_coletadas, oportunidades_restantes,
-                minuto_atual, tempo_atual, botao_pause, gols_brasil, gols_argentina
-            )
+            desenhar_tela_espera(tela, campo_jogo, (CAMPO_X, CAMPO_Y), arquibancada_esquerda, arquibancada_direita, fonte_jogo, fonte_pequena, asset_chuteira_placar, asset_estrela_placar,asset_placar_brasil, asset_placar_argentina, chuteiras_coletadas, estrelas_coletadas, oportunidades_restantes,neymar.confianca, minuto_atual, tempo_atual, botao_pause, gols_brasil, gols_argentina)
 
         elif estado == "jogando":
            
             tela.fill((20, 20, 20))
             tela.blit(campo_jogo, (CAMPO_X, CAMPO_Y))
+            grupo_sprites.draw(tela)
 
             grupo_coletaveis.draw(tela)
             grupo_aliados.draw(tela)
             grupo_zagueiros.draw(tela) 
             
+            # DESENHA AS ARQUIBANCADAS NA TELA
+            tela.blit(arquibancada_esquerda,(CAMPO_X - LARGURA_ARQUIBANCADA, CAMPO_Y))
+            tela.blit(arquibancada_direita, (CAMPO_X + LARGURA_CAMPO_JOGAVEL, CAMPO_Y))
+            
             tela.blit(neymar.image, neymar.rect)
             tela.blit(goleiro.image, goleiro.rect)
             tela.blit(bola.image, bola.rect)
-            desenhar_placar_superior(tela, fonte_pequena, chuteiras_coletadas, estrelas_coletadas, oportunidades_restantes, gols_brasil, gols_argentina)
+            desenhar_placar_superior(tela, fonte_pequena, chuteiras_coletadas, estrelas_coletadas, oportunidades_restantes, neymar.confianca, asset_chuteira_placar, asset_estrela_placar, asset_placar_brasil, asset_placar_argentina, gols_brasil, gols_argentina)
             
-            # HUD DE TESTES VISUALIZADOR DE CONFIANÇA 
-            confianca_atual = int(getattr(neymar, 'confianca', 0)) 
-            texto_confianca = fonte_pequena.render(f"Confiança: {confianca_atual}/100", True, (255, 255, 255)) 
-            tela.blit(texto_confianca, (CAMPO_X + 20, 100))
 
             botao_pause.desenhar(tela)
 

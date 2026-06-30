@@ -11,6 +11,24 @@ def prender_neymar_campo(neymar, campo_jogavel):
     """
     neymar.rect.clamp_ip(campo_jogavel)
     
+def limpar_campo(neymar, grupo_aliados, grupo_zagueiros, grupo_coletaveis):
+    """
+    RESETA TUDO E LIMPA O CAMPO PRA EVITAR QUE O JOGO FIQUE PUXANDO INFORMAÇÕES DE OUTRAS PARTIDAS ANTERIORES
+    """
+    grupo_aliados.empty()
+    grupo_coletaveis.empty()
+    grupo_zagueiros.empty()
+    
+    # RESET TOTAL DO OBJETO NEYMAR 
+    neymar.tem_bola = False
+    neymar.confianca = 0
+    neymar.ney_prime = False
+    neymar.velocidade = VELOCIDADE_NEY
+    neymar.bola_em_drible = False
+    neymar.drible_efetivo = False
+    neymar.ultimo_tipo_drible = 'manual'
+    
+    return 0,0,0,0,0 # RETORNO DAS CHUTEIRAS, ESTRELAS, GOLS DO BRASIL E ARGENTINA E TEMPO DO ULTIMO DRIBLE
 
 def bola_tocou_jogador_continua(bola, jogador):
     """
@@ -57,7 +75,7 @@ def verificar_desarme_zagueiros(grupo_zagueiros, bola, bola_tocou_jogador_contin
     return False
 
 
-def checar_conclusao_jogada(bola):
+def checar_conclusao_jogada(bola, neymar):
     """
     VERIFICA SE A BOLA PASSOU DA LINHA DE FUNDO, SE FOI GOL OU NAO
     """
@@ -82,6 +100,8 @@ def checar_conclusao_jogada(bola):
         if bola.rect.centery <= limite_parada_y:
             
             if bola.resultado_chute == 'gol':
+                # GANHA +20 DE CONFIANCA SE FIZER UM GOL
+                neymar.atualizar_confianca(20)
                 print("GOOOOOL DO NEYMAR!!!") 
             elif bola.resultado_chute == 'defesa':
                 print("MILAGRE DO GOLEIRO! CHANCE PERDIDA!")
@@ -118,7 +138,7 @@ def preparar_nova_oportunidade(dificuldade, indice_lance, neymar, bola, grupo_za
     origem_x, origem_y = cenario["bola_origem"]
     destino_x, destino_y = cenario["bola_destino"]
     
-    bola.iniciar_lancamento(origem_x, origem_y, destino_x, destino_y, velocidade_lancamento=12)
+    bola.iniciar_lancamento(origem_x, origem_y, destino_x, destino_y, VELOCIDADE_LANCAMENTO_INICIAL)
 
     # RECRIA OS ZAGUEIROS NA NOVA OPORTUNIDADE
     grupo_zagueiros.empty()
