@@ -21,32 +21,53 @@ class Goleiro (pygame.sprite.Sprite):
         self.velocidade = 2 # A VELOCIDADE QUE ELE VAI ANDAR
 
     def perseguir_neymar(self, neymar):
-        # RECEBE A POSICAO X E Y DO NEYMAR
         neymar_x = neymar.rect.centerx
-        neymar_y = neymar.rect.centery
 
-        # CALCULA A DISTANCIA DO ZAGUEIRO PARA O NEYMAR
+        # CALCULA A DISTANCIA E DIREÇÃO NO EIXO X
         dist_x = self.rect.centerx - neymar_x
-        dist_y = self.rect.centery - neymar_y
 
-        dist_total = ((dist_x ** 2) + (dist_y ** 2)) ** 0.5
+        # 2 PARA NAO FICAR TREMENDO
+        if abs(dist_x) > 2:
+            # NORMTIZA O VETOR NO EIXO X
+            norma_x = dist_x / abs(dist_x)
 
+            # MOVE O GOLEIRO APENAS NO EIXO X
+            self.rect.x -= (norma_x * self.velocidade)
 
-        # NORMATIZA A DISTANCIA PARA UMA PERSGUICAO MAIS FLUIDA, EU ACHO
-        norma_x = dist_x / dist_total
-        norma_y = dist_y / dist_total
+        # MANTER DENTRO DA ÁREA DO GOL
+        self.rect.clamp_ip(pygame.Rect(900, 75, 120, 100))
 
-        # MOVE O ZAGUEIRO
-        self.rect.x -= (norma_x * self.velocidade)
-        self.rect.y -= (norma_y * self.velocidade)
+    def pular_na_bola(self, bola):
+        alvo = bola.alvo_x
 
-        # MANTER DENTRO DA TELA
-        self.rect.clamp_ip(pygame.Rect(848, 75, 224, 50))
+        # CALCULA A DISTANCIA E DIREÇÃO NO EIXO X
+        dist_x = self.rect.centerx - alvo
+
+        # 2 PARA NAO FICAR TREMENDO
+        if abs(dist_x) > 2:
+            # NORMTIZA O VETOR NO EIXO X
+            norma_x = dist_x / abs(dist_x)
+
+            # MOVE O GOLEIRO APENAS NO EIXO X
+            if bola.resultado_chute == 'gol':
+                self.rect.x -= (norma_x * self.velocidade) * 0.75
+            else:
+                self.rect.x -= (norma_x * self.velocidade) * 1.25
+
+        # MANTER DENTRO DA ÁREA DO GOL
+        self.rect.clamp_ip(pygame.Rect(860, 75, 200, 100))
          
-    def att_gol(self, neymar):
+    def att_gol(self, neymar, bola):
         pos_goleiro = pygame.math.Vector2(self.rect.center)
         pos_neymar = pygame.math.Vector2(neymar.rect.center)
+        pos_bola = pygame.math.Vector2(bola.rect.center)
         distancia_neymar = pos_goleiro.distance_to(pos_neymar)
+        distancia_bola = pos_goleiro.distance_to(pos_bola)
 
-        if(distancia_neymar > 30 and distancia_neymar < 250):
+        # Se o Neymar estiver dentro do raio de ativação (entre 10 e 250 pixels)
+        if bola.foi_chutada:
+            if distancia_bola <= 150:
+                self.pular_na_bola(bola)
+
+        if 30 < distancia_neymar < 450:
             self.perseguir_neymar(neymar)

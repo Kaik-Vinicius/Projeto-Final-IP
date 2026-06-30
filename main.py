@@ -67,7 +67,7 @@ def main():
     asset_placar_argentina = pygame.transform.smoothscale(icone_argentina, (95, 95))
     
     
-    # ESTADO INICIAL DO JOGO 
+    # ESTADO INICIAL DO JOGO
     estado = "menu"
     estado_anterior = "menu"
 
@@ -102,7 +102,7 @@ def main():
 
     # GRUPOS DOS JOGADORES TÁTICOS
     grupo_zagueiros = pygame.sprite.Group()
-    goleiro = Goleiro(960, 75)
+    grupo_goleiro = pygame.sprite.Group()
     grupo_aliados = pygame.sprite.Group()
   
     grupo_coletaveis = pygame.sprite.Group()
@@ -215,7 +215,7 @@ def main():
                 
                 lance_atual = (oportunidades_totais - oportunidades_restantes) + 1
                 # SPAWNA OS NOVOS ALIADOS E ZAGUEIROS E LANÇA A BOLA DE LONGE
-                preparar_nova_oportunidade(dificuldade, lance_atual, neymar, bola, grupo_zagueiros, grupo_aliados)
+                preparar_nova_oportunidade(dificuldade, lance_atual, neymar, bola, grupo_zagueiros, grupo_aliados, grupo_goleiro)
                 estado = "jogando"
             
         # ATUALIZAÇÃO E FÍSICA ATIVA (JOGANDO)
@@ -270,7 +270,8 @@ def main():
             
             # ATUALIZA TODOS OS ZAGUEIROS DE UMA VEZ SÓ
             atualizar_ia_zagueiros(grupo_zagueiros, neymar, bola, grupo_aliados) 
-            goleiro.att_gol(neymar)
+            for goleiro in grupo_goleiro:
+                goleiro.att_gol(neymar, bola)
 
             # CHECA SE O NEYMAR TOMOU O CARRINHO OU NAO
             if verificar_desarme_zagueiros(grupo_zagueiros, bola, bola_tocou_jogador_continua):
@@ -395,13 +396,13 @@ def main():
             grupo_coletaveis.draw(tela)
             grupo_aliados.draw(tela)
             grupo_zagueiros.draw(tela) 
+            grupo_goleiro.draw(tela)
             
             # DESENHA AS ARQUIBANCADAS NA TELA
             tela.blit(arquibancada_esquerda,(CAMPO_X - LARGURA_ARQUIBANCADA, CAMPO_Y))
             tela.blit(arquibancada_direita, (CAMPO_X + LARGURA_CAMPO_JOGAVEL, CAMPO_Y))
             
             
-            tela.blit(goleiro.image, goleiro.rect)
             tela.blit(bola.image, bola.rect)
             tela.blit(neymar.image, neymar.rect)
 

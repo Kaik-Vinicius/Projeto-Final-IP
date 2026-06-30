@@ -4,37 +4,14 @@ import random
 from entidades.zagueiro import Zagueiro
 from entidades.aliado import Aliado
 from gerenciamento.constants import *
+from entidades.goleiro import Goleiro
 
 def prender_neymar_campo(neymar, campo_jogavel):
     """
-    PRENDE O NEYMAR NO CAMPO BASEADO APENAS NOS PÉS
+    FUNÇÃO QUE PRENDE O NEYMAR NOS LIMITES DO CAMPO
     """
-    x_campo, y_campo, largura_campo, altura_campo = campo_jogavel
-
-    # CALCULA OS LIMITES DO CAMPO
-    x_min = x_campo
-    x_max = x_campo + largura_campo
-    y_min = y_campo
-    y_max = altura_campo
-
-    # PEGA A POSICAO ATUAL DOS PES DO NEYMAR
-    pes_x, pes_y = neymar.rect.midbottom
-
-    # TRAVA NO EIXO X
-    if pes_x < x_min:
-        pes_x = x_min
-    elif pes_x > x_max:
-        pes_x = x_max
-
-    # TRAVA NO EIXO Y
-    if pes_y < y_min:
-        pes_y = y_min
-    elif pes_y > y_max:
-        pes_y = y_max
-
-    # APLICA A NOVA POSICAO TRAVADA NOS PES
-    neymar.rect.midbottom = (pes_x, pes_y)
-
+    neymar.rect.clamp_ip(campo_jogavel)
+    
 def limpar_campo(neymar, grupo_aliados, grupo_zagueiros, grupo_coletaveis):
     """
     RESETA TUDO E LIMPA O CAMPO PRA EVITAR QUE O JOGO FIQUE PUXANDO INFORMAÇÕES DE OUTRAS PARTIDAS ANTERIORES
@@ -65,28 +42,17 @@ def colisao_coletavel_customizada(jogador, coletavel):
 
 def bola_tocou_jogador_continua(bola, jogador):
     """
-    CHECA A COLISÃO DA BOLA COM O JOGADOR.
-    SE A BOLA ESTIVER PARADA, A HITBOX FICA NORMAL OU REDUZIDA.
-    SE ESTIVER EM MOVIMENTO, USA A EXPANÇÃO CONTÍNUA PARA EVITAR GLITCHES.
+    EXPANDE BEM A HITBOX DA BOLA E DO JOGADOR E EVITA QUE O JOGAGOR ACABE NAO DOMINANDO A BOLA
     """
-    # 1. CASO A BOLA ESTEJA PARADA NO CHÃO ESPERANDO
-    if getattr(bola, 'no_chao_esperando', False) or (bola.velocidade_x == 0 and bola.velocidade_y == 0):
-        # Reduzimos um pouco o retângulo da bola (ex: tira 4 pixels de cada lado) para ficar bem justa
-        hitbox_bola_parada = bola.rect.inflate(-30, -30)
-        return hitbox_bola_parada.colliderect(jogador.rect)
-
-    # 2. CASO A BOLA ESTEJA EM MOVIMENTO (Mantém a lógica contínua original)
     bola_expandida = bola.rect.inflate(bola.rect.width, bola.rect.height)
     if bola_expandida.colliderect(jogador.rect):
         return True
 
-    jogador_expandido = jogador.rect.inflate(bola.rect.width, bola.rect.height)
+    jogador_expandidado = jogador.rect.inflate(bola.rect.width, bola.rect.height)
     return bool(
-        jogador_expandido.clipline(
+        jogador_expandidado.clipline(
             (int(bola.prev_center.x), int(bola.prev_center.y)),
-            bola.rect.center
-        )
-    )
+            bola.rect.center))
 
 def atualizar_ia_zagueiros(grupo_zagueiros, neymar, bola, grupo_aliados):
     """
@@ -124,9 +90,9 @@ def checar_conclusao_jogada(bola, neymar):
     VERIFICA SE A BOLA PASSOU DA LINHA DE FUNDO, SE FOI GOL OU NAO
     """
     
-    if (bola.rect.centerx < 280 or
-        bola.rect.centerx > 1640 or
-        bola.rect.centery > 1090 or
+    if (bola.rect.centerx < 320 or
+        bola.rect.centerx > 1600 or
+        bola.rect.centery > 1080 or
         (bola.rect.centery < 65 and getattr(bola, 'resultado_chute', None) is None)):
 
         bola.resultado_chute = 'fora'
@@ -157,7 +123,7 @@ def checar_conclusao_jogada(bola, neymar):
     return False 
 
 
-def preparar_nova_oportunidade(dificuldade, indice_lance, neymar, bola, grupo_zagueiros, grupo_aliados):
+def preparar_nova_oportunidade(dificuldade, indice_lance, neymar, bola, grupo_zagueiros, grupo_aliados, grupo_goleiro):
     """
     FUNÇÃO QUE PREPARA NOVA OPORTUNIDADE, LIMPA O CAMPO E POSICIONA TUDO AONDE DEVE ESTAR
     """
@@ -195,3 +161,7 @@ def preparar_nova_oportunidade(dificuldade, indice_lance, neymar, bola, grupo_za
     for pos in cenario["aliados_pos"]:
         novo_aliado = Aliado(pos[0], pos[1])
         grupo_aliados.add(novo_aliado)
+
+    grupo_goleiro.empty()
+    goleiro = Goleiro(960, 70)
+    grupo_goleiro.add(goleiro)
