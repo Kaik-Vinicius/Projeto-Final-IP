@@ -54,29 +54,13 @@ class Bola(pygame.sprite.Sprite):
         # ATRIBUTO QUE DIZ O RESULTADO DO CHUTE
         self.resultado_chute = None
 
-        # LEYER PRA POSICIONAR OS SPRITES DA BOLA E DO JOGADOR
-        self._layer = 5 # Padrão Idle
-
-        # DICIONARIOS DOS OFFSETS DA POSICAO DA BOLA
+        # DICIONARIOS DOS OFFSETS PADRÃO (PARADO)
         self.offsets_posse = {
             "frente":   (32, 80),
             "costas":   (32, 75),
-            "esquerda": (-8, 20),  
-            "direita":  (38, 20)   
+            "esquerda": (10, 75),
+            "direita":  (50, 75)   
         }
-
-    # sistema de posicionamento da bola
-    @property
-    def layer(self):
-        return self._layer
-
-    @layer.setter
-    def layer(self, nova_camada):
-        self._layer = nova_camada
-        if self.groups():
-            for grupo in self.groups():
-                if hasattr(grupo, 'change_layer'):
-                    grupo.change_layer(self, nova_camada)
 
     def sincronizar_coordenadas_float(self):
         self.px = float(self.rect.x)
@@ -118,7 +102,6 @@ class Bola(pygame.sprite.Sprite):
         self.tem_destino = True
         self.em_movimento = True
         self.no_chao_esperando = False
-        self.layer = 10 
         dx = x_destino - x_inicial
         dy = y_destino - y_inicial
         angulo = math.atan2(dy, dx)
@@ -128,17 +111,13 @@ class Bola(pygame.sprite.Sprite):
     def _colar_no_pe_do_dono(self):
         if self.dono is not None:
             direcao = getattr(self.dono, 'olhando_para', 'frente')
+            
+            # Pega o offset base (parado)
             offset_x, offset_y = self.offsets_posse.get(direcao, self.offsets_posse['frente'])
+
+            # Aplica a posição
             self.rect.x = self.dono.rect.x + offset_x
             self.rect.y = self.dono.rect.y + offset_y
-
-            # LÓGICA DE CAMADAS (Z-ORDER)
-            if direcao == "frente":
-                self.layer = 7 # Bola ATRÁS das pernas do Neymar (ele padrão é 5)
-            elif direcao == "costas":
-                self.layer = 7 # Bola NA FRENTE do corpo do Neymar (ela está "atrás dele no campo", mas desenhada por cima pra ver)
-            else:
-                self.layer = 5 
 
     def atualizar_posicao(self, neymar=None):
         if self.dono is not None:
@@ -172,7 +151,6 @@ class Bola(pygame.sprite.Sprite):
         self.no_chao_esperando = True
         self.dono = None
         self._limpar_destino()
-        self.layer = 5 
 
     def dominar(self, jogador):
         self.no_chao_esperando = False
@@ -195,12 +173,11 @@ class Bola(pygame.sprite.Sprite):
         self.no_chao_esperando = False
         self.em_movimento = True
         self._registrar_prev_center()
-        self.layer = 10 
         self.resultado_chute = resultado 
         alvo_y = 70
         if resultado == 'gol': alvo_x = random.randint(880, 1040)
         elif resultado == 'defesa': alvo_x = random.randint(930, 990)
-        else: # SE FOR FORA
+        else: 
             if random.random() < 0.5: alvo_x = random.randint(730, 840)
             else: alvo_x = random.randint(1080, 1190)
         dx = alvo_x - origem_x
@@ -215,7 +192,6 @@ class Bola(pygame.sprite.Sprite):
         self.dono = None
         self.em_movimento = True
         self.no_chao_esperando = False
-        self.layer = 10 
         self.rect.centerx = origem_x
         self.rect.centery = origem_y
         self.sincronizar_coordenadas_float()
@@ -233,7 +209,6 @@ class Bola(pygame.sprite.Sprite):
         self.dono = None
         self.em_movimento = True
         self.no_chao_esperando = False
-        self.layer = 10 
         self.rect.centerx = origem_x
         self.rect.centery = origem_y
         self.sincronizar_coordenadas_float()

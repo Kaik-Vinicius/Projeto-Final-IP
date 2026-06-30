@@ -67,7 +67,7 @@ def main():
     asset_placar_argentina = pygame.transform.smoothscale(icone_argentina, (95, 95))
     
     
-    # ESTADO INICIAL DO JOGO
+    # ESTADO INICIAL DO JOGO 
     estado = "menu"
     estado_anterior = "menu"
 

@@ -4,7 +4,7 @@ import random
 from gerenciamento.funcoes_importantes import prender_neymar_campo
 from entidades.bola import Bola
 from entidades.coletaveis import Coletavel
-from gerenciamento.constants import (LARGURA_TELA, ALTURA_TELA, VELOCIDADE_NEY, COR_NEYMAR, FORCA_CHUTE, TUPLA_LIMITES_CAMPO, DRIBLES_CONFIG)
+from gerenciamento.constants import *
 from animacao.ney_animado import NeymarAnimacao
 
 class Neymar(pygame.sprite.Sprite):
@@ -20,8 +20,7 @@ class Neymar(pygame.sprite.Sprite):
         # O RECT VIRA O TAMANHO DA IMAGEM ORIGINAL
         self.rect = self.image.get_rect()
 
-        self.rect.centerx = LARGURA_TELA // 2
-        self.rect.centery = ALTURA_TELA - 100
+        self.rect.midbottom = (LARGURA_TELA // 2, ALTURA_TELA - 100)
 
         self.velocidade = VELOCIDADE_NEY
         self.barra_estrela = 0
@@ -57,10 +56,12 @@ class Neymar(pygame.sprite.Sprite):
         if teclas[pygame.K_a]:
             dx += -self.velocidade
             self.em_movimento = True # ATIVA A ANIMACAO
+            self.olhando_para = 'esquerda'
 
         if teclas[pygame.K_d]:
             dx += self.velocidade
             self.em_movimento = True
+            self.olhando_para = 'direita'
             
         if teclas[pygame.K_w]:
             self.em_movimento = True 
@@ -76,7 +77,7 @@ class Neymar(pygame.sprite.Sprite):
         self.rect.y += dy
         
         # chama a funcao que prende o ney no campo
-        prender_neymar_campo(self, TUPLA_LIMITES_CAMPO)
+        prender_neymar_campo(self, TUPLA_LIMITES_CAMPO_PRA_NEYMAR)
         
         # AQUI O NEYMAR VAI TENTAR DESVIAR MANUALMENTE SEM DRIBLES
         if grupo_zagueiros and self.tem_bola and (dx != 0 or dy != 0):
