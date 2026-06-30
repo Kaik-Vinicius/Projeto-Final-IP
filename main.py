@@ -328,7 +328,7 @@ def main():
 
             # LÓGICA DE PEGAR OS ITENS
             grupo_coletaveis.update()
-            itens_tocados = pygame.sprite.spritecollide(neymar, grupo_coletaveis, False)
+            itens_tocados = pygame.sprite.spritecollide(neymar, grupo_coletaveis, False, collided=colisao_coletavel_customizada)
             
             for item in itens_tocados:
                 if item.tipo == 'chuteira':
@@ -400,9 +400,11 @@ def main():
             tela.blit(arquibancada_esquerda,(CAMPO_X - LARGURA_ARQUIBANCADA, CAMPO_Y))
             tela.blit(arquibancada_direita, (CAMPO_X + LARGURA_CAMPO_JOGAVEL, CAMPO_Y))
             
-            tela.blit(neymar.image, neymar.rect)
+            
             tela.blit(goleiro.image, goleiro.rect)
             tela.blit(bola.image, bola.rect)
+            tela.blit(neymar.image, neymar.rect)
+
             desenhar_placar_superior(tela, fonte_pequena, chuteiras_coletadas, estrelas_coletadas, oportunidades_restantes, neymar.confianca, asset_chuteira_placar, asset_estrela_placar, asset_placar_brasil, asset_placar_argentina, gols_brasil, gols_argentina)
             
 

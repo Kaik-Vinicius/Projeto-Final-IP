@@ -30,6 +30,15 @@ def limpar_campo(neymar, grupo_aliados, grupo_zagueiros, grupo_coletaveis):
     
     return 0,0,0,0,0 # RETORNO DAS CHUTEIRAS, ESTRELAS, GOLS DO BRASIL E ARGENTINA E TEMPO DO ULTIMO DRIBLE
 
+def colisao_coletavel_customizada(jogador, coletavel):
+    """
+    CRIA UMA HITBOX MENOR PRA O NEYMAR COLIDIR COM OS ITENS DE FORMA MAIS NORMAL
+    """
+    hitbox_menor = jogador.rect.inflate(-30, -40)
+    
+    return hitbox_menor.colliderect(coletavel.rect)
+
+
 def bola_tocou_jogador_continua(bola, jogador):
     """
     EXPANDE BEM A HITBOX DA BOLA E DO JOGADOR E EVITA QUE O JOGAGOR ACABE NAO DOMINANDO A BOLA

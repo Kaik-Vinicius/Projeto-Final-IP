@@ -11,27 +11,17 @@ class Neymar(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
 
-        # 🌟 INSTANCIA O MONITOR DE ANIMAÇÃO EXTERNO
+       # INSTANCIA O NEYMAR ANIMADO
         self.animador = NeymarAnimacao()
 
-        # Define a imagem inicial baseada no primeiro frame do animador
-        if hasattr(self.animador, 'obter_imagem_inicial'):
-            self.image = self.animador.obter_imagem_inicial()
-        else:
-            self.image = pygame.Surface((45, 40))
-            self.image.fill(COR_NEYMAR)
-            
-        # Retângulo expandido (Hitbox controlada de 45x70)
-        LARGURA_HITBOX = 45
-        ALTURA_HITBOX = 70
-        self.rect = pygame.Rect(0, 0, LARGURA_HITBOX, ALTURA_HITBOX)
+        # DEFINE A IMAGEM DO NEYMAR COM A IMAGEM DO FRAME ATUAL
+        self.image = self.animador.obter_imagem_inicial()
+        
+        # O RECT VIRA O TAMANHO DA IMAGEM ORIGINAL
+        self.rect = self.image.get_rect()
 
-        # Posicionamento inicial na tela
         self.rect.centerx = LARGURA_TELA // 2
         self.rect.centery = ALTURA_TELA - 100
-
-        # 🌟 CAMADA INICIAL PADRÃO (Usando o underline para a propriedade)
-        self._layer = 5
 
         self.velocidade = VELOCIDADE_NEY
         self.barra_estrela = 0
@@ -39,83 +29,69 @@ class Neymar(pygame.sprite.Sprite):
         self.tempo_ultimo_passe = 0
         self.tempo_ultimo_chute = 0
 
-        # Controle de drible e especial
+        # ISSO DAQUI É A PARTE QUE VAI ENTRAR O DRIBLE DO NEY
         self.bola_em_drible = False
         self.tempo_inicio_drible = 0
         self.drible_efetivo = False
+
+        # CARACTERISTICAS DOP NEY PRIME
         self.ney_prime = False 
         self.tempo_prime = 0
+        
+        # ATRIBUINDO A CONFIANCA DO NEYMAR
         self.confianca = 0
         self.ultimo_tipo_drible = 'manual'
 
-        # Variáveis de estado para animação e direção
+        # MONITORA SE O JOGADOR ESTÁ CORRENDO OU PARADO PARA A ANIMAÇÃO
         self.em_movimento = False
-        self.olhando_para = "frente" # Pode ser "frente" ou "costas"
+        
+        # GUARDA PARA ONDE O NEYMAR ESTA OLHANDO
+        self.olhando_para = "frente"
 
-    # 🌟 PROPERTY PARA GERENCIAR AS CAMADAS DE FORMA SEGURA NO PYGAME
-    @property
-    def layer(self):
-        return self._layer
-
-    @layer.setter
-    def layer(self, nova_camada):
-        self._layer = nova_camada
-        if self.groups():
-            for grupo in self.groups():
-                if hasattr(grupo, 'change_layer'):
-                    grupo.change_layer(self, nova_camada)
-
-    def mover(self, teclas, bola, grupo_zagueiros):
-        """
-        Controla a movimentação física do Neymar e atualiza dinamicamente 
-        as camadas (Z-order) para o correto desenho da bola.
-        """
+    def mover(self, teclas, bola, grupo_zagueiros=None):
         self.em_movimento = False
 
-        # Vetor de movimento para o frame atual
         dx = 0
         dy = 0
 
         if teclas[pygame.K_a]:
-            dx = -self.velocidade
-            self.em_movimento = True
-            # Se você implementar esquerda futuramente: self.olhando_para = "esquerda"
+            dx += -self.velocidade
+            self.em_movimento = True # ATIVA A ANIMACAO
+
         if teclas[pygame.K_d]:
-            dx = self.velocidade
+            dx += self.velocidade
             self.em_movimento = True
-            # Se você implementar direita futuramente: self.olhando_para = "direita"
             
         if teclas[pygame.K_w]:
-            dy = -self.velocidade
-            self.em_movimento = True
-            self.olhando_para = "costas"
-        if teclas[pygame.K_s]:
-            dy = self.velocidade
-            self.em_movimento = True
-            self.olhando_para = "frente"
+            self.em_movimento = True 
+            self.olhando_para = "costas" # MUDA A DIREÇÃO PARA DE COSTAS
+            dy += -self.velocidade
 
-        # Aplica o movimento ao rect (adicione suas colisões com zagueiros aqui se houver)
+        if teclas[pygame.K_s]:
+            self.em_movimento = True 
+            self.olhando_para = 'frente'  # MUDA PRA FRENTE
+            dy += self.velocidade
+        
         self.rect.x += dx
         self.rect.y += dy
-
-        # 🌟 O PULO DO GATO: ATUALIZAÇÃO DE CAMADAS DINÂMICAS 🌟
-        if self.tem_bola:
-            if self.olhando_para == "costas":
-                # Quando anda para trás, o Neymar vai para a camada de baixo (4)
-                # Como a bola na condução de costas assume camada 7, ela fica na FRENTE das pernas.
-                self.layer = 4
-            else:
-                # Padrão normal correndo para frente ou lados
-                self.layer = 5
-
-    def update(self):
-        """
-        Atualiza os frames da animação baseando-se no estado atual do jogador.
-        """
-        # Chama a lógica do seu script de animações externo
-        if hasattr(self.animador, 'atualizar_frames'):
-            self.image = self.animador.atualizar_frames(self.em_movimento, self.olhando_para)
+        
+        # chama a funcao que prende o ney no campo
+        prender_neymar_campo(self, TUPLA_LIMITES_CAMPO)
+        
+        # AQUI O NEYMAR VAI TENTAR DESVIAR MANUALMENTE SEM DRIBLES
+        if grupo_zagueiros and self.tem_bola and (dx != 0 or dy != 0):
+            self.checar_desvio_manual(bola, grupo_zagueiros)
     
+    def update(self):
+        """ESSE UPDATE VAI SER PARA ATUALIZAR A ANIMAÇÃO"""
+        # SALVA A POSICAOP DO CENTRO INICIAL
+        posicao_centro = self.rect.center
+        
+        # ATUALIZA A IMAGEM
+        self.image = self.animador.atualizar_animacao(self.em_movimento, self.olhando_para)
+        
+        # RECRIA O RECT BASEADO NA NOVA IMAGEM
+        self.rect = self.image.get_rect(center=posicao_centro)
             
     # metodo pra o ney dar passe
     def dar_passe(self, bola, grupo_aliados):
@@ -156,11 +132,9 @@ class Neymar(pygame.sprite.Sprite):
         centro_gol_x = 960
         centro_gol_y = 70
         
-        # SE FOR O MODO NEY PRIME ELE FICA COM 95% DE CHANCE DE FAZER O GOL
         if self.ney_prime:
             probabilidade_gol = 0.95
-        
-        # SE NAO FOR O MODO NEY PRIME AI ELE ENTRA NESSE CALCULO DA DISTANCIA E TUDO MAIS
+
         else:
             # CÁLCULO DA DISTÂNCIA
             distancia = math.hypot(centro_gol_x - self.rect.centerx, centro_gol_y - self.rect.centery)
@@ -172,7 +146,7 @@ class Neymar(pygame.sprite.Sprite):
             fator_confianca = max(0.0, min(1.0, self.confianca / 100.0))
 
             # PROBABILIDADE FINAL == UM PESO DE 60% PRA DISTANCIA E UM PESO DE 40% PRA CONFIANCA (talvez possamos mudar isso daqui)
-            probabilidade_gol = (fator_distancia * 0.65) + (fator_confianca * 0.35)
+            probabilidade_gol = (fator_distancia * 0.7) + (fator_confianca * 0.3)
 
         # DEFINIÇÃO DO RESULTADO DO CHUTE
         # AQUI ENTRA A ALEATORIEDADE DE SE VAI SER GOL OU NAO
@@ -195,24 +169,19 @@ class Neymar(pygame.sprite.Sprite):
         """
         ATUALIZA A CONFIANÇA SEMPRE QUE ALGO ACONTECE
         """
-        
-        # SO ATUALIZA SE TIVER NO MODO NEY PRIME PRA NAO FICAR MUITA APELAÇÃO
+        # SO ATUALIZA SE NAO TIVER NO NEY PRIME PRA NAO FICAR MUITA APELAÇÃO
         if not self.ney_prime:
             self.confianca += valor
         
         # Garante que a confiança não fique negativa
         if self.confianca < 0:
             self.confianca = 0
-        
-        if self.confianca >= 100:
-            self.confianca = 0
+            
+        if self.confianca > 100:
+            self.confianca = 100
             
     def calcular_chance_drible(self, tipo_drible):
         """APLICA A FORMULA PRA CALCULAR SE DRIBLOU OU NAO"""
-        
-        # SE ELE TIVER NO PRIME, ELE NUNCA ERRA DRIBLE
-        if self.ney_prime:
-            return 1.0
         
         c_ini = DRIBLES_CONFIG[tipo_drible]['chance_inicial']
         c_max = DRIBLES_CONFIG[tipo_drible]['chance_max']
@@ -304,7 +273,7 @@ class Neymar(pygame.sprite.Sprite):
                         self.drible_efetivo = True
                         self.tempo_inicio_drible = pygame.time.get_ticks()
                         self.ultimo_tipo_drible = tipo_drible
-                    else:
-                        print('errou o drible')
+                        
+            
 
 

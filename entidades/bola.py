@@ -54,27 +54,18 @@ class Bola(pygame.sprite.Sprite):
         # ATRIBUTO QUE DIZ O RESULTADO DO CHUTE
         self.resultado_chute = None
 
-        # 🌟 PASSO 1: CAMADA INICIAL DA BOLA (Usando underline para a propriedade)
+        # LEYER PRA POSICIONAR OS SPRITES DA BOLA E DO JOGADOR
         self._layer = 5 # Padrão Idle
 
-        # 🌟 PASSO 2: DICIONÁRIO DE OFFSETS TOTALMENTE CORRIGIDO PARA O CHÃO 🌟
-        # Os valores Y agora representam a base das chuteiras em cada direção
+        # DICIONARIOS DOS OFFSETS DA POSICAO DA BOLA
         self.offsets_posse = {
-            # "frente": Antes (14, 38). Ajustado para (14, 42) para colar no chão na frente dele
-            "frente":   (14, 42),  # No gramado, na frente das chuteiras
-            
-            # "costas": ANTES ESTAVA (-8) - POR ISSO VOAVA ACIMA DA CABEÇA!
-            # MUDADO PARA (20) para trazer a bola para o chão, atrás dele
-            "costas":   (26, 75),  # No gramado, atrás das chuteiras (costas)
-            
+            "frente":   (32, 80),
+            "costas":   (32, 75),
             "esquerda": (-8, 20),  
             "direita":  (38, 20)   
         }
 
-    # -------------------------------------------------------------
-    # 🌟 SISTEMA DE PROPRIEDADE INTELIGENTE DE CAMADAS (LAYER FIX) 🌟
-    # Resolve o erro AttributeError ao mudar a camada de dentro do sprite
-    # -------------------------------------------------------------
+    # sistema de posicionamento da bola
     @property
     def layer(self):
         return self._layer
@@ -82,8 +73,6 @@ class Bola(pygame.sprite.Sprite):
     @layer.setter
     def layer(self, nova_camada):
         self._layer = nova_camada
-        # Se a bola já estiver dentro de um grupo de camadas do Pygame,
-        # ela avisa o grupo para mudar a posição visual de forma segura
         if self.groups():
             for grupo in self.groups():
                 if hasattr(grupo, 'change_layer'):
