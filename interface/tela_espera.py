@@ -27,8 +27,64 @@ def desenhar_placar_superior(tela, fonte_pequena, chuteiras, estrelas, chances, 
     pos_x_count_estrela = inicial_x_estrela + asset_estrela.get_width() + 3
     tela.blit(txt_estrelas, (pos_x_count_estrela, 34))
     
-    pos_x_confianca = pos_x_count_estrela + txt_estrelas.get_width() + 80
+    pos_x_confianca = pos_x_count_estrela + txt_estrelas.get_width() + 45
     tela.blit(txt_confianca, (pos_x_confianca, 15))
+
+    # BARRA DE CONFIANÇA ESTILIZADA
+
+    barra_x = 500  
+    barra_y = 40   
+    largura_maxima = 160  
+    altura_barra = 15     
+    raio_borda = altura_barra // 2  # Cria o formato perfeito de cápsula/pílula
+    
+    # 1. Borda Externa Preta e Fundo Cinza
+    pygame.draw.rect(tela, (0, 0, 0), (barra_x - 2, barra_y - 2, largura_maxima + 4, altura_barra + 4), border_radius=raio_borda + 2)
+    pygame.draw.rect(tela, (112, 128, 144), (barra_x, barra_y, largura_maxima, altura_barra), border_radius=raio_borda)
+    
+    # Cálculo do preenchimento da barra com base na confiança
+    META_ESTRELA = 100 
+    proporcao = min(confianca / META_ESTRELA, 1.0)
+    largura_atual = int(largura_maxima * proporcao)
+    
+    if largura_atual > 0:
+        tempo = pygame.time.get_ticks()
+        
+        deslocamento_fluxo = int(tempo * 0.03) % 16  
+
+        # Definição das Cores
+        if proporcao >= 1.0:
+            cor_base = (218, 165, 32); cor_fluxo = (255, 235, 100); cor_brilho = (255, 255, 180)
+        else:
+            cor_base = (39, 174, 96); cor_fluxo = (46, 204, 113); cor_brilho = (163, 243, 191)
+            
+        # 2. Superfície temporária para o miolo da barra
+        surf_interna = pygame.Surface((largura_atual, altura_barra), pygame.SRCALPHA)
+        
+        # 3. Evita que o conteúdo da barra vaze para fora da borda arredondada
+        pygame.draw.rect(surf_interna, cor_base, (0, 0, largura_atual, altura_barra), border_radius=raio_borda)
+        
+        inicio_reto = raio_borda
+        fim_reto = largura_atual - raio_borda
+        
+        if fim_reto > inicio_reto:
+            for x_listra in range(inicio_reto - 16, fim_reto + 16, 16):
+                x_animado = x_listra + deslocamento_fluxo
+                
+                # Só desenha a listra se ela estiver estritamente dentro do miolo reto da barra
+                if x_animado >= inicio_reto and x_animado <= fim_reto:
+                    pontos_fatia = [
+                        (x_animado, 0), 
+                        (x_animado + 4, 0),             
+                        (x_animado + 1, altura_barra), 
+                        (x_animado - 3, altura_barra)
+                    ]
+                    pygame.draw.polygon(surf_interna, cor_fluxo, pontos_fatia)
+            
+        tela.blit(surf_interna, (barra_x, barra_y))
+        
+        if largura_atual > 8:
+            pygame.draw.rect(tela, cor_brilho, (barra_x + 4, barra_y + 2, largura_atual - 8, 3), border_radius=2)
     
     # ==== LADO DO PLACAR ====
     
@@ -78,6 +134,62 @@ def desenhar_tela_espera(tela, campo_jogo, pos_campo, arquibancada_esquerda, arq
     barra_inferior.fill((0, 0, 0, 180))
     tela.blit(barra_inferior, (0, tela.get_height() - 60))
     
+    # BARRA DE CONFIANÇA ESTILIZADA
+
+    barra_x = 500  
+    barra_y = 40   
+    largura_maxima = 160  
+    altura_barra = 15     
+    raio_borda = altura_barra // 2  # Cria o formato perfeito de cápsula/pílula
+    
+    # 1. Borda Externa Preta e Fundo Cinza
+    pygame.draw.rect(tela, (0, 0, 0), (barra_x - 2, barra_y - 2, largura_maxima + 4, altura_barra + 4), border_radius=raio_borda + 2)
+    pygame.draw.rect(tela, (112, 128, 144), (barra_x, barra_y, largura_maxima, altura_barra), border_radius=raio_borda)
+    
+    # Cálculo do preenchimento da barra com base na confiança
+    META_ESTRELA = 100 
+    proporcao = min(confianca / META_ESTRELA, 1.0)
+    largura_atual = int(largura_maxima * proporcao)
+    
+    if largura_atual > 0:
+        tempo = pygame.time.get_ticks()
+        
+        deslocamento_fluxo = int(tempo * 0.03) % 16  
+
+        # Definição das Cores
+        if proporcao >= 1.0:
+            cor_base = (218, 165, 32); cor_fluxo = (255, 235, 100); cor_brilho = (255, 255, 180)
+        else:
+            cor_base = (39, 174, 96); cor_fluxo = (46, 204, 113); cor_brilho = (163, 243, 191)
+            
+        # 2. Superfície temporária para o miolo da barra
+        surf_interna = pygame.Surface((largura_atual, altura_barra), pygame.SRCALPHA)
+        
+        # 3. Evita que o conteúdo da barra vaze para fora da borda arredondada
+        pygame.draw.rect(surf_interna, cor_base, (0, 0, largura_atual, altura_barra), border_radius=raio_borda)
+        
+        inicio_reto = raio_borda
+        fim_reto = largura_atual - raio_borda
+        
+        if fim_reto > inicio_reto:
+            for x_listra in range(inicio_reto - 16, fim_reto + 16, 16):
+                x_animado = x_listra + deslocamento_fluxo
+                
+                # Só desenha a listra se ela estiver estritamente dentro do miolo reto da barra
+                if x_animado >= inicio_reto and x_animado <= fim_reto:
+                    pontos_fatia = [
+                        (x_animado, 0), 
+                        (x_animado + 4, 0),             
+                        (x_animado + 1, altura_barra), 
+                        (x_animado - 3, altura_barra)
+                    ]
+                    pygame.draw.polygon(surf_interna, cor_fluxo, pontos_fatia)
+            
+        tela.blit(surf_interna, (barra_x, barra_y))
+        
+        if largura_atual > 8:
+            pygame.draw.rect(tela, cor_brilho, (barra_x + 4, barra_y + 2, largura_atual - 8, 3), border_radius=2)
+
     # RENDERIZA O RELOGIO CONTANDO
     txt_relogio = fonte_jogo.render(f"  {minuto_atual}' MIN", True, (255, 255, 255))
     tela.blit(txt_relogio, (20, tela.get_height() - 45))
