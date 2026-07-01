@@ -3,8 +3,7 @@ import random
 import math
 from gerenciamento.constants import (LIMITE_ESQUERDO, LIMITE_DIREITO, 
                                      LIMITE_SUPERIOR, LIMITE_INFERIOR, 
-                                     TAMANHO_ITEM, COR_ESTRELA, 
-                                     COR_CHUTEIRA, TEMPO_CHUTEIRA)
+                                     TAMANHO_ITEM, TEMPO_CHUTEIRA)
 
 class Coletavel(pygame.sprite.Sprite):
     def __init__(self, tipo, pos_jogador=None): 

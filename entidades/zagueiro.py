@@ -1,5 +1,5 @@
 import pygame
-from gerenciamento.constants import (LARGURA_TELA, ALTURA_TELA, VELOCIDADE_ZAG, COR_ZAGUEIRO, CONFIANCA_POR_DIFICULDADE, DRIBLES_CONFIG, META_ESTRELA, FORCA_CHUTE, POS_GOL_X, POS_GOL_Y)
+from gerenciamento.constants import (LARGURA_TELA, ALTURA_TELA, VELOCIDADE_ZAG)
 from assets.animacao.zag_animado import ZagueiroAnimacao
 from types import SimpleNamespace
 
