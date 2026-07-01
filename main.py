@@ -280,40 +280,11 @@ def main():
                 estado = "espera"
                 ultimo_tick_relogio = tempo_atual
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-                        if bola.no_chao_esperando or bola.em_movimento:
-
-                            if hasattr(bola, 'destino_x'):
-                                del bola.destino_x
-
-                            if hasattr(bola, 'destino_y'):
-                                del bola.destino_y
-
-                            bola.dominar(neymar)
-                          
-            # ISSO DAQUI É O SISTEMA PRA O ZAGUEIRO MEIO QUE PERSEGUIR O NEYMAR
-            pos_neymar = pygame.math.Vector2(neymar.rect.center)
-            pos_bola = pygame.math.Vector2(bola.rect.center)
-            pos_zagueiro = pygame.math.Vector2(zagueiro1.rect.center)
-            distancia_neymar = pos_zagueiro.distance_to(pos_neymar)
-            distancia_bola = pos_zagueiro.distance_to(pos_bola)
-          
-            # CONDICIONAL QUE FAZ O ZAGUEIRO PERSEGUIR O NEYMAR
-            zagueiro1.atualizar(neymar, bola, distancia_neymar, distancia_bola, any(aliado.tem_bola for aliado in grupo_aliados))
-
-=======
-=======
->>>>>>> dev
                 if oportunidades_restantes > 0:
                     minuto_inicio_bloco = bloco_atual * tamanho_bloco
                     minuto_fim_bloco = minuto_inicio_bloco + tamanho_bloco
                     minuto_proximo_ataque = random.randint(minuto_inicio_bloco + 2, minuto_fim_bloco - 2)
             
-<<<<<<< HEAD
->>>>>>> jogador-e-chute
-=======
->>>>>>> dev
             # DETECTA O DRIBLE E GERA A CHUTEIRA
             if getattr(neymar, 'drible_efetivo', False):
                 if neymar.tempo_inicio_drible != tempo_ultimo_drible_registrado:
@@ -360,16 +331,7 @@ def main():
             for item in itens_tocados:
                 if item.tipo == 'chuteira':
                     item.kill()
-<<<<<<< HEAD
-<<<<<<< HEAD
-                    ganho = getattr(item, 'valor_recompensa', 15) 
-                    neymar.atualizar_confianca(ganho) 
-=======
                     neymar.atualizar_confianca(item.valor_recompensa) 
->>>>>>> jogador-e-chute
-=======
-                    neymar.atualizar_confianca(item.valor_recompensa) 
->>>>>>> dev
                     chuteiras_coletadas += 1 
                     
                 # SE COLETAR A ESTRELA ATIVA O MODO NEY PRIME
@@ -446,26 +408,10 @@ def main():
             
             neymar.desenhar_ney_com_sombra(tela)
             tela.blit(bola.image, bola.rect)
-<<<<<<< HEAD
-            desenhar_placar_superior(tela, fonte_pequena, chuteiras_coletadas, estrelas_coletadas, oportunidades_restantes, gols_brasil, gols_argentina)
-            
-            # HUD DE TESTES VISUALIZADOR DE CONFIANÇA 
-            confianca_atual = int(getattr(neymar, 'confianca', 0)) 
-<<<<<<< HEAD
-            texto_confianca = fonte_pequena.render(f"Confiança: {confianca_atual}/100", True, (255, 255, 0)) 
-            tela.blit(texto_confianca, (CAMPO_X + 20, 70))
-            
-=======
-            texto_confianca = fonte_pequena.render(f"Confiança: {confianca_atual}/100", True, (255, 255, 255)) 
-            tela.blit(texto_confianca, (CAMPO_X + 20, 100))
-
->>>>>>> jogador-e-chute
-=======
             tela.blit(neymar.image, neymar.rect)
 
             desenhar_placar_superior(tela, fonte_pequena, chuteiras_coletadas, estrelas_coletadas, oportunidades_restantes, neymar.confianca, asset_chuteira_placar, asset_estrela_placar, asset_placar_brasil, asset_placar_argentina, gols_brasil, gols_argentina, neymar)
             
->>>>>>> dev
             botao_pause.desenhar(tela)
 
         elif estado == "pause":
