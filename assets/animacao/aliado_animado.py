@@ -27,7 +27,7 @@ class AliadoAnimado:
         """Atualiza o relógio interno e retorna o frame correto do jogador"""
         tempo_atual = pygame.time.get_ticks()
         
-        # Mantém parado de frente e com a sombra horizontal ativa
+        # MANTEM PARADO PRA FRENTE COM A SOMBRA HORIZONTAL ATIVA
         self.lista_atual = self.frames_idle
         
         if tempo_atual - self.ultimo_update > self.velocidade_animacao:

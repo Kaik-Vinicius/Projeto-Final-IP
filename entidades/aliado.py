@@ -8,7 +8,7 @@ class Aliado(pygame.sprite.Sprite):
 
         self.animador = AliadoAnimado()
         
-        # Define a imagem e o retângulo nativos com base no tamanho original do sprite
+        # DEFINE O RETANGULO COMO O TAMANHO DO SPRITE
         self.image = self.animador.obter_imagem_inicial()
         self.rect = self.image.get_rect()
 
@@ -64,18 +64,18 @@ class Aliado(pygame.sprite.Sprite):
         sombra = self.animador.sombra_horizontal
         sombra_rect = sombra.get_rect()
         
-        # Alinha com os pés
+        # ALINHA COM OS PES
         sombra_rect.center = self.rect.midbottom
         
-        # Ajuste vertical fino para encaixar embaixo do sprite (Como está sempre de frente, recua 15)
+        # AJUSTE PRA ENCAIXAR DEBAIXO DO SPRITE
         sombra_rect.centery -= 10
         
-        # Desenha primeiro a sombra
+        # DESENHA PRIMEIRO A SOMBRA
         tela.blit(sombra, sombra_rect)
         
-        # Desenha depois o aliado
+        # DEPOIS DESENHA O ALIADO
         tela.blit(self.image, self.rect)
 
     def update(self):
-        # Apenas atualiza qual é a imagem atual do frame de animação
+        # ATUALIZA A IMAGEM
         self.image = self.animador.atualizar_animacao()

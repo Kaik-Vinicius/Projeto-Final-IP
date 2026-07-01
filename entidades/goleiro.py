@@ -71,7 +71,7 @@ class Goleiro (pygame.sprite.Sprite):
         distancia_neymar = pos_goleiro.distance_to(pos_neymar)
         distancia_bola = pos_goleiro.distance_to(pos_bola)
 
-        # Se o Neymar estiver dentro do raio de ativação (entre 10 e 250 pixels)
+        # SE O NEYMAR TIVER 
         if bola.foi_chutada:
             if distancia_bola <= 200:
                 self.pular_na_bola(bola, distancia_bola)
