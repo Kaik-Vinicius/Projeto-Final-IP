@@ -8,7 +8,6 @@ class NeymarAnimacao:
             pygame.image.load("assets/jogadores/ney/ney_idle/idle_frente/idle_frente2.png").convert_alpha(),
             pygame.image.load("assets/jogadores/ney/ney_idle/idle_frente/idle_frente3.png").convert_alpha(),
             pygame.image.load("assets/jogadores/ney/ney_idle/idle_frente/idle_frente4.png").convert_alpha(),
-            
         ]
         
         # CARREGA OS FRAMES DE COSTAS
@@ -31,8 +30,15 @@ class NeymarAnimacao:
             pygame.image.load("assets/jogadores/ney/ney_idle/idle_esquerda/idle_esquerda2.png").convert_alpha(),
             pygame.image.load("assets/jogadores/ney/ney_idle/idle_esquerda/idle_esquerda3.png").convert_alpha(),
             pygame.image.load("assets/jogadores/ney/ney_idle/idle_esquerda/idle_esquerda4.png").convert_alpha(),
-
         ]
+        
+        self.frames_correndo_frente = [
+            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_frente/correndo_frente1.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_frente/correndo_frente2.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_frente/correndo_frente3.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_frente/correndo_frente4.png').convert_alpha(),
+        ]
+        
         
         # CARREGA O SPRITE DA SOMBRA
         self.sombra_horizontal = pygame.image.load("assets/jogadores/sombra_jogador_horizontal.png").convert_alpha()
@@ -73,7 +79,21 @@ class NeymarAnimacao:
                 self.lista_atual = self.frames_parado_esquerda
                 self.sombra_atual = self.sombra_vertical
         else:
-            # DEPOIS IMPLEMENTAR OS SPRITES CORRENDO AQUI
+            # ATIVA A ANIMAÇÃO DE CORRENDO PRA FRENTE
+            if olhando_para == "frente":
+                self.lista_atual = self.frames_correndo_frente
+                self.sombra_atual = self.sombra_horizontal
+            # Caso queira deixar os parados como padrão provisório para os outros lados:
+            elif olhando_para == "costas":
+                self.lista_atual = self.frames_parado_costas
+                self.sombra_atual = self.sombra_horizontal
+            elif olhando_para == "direita":
+                self.lista_atual = self.frames_parado_direita
+                self.sombra_atual = self.sombra_vertical
+            elif olhando_para == "esquerda":
+                self.lista_atual = self.frames_parado_esquerda
+                self.sombra_atual = self.sombra_vertical
+            
             pass
 
         # LOGICA DO RELOGIO QUE ATUALIZA OS FRAMES

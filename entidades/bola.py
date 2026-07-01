@@ -58,10 +58,18 @@ class Bola(pygame.sprite.Sprite):
 
         # DICIONARIOS DOS OFFSETS PADRÃO (PARADO)
         self.offsets_posse = {
-            "frente":   (32, 80),
-            "costas":   (32, 75),
-            "esquerda": (10, 75),
-            "direita":  (50, 75)   
+            "parado": {
+                "frente":   (32, 80),
+                "costas":   (32, 75),
+                "esquerda": (10, 75),
+                "direita":  (50, 75)   
+            },
+            "movimento": {
+                "frente":   (32, 95),
+                "costas":   (32, 78),
+                "esquerda": (18, 75),
+                "direita":  (42, 75)
+            }
         }
 
     def sincronizar_coordenadas_float(self):
@@ -113,12 +121,18 @@ class Bola(pygame.sprite.Sprite):
 
     def _colar_no_pe_do_dono(self):
         if self.dono is not None:
+            # Identifica a direção ("frente", "costas", etc.)
             direcao = getattr(self.dono, 'olhando_para', 'frente')
             
-            # Pega o offset base (parado)
-            offset_x, offset_y = self.offsets_posse.get(direcao, self.offsets_posse['frente'])
+            # Identifica o estado do jogador ("movimento" ou "parado")
+            # Caso o jogador não tenha esse atributo, assume "parado" por segurança
+            estado = "movimento" if getattr(self.dono, 'em_movimento', False) else "parado"
+            
+            # Busca primeiro a tabela do estado (parado/movimento) e depois a direção
+            tabela_estado = self.offsets_posse.get(estado, self.offsets_posse['parado'])
+            offset_x, offset_y = tabela_estado.get(direcao, tabela_estado['frente'])
 
-            # Aplica a posição
+            # Aplica a posição final da bola
             self.rect.x = self.dono.rect.x + offset_x
             self.rect.y = self.dono.rect.y + offset_y
 

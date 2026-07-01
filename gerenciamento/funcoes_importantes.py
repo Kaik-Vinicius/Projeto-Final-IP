@@ -119,7 +119,7 @@ def checar_conclusao_jogada(bola, neymar):
     
     if (bola.rect.centerx < 320 or
         bola.rect.centerx > 1600 or
-        bola.rect.centery > 1080 or
+        bola.rect.centery > 1100 or
         (bola.rect.centery < 65 and getattr(bola, 'resultado_chute', None) is None)):
 
         bola.resultado_chute = 'fora'

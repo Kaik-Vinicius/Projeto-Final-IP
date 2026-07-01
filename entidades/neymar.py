@@ -50,33 +50,57 @@ class Neymar(pygame.sprite.Sprite):
         self.olhando_para = "frente"
 
     def mover(self, teclas, bola, grupo_zagueiros=None):
+        """
+        FUNCAO QUE MOVE O NEYMAR
+        """
         self.em_movimento = False
 
         dx = 0
         dy = 0
 
         if teclas[pygame.K_a]:
-            dx += -self.velocidade
-            self.em_movimento = True # ATIVA A ANIMACAO
+            dx -= 1
+            self.em_movimento = True
             self.olhando_para = 'esquerda'
 
         if teclas[pygame.K_d]:
-            dx += self.velocidade
+            dx += 1
             self.em_movimento = True
             self.olhando_para = 'direita'
             
         if teclas[pygame.K_w]:
+            dy -= 1
             self.em_movimento = True 
-            self.olhando_para = "costas" # MUDA A DIREÇÃO PARA DE COSTAS
-            dy += -self.velocidade
+            self.olhando_para = "costas"
+            
 
         if teclas[pygame.K_s]:
+            dy += 1
             self.em_movimento = True 
-            self.olhando_para = 'frente'  # MUDA PRA FRENTE
-            dy += self.velocidade
+            self.olhando_para = 'frente'
         
-        self.rect.x += dx
-        self.rect.y += dy
+        if dx != 0 or dy != 0:
+            # VERIFICA SE MOVEU NA DIAGONAL
+            if dx != 0 and dy != 0:
+                fator_diagonal = 0.8  # UTILIZA MATEMATICA PRA NORMALIZAR A VELOCIDADE NA DIAGONAL
+                                        # 0.8 PRA FICAR O MAXIMO PARECIDO COM O MOVIMENTO PRA OS LADOS NORMAL
+                dx *= self.velocidade * fator_diagonal
+                dy *= self.velocidade * fator_diagonal
+            else:
+                # SE NAO MOVEU NA DIAGONAL
+                dx *= self.velocidade
+                dy *= self.velocidade
+
+        # APLICA O MOVIMENTO FINAL
+        self.rect.x += int(dx)
+        self.rect.y += int(dy)
+        
+        # chama a funcao que prende o ney no campo
+        prender_neymar_campo(self, TUPLA_LIMITES_CAMPO_PRA_NEYMAR)
+        
+        # AQUI O NEYMAR VAI TENTAR DESVIAR MANUALMENTE SEM DRIBLES
+        if grupo_zagueiros and self.tem_bola and (dx != 0 or dy != 0):
+            self.checar_desvio_manual(bola, grupo_zagueiros)
         
         # chama a funcao que prende o ney no campo
         prender_neymar_campo(self, TUPLA_LIMITES_CAMPO_PRA_NEYMAR)
@@ -116,7 +140,8 @@ class Neymar(pygame.sprite.Sprite):
         self.image = self.animador.atualizar_animacao(self.em_movimento, self.olhando_para)
         
         # RECRIA O RECT BASEADO NA NOVA IMAGEM
-        self.rect = self.image.get_rect(center=posicao_centro)
+        self.rect = self.image.get_rect()
+        self.rect.center = posicao_centro
         
         # ATUALIZA A HITBOX DO NEYMAR
         self.hitbox.midbottom = self.rect.midbottom
