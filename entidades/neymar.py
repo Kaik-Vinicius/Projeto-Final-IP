@@ -9,7 +9,7 @@ class Neymar(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
 
-       # INSTANCIA O NEYMAR ANIMADO
+        # INSTANCIA O NEYMAR ANIMADO
         self.animador = NeymarAnimacao()
 
         # DEFINE A IMAGEM DO NEYMAR COM A IMAGEM DO FRAME ATUAL
@@ -79,11 +79,11 @@ class Neymar(pygame.sprite.Sprite):
             self.olhando_para = 'frente'
             
         # CASO ELE COMECE A CORRER NA DIAGONAL
-        if (teclas[pygame.K_w] or teclas[pygame.K_s]) and teclas[pygame.K_a]:
-            self.olhando_para = 'esquerda'
+        if (teclas[pygame.K_d] or teclas[pygame.K_a]) and teclas[pygame.K_w]:
+            self.olhando_para = 'costas'
         
-        if (teclas[pygame.K_w] or teclas[pygame.K_s]) and teclas[pygame.K_d]:
-            self.olhando_para = 'direita'
+        if (teclas[pygame.K_d] or teclas[pygame.K_a]) and teclas[pygame.K_s]:
+            self.olhando_para = 'frente'
             
         
         if dx != 0 or dy != 0:

@@ -1,16 +1,27 @@
 import pygame
 from gerenciamento.constants import (LARGURA_TELA, ALTURA_TELA, VELOCIDADE_ZAG, COR_ZAGUEIRO, CONFIANCA_POR_DIFICULDADE, DRIBLES_CONFIG, META_ESTRELA, FORCA_CHUTE, POS_GOL_X, POS_GOL_Y)
+from assets.animacao.zag_animado import ZagueiroAnimacao
 
 # FIZ ALGUMAS MUDANÇAS NA CLASSE DO ZAGUEIRO, PRINCIPALMENTE PRA NAO BUGAR A POSICAO DE SPAWN DE CADA UM
 
 class Zagueiro(pygame.sprite.Sprite):
     def __init__(self, pos_inicial_x, pos_inicial_y):
         super().__init__()
-      
-        # DEFININDO O RETANGULO DO ZAGUEIRO
-        self.image = pygame.Surface((45,40))
-        self.image.fill(COR_ZAGUEIRO)
+
+        # INSTANCIA O ZAGUEIRO ANIMADO
+        self.animador = ZagueiroAnimacao()
+
+        # DEFINE A IMAGEM DO NEYMAR COM A IMAGEM DO FRAME ATUAL
+        self.image = self.animador.obter_imagem_inicial()
+        
+        # O RECT VIRA O TAMANHO DA IMAGEM ORIGINAL
         self.rect = self.image.get_rect()
+
+        self.rect.midbottom = (LARGURA_TELA // 2, ALTURA_TELA - 100)
+        
+        # HITBOX DO NEYMAR REDUZIDA PRA COLISAO COM A BOLA E COM OS COLETAVEIS
+        self.hitbox = pygame.Rect(0, 0, 40, 40)
+        self.hitbox.midbottom = self.rect.midbottom
       
         # ONDE ELE VAI SPAWNAR
         self.rect.centerx = pos_inicial_x
@@ -23,6 +34,8 @@ class Zagueiro(pygame.sprite.Sprite):
         self.velocidade = VELOCIDADE_ZAG # A VELOCIDADE QUE ELE VAI ANDAR
 
         #VARIAVEIS PARA O CARRINHO
+        self.em_movimento = False
+        self.olhando_para = "frente"
         self.pausa = False
         self.tempo_pausa = 0
         self.preparo_pro_bote = False
@@ -63,6 +76,8 @@ class Zagueiro(pygame.sprite.Sprite):
         # MANTER DENTRO DA TELA
         self.rect.clamp_ip(pygame.Rect(0, 0, LARGURA_TELA, ALTURA_TELA))
 
+        return bola_x
+
 
     def perseguir_neymar(self, neymar):
         # RECEBE A POSICAO X E Y DO NEYMAR
@@ -87,6 +102,8 @@ class Zagueiro(pygame.sprite.Sprite):
         # MANTER DENTRO DA TELA
         self.rect.clamp_ip(pygame.Rect(0, 0, LARGURA_TELA, ALTURA_TELA))
 
+        return neymar_x
+
     def idle(self):
         # MUDANÇA FEITA PRA ATUALIZAR AS VARIAVEIS DE SPAWN DE CADA ZAGUEIRO INDIVIDUALMENTE
         if(self.rect.centerx != self.spawn_x and self.rect.centery != self.spawn_y):
@@ -107,6 +124,8 @@ class Zagueiro(pygame.sprite.Sprite):
             # MOVE O ZAGUEIRO
             self.rect.x -= (norma_x * self.velocidade) / 1.5
             self.rect.y -= (norma_y * self.velocidade) / 1.5
+
+            return pos_inicial_x
 
     def iniciar_carrinho(self, bola):
         #CRIANDO UM VETOR DO ZAGUEIRO PARA A BOLA
@@ -134,6 +153,47 @@ class Zagueiro(pygame.sprite.Sprite):
             return False
         return True
 
+    def desenhar_zag_com_sombra(self, tela):
+        """METODO PRA DESENHAR O NEYMAR POR CIMA DA SOMBRA DA FORMA CORRETA"""
+        # PEGA A IMAGEM DA SOMBRA CONFIGURADO NO ANIMADOR
+        sombra = self.animador.sombra_atual
+        sombra_rect = sombra.get_rect()
+        
+        # ALINHA COM OS PES
+        sombra_rect.center = self.rect.midbottom
+        
+        # AJUSTES DIFERENTES A DEPENDER DA POSICAO QUE ELE ESTIVER OLHANDO PARADO
+        if self.olhando_para in ['esquerda','direita']:
+            sombra_rect.centery -= 18
+            
+        if self.olhando_para in ['frente', 'costas']:
+            sombra_rect.centery -= 15
+            
+        # desenha primeiro a sombra
+        tela.blit(sombra, sombra_rect)
+        
+        # desenha depois o neymar
+        tela.blit(self.image, self.rect)
+    
+    def update_anim(self, alvo_x):
+        """ESSE UPDATE VAI SER PARA ATUALIZAR A ANIMAÇÃO"""
+        # SALVA A POSICAO DO CENTRO INICIAL
+        posicao_centro = self.rect.center
+
+        if alvo_x > posicao_centro:
+            self.olhando_para = "direita"
+        elif alvo_x < posicao_centro:
+            self.olhando_para = "esquerda"
+        
+        # ATUALIZA A IMAGEM
+        self.image = self.animador.atualizar_animacao(self.em_movimento, self.olhando_para)
+        
+        # RECRIA O RECT BASEADO NA NOVA IMAGEM
+        self.rect = self.image.get_rect()
+        self.rect.center = posicao_centro
+        
+        # ATUALIZA A HITBOX DO NEYMAR
+        self.hitbox.midbottom = self.rect.midbottom
 
     def atualizar(self, neymar, bola, distancia_neymar, distancia_bola, alguem_com_bola):
         tempo_atual = pygame.time.get_ticks()
@@ -196,13 +256,19 @@ class Zagueiro(pygame.sprite.Sprite):
         elif distancia_bola < 80 and neymar.tem_bola:#carrinho na bola com neymar
             self.preparo_pro_bote = True
         elif distancia_bola < 200 and distancia_bola > 0 and bola.em_movimento:#perseguir bola em movimento
-            self.perseguir_bola(bola)
+            self.em_movimento = True
+            alvo_x = self.perseguir_bola(bola)
         elif distancia_bola > 0 and distancia_bola < 250 and alguem_com_bola:#ir pra cima do aliado quando ele tiver a bola
-            self.perseguir_bola(bola)
+            self.em_movimento = True
+            alvo_x = self.perseguir_bola(bola)
         elif distancia_neymar < 250 and distancia_neymar > 0:
-            self.perseguir_neymar(neymar)
+            self.em_movimento = True
+            alvo_x = self.perseguir_neymar(neymar)
         else:
-            self.idle()
+            self.em_movimento = True
+            alvo_x = self.idle()
+
+
     
     def esta_em_idle(self):
         # RETORNA TRUE SE O ZAGUEIRO ESTIVER EM IDLE, SE ESTIVER FAZENDO QUALQUER OUTRA COISA ELE RETORNA FALSE

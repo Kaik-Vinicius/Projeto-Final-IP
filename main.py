@@ -407,6 +407,8 @@ def main():
             tela.blit(arquibancada_direita, (CAMPO_X + LARGURA_CAMPO_JOGAVEL, CAMPO_Y))
             
             neymar.desenhar_ney_com_sombra(tela)
+            for zagueiro in grupo_zagueiros:
+                zagueiro.desenhar_zag_com_sombra(tela)
             tela.blit(bola.image, bola.rect)
             tela.blit(neymar.image, neymar.rect)
 
