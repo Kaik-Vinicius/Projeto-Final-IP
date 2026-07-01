@@ -33,26 +33,53 @@ def limpar_campo(neymar, grupo_aliados, grupo_zagueiros, grupo_coletaveis):
 
 def colisao_coletavel_customizada(jogador, coletavel):
     """
-    CRIA UMA HITBOX MENOR PRA O NEYMAR COLIDIR COM OS ITENS DE FORMA MAIS NORMAL
+    CRIA UMA HITBOX MENOR TANTO PARA O NEYMAR QUANTO PARA OS COLETÁVEIS,
+    TORNANDO A COLETA MUITO MAIS PRECISA E COERENTE.
     """
-    hitbox_menor = jogador.rect.inflate(-30, -40)
     
-    return hitbox_menor.colliderect(coletavel.rect)
-
+    # FAZ UM ENCOLHIMENTO DA HITBOX DO NEYMAR PRA OS COLETAVEIS
+    if hasattr(jogador, 'hitbox'):
+        hitbox_jogador = jogador.hitbox
+    else:
+        hitbox_jogador = jogador.rect.inflate(-30, -20)
+    
+    # ENCONLHE TAMBEM A HITBOX DO COLETAVEL PRA MELHORAR A COLISAO
+    hitbox_coletavel = coletavel.rect.inflate(-10, -10)
+    
+    return hitbox_jogador.colliderect(hitbox_coletavel)
 
 def bola_tocou_jogador_continua(bola, jogador):
     """
-    EXPANDE BEM A HITBOX DA BOLA E DO JOGADOR E EVITA QUE O JOGAGOR ACABE NAO DOMINANDO A BOLA
+    CHECA A COLISÃO DA BOLA COM O JOGADOR.
+    SE A BOLA ESTIVER PARADA, MANTÉM O TAMANHO REAL DA BOLA, MAS USA APENAS OS PÉS DO JOGADOR.
     """
+    # CASO A BOLA ESTEJA PARADA NO CHÃO ESPERANDO
+    if getattr(bola, 'no_chao_esperando', False) or (bola.velocidade_x == 0 and bola.velocidade_y == 0):
+        # A BOLA VOLTA AO TAMANHO ORIGINAL
+        hitbox_bola = bola.rect
+        
+        # O NEYMAR CONTINUA COM A HITBOX REDUZIDA NOS PÉS
+        if hasattr(jogador, 'hitbox') and isinstance(jogador.hitbox, pygame.Rect):
+            hitbox_jogador_parado = jogador.hitbox
+        else:
+            # SE FOR O ALIADO OU O ZAGUEIRO POSICIONA A BOLA NOS PES DINAMICAMENTE
+            hitbox_jogador_parado = pygame.Rect(0, 0, jogador.rect.width - 20, 25)
+            hitbox_jogador_parado.midbottom = jogador.rect.midbottom
+            
+        return hitbox_bola.colliderect(hitbox_jogador_parado)
+
+    # CASO A BOLA ESTEJA EM MOVIMENTO RÁPIDO
     bola_expandida = bola.rect.inflate(bola.rect.width, bola.rect.height)
     if bola_expandida.colliderect(jogador.rect):
         return True
 
-    jogador_expandidado = jogador.rect.inflate(bola.rect.width, bola.rect.height)
+    jogador_expandido = jogador.rect.inflate(bola.rect.width, bola.rect.height)
     return bool(
-        jogador_expandidado.clipline(
+        jogador_expandido.clipline(
             (int(bola.prev_center.x), int(bola.prev_center.y)),
-            bola.rect.center))
+            bola.rect.center
+        )
+    )
 
 def atualizar_ia_zagueiros(grupo_zagueiros, neymar, bola, grupo_aliados):
     """

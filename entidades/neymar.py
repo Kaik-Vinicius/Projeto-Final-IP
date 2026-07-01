@@ -2,7 +2,6 @@ import pygame
 import math
 import random
 from gerenciamento.funcoes_importantes import prender_neymar_campo
-from entidades.bola import Bola
 from entidades.coletaveis import Coletavel
 from gerenciamento.constants import *
 from animacao.ney_animado import NeymarAnimacao
@@ -21,6 +20,10 @@ class Neymar(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
         self.rect.midbottom = (LARGURA_TELA // 2, ALTURA_TELA - 100)
+        
+        # HITBOX DO NEYMAR REDUZIDA PRA COLISAO COM A BOLA E COM OS COLETAVEIS
+        self.hitbox = pygame.Rect(0, 0, 40, 40)
+        self.hitbox.midbottom = self.rect.midbottom
 
         self.velocidade = VELOCIDADE_NEY
         self.barra_estrela = 0
@@ -93,6 +96,9 @@ class Neymar(pygame.sprite.Sprite):
         
         # RECRIA O RECT BASEADO NA NOVA IMAGEM
         self.rect = self.image.get_rect(center=posicao_centro)
+        
+        # ATUALIZA A HITBOX DO NEYMAR
+        self.hitbox.midbottom = self.rect.midbottom
             
     # metodo pra o ney dar passe
     def dar_passe(self, bola, grupo_aliados):

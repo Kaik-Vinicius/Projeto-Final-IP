@@ -5,9 +5,6 @@ import math
 import ctypes 
 from gerenciamento.constants import *
 from entidades.neymar import Neymar  
-from entidades.zagueiro import Zagueiro
-from entidades.goleiro import Goleiro
-from entidades.aliado import Aliado
 from entidades.bola import Bola
 from gerenciamento.funcoes_importantes import *
 import random

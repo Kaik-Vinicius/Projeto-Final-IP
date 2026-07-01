@@ -36,9 +36,9 @@ def desenhar_placar_superior(tela, fonte_pequena, chuteiras, estrelas, chances, 
     barra_y = 40   
     largura_maxima = 160  
     altura_barra = 15     
-    raio_borda = altura_barra // 2  # Cria o formato perfeito de cápsula/pílula
+    raio_borda = altura_barra // 2 
     
-    # 1. Borda Externa Preta e Fundo Cinza
+    # Borda Externa Preta e Fundo Cinza
     pygame.draw.rect(tela, (0, 0, 0), (barra_x - 2, barra_y - 2, largura_maxima + 4, altura_barra + 4), border_radius=raio_borda + 2)
     pygame.draw.rect(tela, (112, 128, 144), (barra_x, barra_y, largura_maxima, altura_barra), border_radius=raio_borda)
     
@@ -58,10 +58,10 @@ def desenhar_placar_superior(tela, fonte_pequena, chuteiras, estrelas, chances, 
         else:
             cor_base = (39, 174, 96); cor_fluxo = (46, 204, 113); cor_brilho = (163, 243, 191)
             
-        # 2. Superfície temporária para o miolo da barra
+        # Superfície temporária para o miolo da barra
         surf_interna = pygame.Surface((largura_atual, altura_barra), pygame.SRCALPHA)
         
-        # 3. Evita que o conteúdo da barra vaze para fora da borda arredondada
+        # Evita que o conteúdo da barra vaze para fora da borda arredondada
         pygame.draw.rect(surf_interna, cor_base, (0, 0, largura_atual, altura_barra), border_radius=raio_borda)
         
         inicio_reto = raio_borda
@@ -142,7 +142,7 @@ def desenhar_tela_espera(tela, campo_jogo, pos_campo, arquibancada_esquerda, arq
     altura_barra = 15     
     raio_borda = altura_barra // 2  # Cria o formato perfeito de cápsula/pílula
     
-    # 1. Borda Externa Preta e Fundo Cinza
+    # Borda Externa Preta e Fundo Cinza
     pygame.draw.rect(tela, (0, 0, 0), (barra_x - 2, barra_y - 2, largura_maxima + 4, altura_barra + 4), border_radius=raio_borda + 2)
     pygame.draw.rect(tela, (112, 128, 144), (barra_x, barra_y, largura_maxima, altura_barra), border_radius=raio_borda)
     
@@ -162,10 +162,10 @@ def desenhar_tela_espera(tela, campo_jogo, pos_campo, arquibancada_esquerda, arq
         else:
             cor_base = (39, 174, 96); cor_fluxo = (46, 204, 113); cor_brilho = (163, 243, 191)
             
-        # 2. Superfície temporária para o miolo da barra
+        # Superfície temporária para o miolo da barra
         surf_interna = pygame.Surface((largura_atual, altura_barra), pygame.SRCALPHA)
         
-        # 3. Evita que o conteúdo da barra vaze para fora da borda arredondada
+        # Evita que o conteúdo da barra vaze para fora da borda arredondada
         pygame.draw.rect(surf_interna, cor_base, (0, 0, largura_atual, altura_barra), border_radius=raio_borda)
         
         inicio_reto = raio_borda
@@ -222,7 +222,7 @@ def atualizar_logica_espera(tempo_atual, ultimo_tick_relogio, minuto_atual,
     if oportunidades_restantes > 0:
         intervalo_dinamico = intervalo_minuto_ms
     else:
-        intervalo_dinamico = 200 # Passa mais rápido se não houver chances
+        intervalo_dinamico = 200 # PASSA MAIS RAPIDO SE NAO HOUVER CHANCES
         
     # ATUALIZA O PONTEIRO DOS MINUTOS
     if tempo_atual - ultimo_tick_relogio >= intervalo_dinamico:
