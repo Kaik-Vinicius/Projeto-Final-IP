@@ -1,6 +1,7 @@
 import pygame
 from gerenciamento.constants import (LARGURA_TELA, ALTURA_TELA, VELOCIDADE_ZAG, COR_ZAGUEIRO, CONFIANCA_POR_DIFICULDADE, DRIBLES_CONFIG, META_ESTRELA, FORCA_CHUTE, POS_GOL_X, POS_GOL_Y)
 from assets.animacao.zag_animado import ZagueiroAnimacao
+from types import SimpleNamespace
 
 # FIZ ALGUMAS MUDANÇAS NA CLASSE DO ZAGUEIRO, PRINCIPALMENTE PRA NAO BUGAR A POSICAO DE SPAWN DE CADA UM
 
@@ -76,7 +77,7 @@ class Zagueiro(pygame.sprite.Sprite):
         # MANTER DENTRO DA TELA
         self.rect.clamp_ip(pygame.Rect(0, 0, LARGURA_TELA, ALTURA_TELA))
 
-        return bola_x
+        return bola
 
 
     def perseguir_neymar(self, neymar):
@@ -102,11 +103,13 @@ class Zagueiro(pygame.sprite.Sprite):
         # MANTER DENTRO DA TELA
         self.rect.clamp_ip(pygame.Rect(0, 0, LARGURA_TELA, ALTURA_TELA))
 
-        return neymar_x
+        return neymar
 
-    def idle(self):
+    def idle(self, neymar):
         # MUDANÇA FEITA PRA ATUALIZAR AS VARIAVEIS DE SPAWN DE CADA ZAGUEIRO INDIVIDUALMENTE
         if(self.rect.centerx != self.spawn_x and self.rect.centery != self.spawn_y):
+            self.em_movimento = True
+
             # RECUPERANDO A POSIÇÂO INICIAL DO ZAGUEIRO
             pos_inicial_x = self.spawn_x
             pos_inicial_y = self.spawn_y
@@ -125,7 +128,15 @@ class Zagueiro(pygame.sprite.Sprite):
             self.rect.x -= (norma_x * self.velocidade) / 1.5
             self.rect.y -= (norma_y * self.velocidade) / 1.5
 
-            return pos_inicial_x
+            rect_spawn = pygame.sprite.Sprite()
+            rect_spawn.rect = pygame.Rect(0, 0, 0, 0)
+            rect_spawn.centerx = self.spawn_x
+            rect_spawn.centery = self.spawn_y
+            
+            return rect_spawn
+        else:
+            self.em_movimento = False
+            return neymar
 
     def iniciar_carrinho(self, bola):
         #CRIANDO UM VETOR DO ZAGUEIRO PARA A BOLA
@@ -175,15 +186,24 @@ class Zagueiro(pygame.sprite.Sprite):
         # desenha depois o neymar
         tela.blit(self.image, self.rect)
     
-    def update_anim(self, alvo_x):
+    def update_anim(self, alvo):
         """ESSE UPDATE VAI SER PARA ATUALIZAR A ANIMAÇÃO"""
         # SALVA A POSICAO DO CENTRO INICIAL
         posicao_centro = self.rect.center
+        posicao_alvo_x = alvo.rect.centerx
+        posicao_alvo_y = alvo.rect.centery
 
-        if alvo_x > posicao_centro:
-            self.olhando_para = "direita"
-        elif alvo_x < posicao_centro:
-            self.olhando_para = "esquerda"
+        dist_y = abs(posicao_centro[1] - posicao_alvo_y)
+        dist_x = posicao_centro[0] - posicao_alvo_x
+        abs_dist_x = abs(dist_x)
+
+        if dist_y > abs_dist_x:
+            self.olhando_para = "frente"
+        else:
+            if dist_x > 0:
+                self.olhando_para = "esquerda"
+            elif dist_x < 0:
+                self.olhando_para = "direita"
         
         # ATUALIZA A IMAGEM
         self.image = self.animador.atualizar_animacao(self.em_movimento, self.olhando_para)
@@ -257,18 +277,17 @@ class Zagueiro(pygame.sprite.Sprite):
             self.preparo_pro_bote = True
         elif distancia_bola < 200 and distancia_bola > 0 and bola.em_movimento:#perseguir bola em movimento
             self.em_movimento = True
-            alvo_x = self.perseguir_bola(bola)
+            alvo = self.perseguir_bola(bola)
         elif distancia_bola > 0 and distancia_bola < 250 and alguem_com_bola:#ir pra cima do aliado quando ele tiver a bola
             self.em_movimento = True
-            alvo_x = self.perseguir_bola(bola)
+            alvo = self.perseguir_bola(bola)
         elif distancia_neymar < 250 and distancia_neymar > 0:
             self.em_movimento = True
-            alvo_x = self.perseguir_neymar(neymar)
+            alvo = self.perseguir_neymar(neymar)
         else:
-            self.em_movimento = True
-            alvo_x = self.idle()
+            alvo = self.idle(neymar)
 
-
+        self.update_anim(alvo)
     
     def esta_em_idle(self):
         # RETORNA TRUE SE O ZAGUEIRO ESTIVER EM IDLE, SE ESTIVER FAZENDO QUALQUER OUTRA COISA ELE RETORNA FALSE
