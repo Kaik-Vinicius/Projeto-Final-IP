@@ -4,27 +4,82 @@ import random
 from entidades.zagueiro import Zagueiro
 from entidades.aliado import Aliado
 from gerenciamento.constants import *
+from entidades.goleiro import Goleiro
 
-
-# =-=-=-=-=--=-= FUNCAO QUE PRENDE O NEY NO CAMPO =-=-=-=-=-=-=-=-=-=
 def prender_neymar_campo(neymar, campo_jogavel):
+    """
+    FUNÇÃO QUE PRENDE O NEYMAR NOS LIMITES DO CAMPO
+    """
     neymar.rect.clamp_ip(campo_jogavel)
     
+def limpar_campo(neymar, grupo_aliados, grupo_zagueiros, grupo_coletaveis):
+    """
+    RESETA TUDO E LIMPA O CAMPO PRA EVITAR QUE O JOGO FIQUE PUXANDO INFORMAÇÕES DE OUTRAS PARTIDAS ANTERIORES
+    """
+    grupo_aliados.empty()
+    grupo_coletaveis.empty()
+    grupo_zagueiros.empty()
+    
+    # RESET TOTAL DO OBJETO NEYMAR 
+    neymar.tem_bola = False
+    neymar.confianca = 0
+    neymar.ney_prime = False
+    neymar.velocidade = VELOCIDADE_NEY
+    neymar.bola_em_drible = False
+    neymar.drible_efetivo = False
+    neymar.ultimo_tipo_drible = 'manual'
+    
+    return 0,0,0,0,0 # RETORNO DAS CHUTEIRAS, ESTRELAS, GOLS DO BRASIL E ARGENTINA E TEMPO DO ULTIMO DRIBLE
 
-# =-=-=-=-=--=-= FUNCAO QUE VAI RETONAR SE A BOLA COLIDIU COM O JOGADOR =-=-=-=-=-=-=-=-=-=
+def colisao_coletavel_customizada(jogador, coletavel):
+    """
+    CRIA UMA HITBOX MENOR TANTO PARA O NEYMAR QUANTO PARA OS COLETÁVEIS,
+    TORNANDO A COLETA MUITO MAIS PRECISA E COERENTE.
+    """
+    
+    # FAZ UM ENCOLHIMENTO DA HITBOX DO NEYMAR PRA OS COLETAVEIS
+    if hasattr(jogador, 'hitbox'):
+        hitbox_jogador = jogador.hitbox
+    else:
+        hitbox_jogador = jogador.rect.inflate(-30, -20)
+    
+    # ENCONLHE TAMBEM A HITBOX DO COLETAVEL PRA MELHORAR A COLISAO
+    hitbox_coletavel = coletavel.rect.inflate(-10, -10)
+    
+    return hitbox_jogador.colliderect(hitbox_coletavel)
+
 def bola_tocou_jogador_continua(bola, jogador):
     """
-    EXPANDE BEM A HITBOX DA BOLA E DO JOGADOR E EVITA QUE O JOGAGOR ACABE NAO DOMINANDO A BOLA
+    CHECA A COLISÃO DA BOLA COM O JOGADOR.
+    SE A BOLA ESTIVER PARADA, MANTÉM O TAMANHO REAL DA BOLA, MAS USA APENAS OS PÉS DO JOGADOR.
     """
+    # CASO A BOLA ESTEJA PARADA NO CHÃO ESPERANDO
+    if getattr(bola, 'no_chao_esperando', False) or (bola.velocidade_x == 0 and bola.velocidade_y == 0):
+        # A BOLA VOLTA AO TAMANHO ORIGINAL
+        hitbox_bola = bola.rect
+        
+        # O NEYMAR CONTINUA COM A HITBOX REDUZIDA NOS PÉS
+        if hasattr(jogador, 'hitbox') and isinstance(jogador.hitbox, pygame.Rect):
+            hitbox_jogador_parado = jogador.hitbox
+        else:
+            # SE FOR O ALIADO OU O ZAGUEIRO POSICIONA A BOLA NOS PES DINAMICAMENTE
+            hitbox_jogador_parado = pygame.Rect(0, 0, jogador.rect.width - 20, 25)
+            hitbox_jogador_parado.midbottom = jogador.rect.midbottom
+            
+        return hitbox_bola.colliderect(hitbox_jogador_parado)
+
+    # CASO A BOLA ESTEJA EM MOVIMENTO RÁPIDO
     bola_expandida = bola.rect.inflate(bola.rect.width, bola.rect.height)
     if bola_expandida.colliderect(jogador.rect):
         return True
 
-    jogador_expandidado = jogador.rect.inflate(bola.rect.width, bola.rect.height)
+    jogador_expandido = jogador.rect.inflate(bola.rect.width, bola.rect.height)
     return bool(
-        jogador_expandidado.clipline(
+        jogador_expandido.clipline(
             (int(bola.prev_center.x), int(bola.prev_center.y)),
-            bola.rect.center))
+            bola.rect.center
+        )
+    )
 
 def atualizar_ia_zagueiros(grupo_zagueiros, neymar, bola, grupo_aliados):
     """
@@ -57,10 +112,20 @@ def verificar_desarme_zagueiros(grupo_zagueiros, bola, bola_tocou_jogador_contin
     return False
 
 
-def checar_conclusao_jogada(bola):
+def checar_conclusao_jogada(bola, neymar):
     """
     VERIFICA SE A BOLA PASSOU DA LINHA DE FUNDO, SE FOI GOL OU NAO
     """
+    
+    if (bola.rect.centerx < 320 or
+        bola.rect.centerx > 1600 or
+        bola.rect.centery > 1100 or
+        (bola.rect.centery < 65 and getattr(bola, 'resultado_chute', None) is None)):
+
+        bola.resultado_chute = 'fora'
+        return True
+        
+
     if bola.em_movimento and getattr(bola, 'resultado_chute', None) is not None:
         
         # DEFINE O LIMITE DA PARADA DA BOLA CONFORME OS PIXELS
@@ -72,6 +137,8 @@ def checar_conclusao_jogada(bola):
         if bola.rect.centery <= limite_parada_y:
             
             if bola.resultado_chute == 'gol':
+                # GANHA +20 DE CONFIANCA SE FIZER UM GOL
+                neymar.atualizar_confianca(20)
                 print("GOOOOOL DO NEYMAR!!!") 
             elif bola.resultado_chute == 'defesa':
                 print("MILAGRE DO GOLEIRO! CHANCE PERDIDA!")
@@ -83,42 +150,45 @@ def checar_conclusao_jogada(bola):
     return False 
 
 
-def preparar_nova_oportunidade(dificuldade, indice_lance, neymar, bola, grupo_zagueiros, grupo_aliados):
+def preparar_nova_oportunidade(dificuldade, indice_lance, neymar, bola, grupo_zagueiros, grupo_aliados, grupo_goleiro):
     """
-    Limpa o campo e monta o cenário tático baseado na DIFICULDADE selecionada
-    e no número do LANCE atual.
+    FUNÇÃO QUE PREPARA NOVA OPORTUNIDADE, LIMPA O CAMPO E POSICIONA TUDO AONDE DEVE ESTAR
     """
-    # Fallback de segurança caso a string venha errada ou nula
+    # SEGURANÇA PRA EVITAR ERROS SE A STRING VIER NULA
     if dificuldade not in CENARIOS_TATICOS:
         dificuldade = "facil"
         
     cenarios_do_nivel = CENARIOS_TATICOS[dificuldade]
     
-    # Se o índice do lance passar do limite disponível para aquela dificuldade, reseta pro lance 1
+    # DEFININDO OS LANCES POR INDICE A COMECAR DO 1 PRA FACILITAR NA COMPARAÇÃO
     if indice_lance not in cenarios_do_nivel:
         indice_lance = 1
         
     cenario = cenarios_do_nivel[indice_lance]
     print(f"\n--- INICIANDO LANCE {indice_lance}: {cenario['nome']} ---")
 
-    # 1. Reposiciona o Neymar e remove posses antigas
+    # REPOSICIONA O NEYMAR NO PROXIMO CENARIO DE JOGADA
     neymar.rect.center = cenario["neymar_pos"]
     neymar.tem_bola = False
 
-    # 2. Desempacota as coordenadas e faz o lançamento no ponto futuro
+    # JOGA A BOLA DA ORIGEM ATE O DESTINO DELA
     origem_x, origem_y = cenario["bola_origem"]
     destino_x, destino_y = cenario["bola_destino"]
     
-    bola.iniciar_lancamento(origem_x, origem_y, destino_x, destino_y, velocidade_lancamento=12)
+    bola.iniciar_lancamento(origem_x, origem_y, destino_x, destino_y, VELOCIDADE_LANCAMENTO_INICIAL)
 
-    # 3. Limpa e recria os Zagueiros específicos deste nível
+    # RECRIA OS ZAGUEIROS NA NOVA OPORTUNIDADE
     grupo_zagueiros.empty()
     for pos in cenario["zagueiros_pos"]:
         novo_zag = Zagueiro(pos[0], pos[1])
         grupo_zagueiros.add(novo_zag)
 
-    # 4. Limpa e recria os Aliados de suporte deste nível
+    # RECRIA OS ALIADOS NA NOVA OPORTUNIDADE
     grupo_aliados.empty()
     for pos in cenario["aliados_pos"]:
         novo_aliado = Aliado(pos[0], pos[1])
         grupo_aliados.add(novo_aliado)
+
+    grupo_goleiro.empty()
+    goleiro = Goleiro(960, 70)
+    grupo_goleiro.add(goleiro)

@@ -7,7 +7,6 @@ class Bola(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
 
-        #ADICIONANDO OS SPRITES DA BOLA
         # ADICIONANDO OS SPRITES DA BOLA
         self.frames_bola = [
             pygame.image.load("assets/bola/bola1.png").convert_alpha(),
@@ -54,11 +53,26 @@ class Bola(pygame.sprite.Sprite):
         
         # ATRIBUTO QUE DIZ O RESULTADO DO CHUTE
         self.resultado_chute = None
+        self.alvo_x = 0 # ATRIBUI alvo_x PRA PODER USAR NO GOLEIRO
+        self.foi_chutada = False
+
+        # DICIONARIOS DOS OFFSETS PADRÃO (PARADO)
+        self.offsets_posse = {
+            "parado": {
+                "frente":   (32, 80),
+                "costas":   (32, 75),
+                "esquerda": (10, 75),
+                "direita":  (50, 75)   
+            },
+            "movimento": {
+                "frente":   (32, 95),
+                "costas":   (32, 78),
+                "esquerda": (18, 75),
+                "direita":  (42, 75)
+            }
+        }
 
     def sincronizar_coordenadas_float(self):
-        """
-        TRANSFORMA AS COORDENADAS DA BOLA EM FLOAT
-        """
         self.px = float(self.rect.x)
         self.py = float(self.rect.y)
 
@@ -72,8 +86,6 @@ class Bola(pygame.sprite.Sprite):
 
     def animar(self):
         centro_atual = self.rect.center
-
-        # Se a bola estiver parada, deixa no primeiro frame
         if not self.em_movimento:
             self.frame_atual = 0
             self.image = self.frames_bola[self.frame_atual]
@@ -81,209 +93,172 @@ class Bola(pygame.sprite.Sprite):
             return
 
         tempo_atual = pygame.time.get_ticks()
-
         if tempo_atual - self.tempo_ultima_animacao > self.intervalo_animacao:
             self.tempo_ultima_animacao = tempo_atual
-
-            # Se estiver indo para a esquerda, roda ao contrário
-            if self.velocidade_x < 0:
-                self.frame_atual -= 1
-            else:
-                self.frame_atual += 1
-
+            if self.velocidade_x < 0: self.frame_atual -= 1
+            else: self.frame_atual += 1
             self.frame_atual %= len(self.frames_bola)
-
             self.image = self.frames_bola[self.frame_atual]
             self.rect = self.image.get_rect(center=centro_atual)
 
     def iniciar_lancamento(self, x_inicial, y_inicial, x_destino, y_destino, velocidade_lancamento):
-        """
-        LANÇAMENTO INICIAL DA BOLA
-        """
         self.dono = None
         self.rect.centerx = x_inicial
         self.rect.centery = y_inicial
         self.sincronizar_coordenadas_float()
         self._registrar_prev_center()
-
         self.destino_x = x_destino
         self.destino_y = y_destino
         self.tem_destino = True
-
         self.em_movimento = True
+        self.foi_chutada = False
         self.no_chao_esperando = False
-
         dx = x_destino - x_inicial
         dy = y_destino - y_inicial
         angulo = math.atan2(dy, dx)
-
         self.velocidade_x = math.cos(angulo) * velocidade_lancamento
         self.velocidade_y = math.sin(angulo) * velocidade_lancamento
 
-    def atualizar_posicao(self, neymar=None):
-        """
-        GERENCIA A FISICA DA BOLA A CADA FRAME
-        """
-        # Se a bola estiver com alguém, ela segue o dono e não "voa"
+    def _colar_no_pe_do_dono(self):
         if self.dono is not None:
-            self.rect.center = self.dono.rect.center
+            # Identifica a direção ("frente", "costas", etc.)
+            direcao = getattr(self.dono, 'olhando_para', 'frente')
+            
+            # Identifica o estado do jogador ("movimento" ou "parado")
+            # Caso o jogador não tenha esse atributo, assume "parado" por segurança
+            estado = "movimento" if getattr(self.dono, 'em_movimento', False) else "parado"
+            
+            # Busca primeiro a tabela do estado (parado/movimento) e depois a direção
+            tabela_estado = self.offsets_posse.get(estado, self.offsets_posse['parado'])
+            offset_x, offset_y = tabela_estado.get(direcao, tabela_estado['frente'])
+
+            # Aplica a posição final da bola
+            self.rect.x = self.dono.rect.x + offset_x
+            self.rect.y = self.dono.rect.y + offset_y
+
+    def atualizar_posicao(self, neymar=None):
+        if self.dono is not None:
+            self._colar_no_pe_do_dono()
             self.sincronizar_coordenadas_float()
             self._registrar_prev_center()
             self.animar()
             return
 
         if self.em_movimento:
-            # guarda a posição anterior antes de mover
             self._registrar_prev_center()
-
             self.px += self.velocidade_x
             self.py += self.velocidade_y
-
             self.rect.x = int(self.px)
             self.rect.y = int(self.py)
-
-            # Se houver destino, checa chegada
+            
             if self.tem_destino and self.destino_x is not None and self.destino_y is not None:
                 distancia = math.hypot(self.destino_x - self.rect.centerx, self.destino_y - self.rect.centery)
-                if distancia < 12:
+                
+                if distancia < 12: 
                     self.ficar_no_chao()
-
-            # Segurança para sair do mapa
-            if self.rect.bottom < 0:
+                
+            if self.rect.bottom < 0: 
                 self.resetar(neymar)
-
+                
         elif neymar is not None and neymar.tem_bola:
-            # fallback de compatibilidade
-            self.rect.center = neymar.rect.center
+            self.dono = neymar
+            self._colar_no_pe_do_dono()
             self.sincronizar_coordenadas_float()
             self._registrar_prev_center()
-
         self.animar()
 
     def ficar_no_chao(self):
-        """
-        INTERROMPE O LANÇAMENTO E DEIXA A BOLA PARADA
-        """
         self.velocidade_x = 0.0
         self.velocidade_y = 0.0
         self.em_movimento = False
+        self.foi_chutada = False
         self.no_chao_esperando = True
         self.dono = None
         self._limpar_destino()
 
     def dominar(self, jogador):
-        """
-        FAZ A BOLA FICAR DOMINADA NO PÉ DO JOGADOR
-        FUNCIONA PARA NEYMAR E PARA O ALIADO
-        """
         self.no_chao_esperando = False
         self.em_movimento = False
+        self.foi_chutada = False
         self.velocidade_x = 0.0
         self.velocidade_y = 0.0
         self.dono = jogador
         self._limpar_destino()
-
-        self.rect.center = jogador.rect.center
+        self._colar_no_pe_do_dono()
         self.sincronizar_coordenadas_float()
         self._registrar_prev_center()
-
-        if hasattr(jogador, "tem_bola"):
-            jogador.tem_bola = True
-
-        if hasattr(jogador, "tempo_recebeu_bola"):
-            jogador.tempo_recebeu_bola = pygame.time.get_ticks()
+        if hasattr(jogador, "tem_bola"): jogador.tem_bola = True
+        if hasattr(jogador, "tempo_recebeu_bola"): jogador.tempo_recebeu_bola = pygame.time.get_ticks()
 
     def chutar(self, origem_x, origem_y, FORCA_CHUTE, resultado='gol'):
-        """
-        FAZ O NEYMAR CHUTAR A BOLA (AGORA COM PRECISÃO DINÂMICA BASEADA NO RESULTADO)
-        """
         self.dono = None
         self._limpar_destino()
         self.rect.centerx = origem_x
         self.rect.centery = origem_y
         self.no_chao_esperando = False
         self.em_movimento = True
+        self.foi_chutada = True
         self._registrar_prev_center()
-        
-        # GUARDA O RESULTADO SE FOI GOL OU NAO
         self.resultado_chute = resultado 
-
-        # DEFINICAO DO ALVO QUE É LA EM CIMA NO GOL
         alvo_y = 70
 
-        if resultado == 'gol':
-            # MIRA EM QUALUQER PONTO DENTRO DO GOL 
-            alvo_x = random.randint(880, 1040) # dentro dessas coordenadas aqui
-        elif resultado == 'defesa':
-            # MIRA NO MEIO DO GOL PQ É ONDE O GOLEIRO VAI PEGAR A BOLA
-            alvo_x = random.randint(930, 990)
-            
-        else: # SE FOR FORA
-            # 50% DE CHANCE DE IR PRA ESQUERDA E 50% DE CHANCE DE IR PRA DIREITA
-            if random.random() < 0.5:
-                alvo_x = random.randint(730, 840)
-            else:
-                alvo_x = random.randint(1080, 1190)
-
-        # CALCULA A VELOCIDADE BASEADA NO ALVO PRA FICAR MAIS "REALISTA"
-        dx = alvo_x - origem_x
+        if resultado == 'gol': 
+            self.alvo_x = random.randint(880, 1040)
+        elif resultado == 'defesa': 
+            self.alvo_x = random.randint(930, 990)
+        else: 
+            if random.random() < 0.5: 
+                self.alvo_x = random.randint(730, 840)
+            else: 
+                self.alvo_x = random.randint(1080, 1190)
+                
+        dx = self.alvo_x - origem_x
         dy = alvo_y - origem_y
         distancia_alvo = math.hypot(dx, dy)
-
         if distancia_alvo > 0:
             self.velocidade_x = (dx / distancia_alvo) * FORCA_CHUTE
             self.velocidade_y = (dy / distancia_alvo) * FORCA_CHUTE
-        else:
-            self.velocidade_x = 0.0
-            self.velocidade_y = -FORCA_CHUTE
+        else: 
+            self.velocidade_x = 0.0; self.velocidade_y = -FORCA_CHUTE
 
     def passar(self, origem_x, origem_y, destino_x, destino_y, velocidade_passe):
-        """
-        PASSE NORMAL PARA O ALIADO
-        """
         self.dono = None
         self.em_movimento = True
+        self.foi_chutada = False
         self.no_chao_esperando = False
-
         self.rect.centerx = origem_x
         self.rect.centery = origem_y
         self.sincronizar_coordenadas_float()
         self._registrar_prev_center()
-
         self.destino_x = destino_x
         self.destino_y = destino_y
         self.tem_destino = True
-
         dx = destino_x - origem_x
         dy = destino_y - origem_y
         angulo = math.atan2(dy, dx)
-
         self.velocidade_x = math.cos(angulo) * velocidade_passe
         self.velocidade_y = math.sin(angulo) * velocidade_passe
 
     def lancar_em_profundidade(self, origem_x, origem_y, destino_x, destino_y, velocidade_passe):
-        """
-        PASSE EM PROFUNDIDADE DO ALIADO DE VOLTA AO NEYMAR
-        """
         self.dono = None
         self.em_movimento = True
+        self.foi_chutada = False
         self.no_chao_esperando = False
-
         self.rect.centerx = origem_x
         self.rect.centery = origem_y
         self.sincronizar_coordenadas_float()
         self._registrar_prev_center()
-
         self.destino_x = destino_x
         self.destino_y = destino_y
         self.tem_destino = True
-
         dx = destino_x - origem_x
         dy = destino_y - origem_y
         angulo = math.atan2(dy, dx)
-
         self.velocidade_x = math.cos(angulo) * velocidade_passe
         self.velocidade_y = math.sin(angulo) * velocidade_passe
-    
-
         
+    def resetar(self, neymar=None):
+        self.ficar_no_chao()
+        if neymar:
+            self.rect.center = neymar.rect.center
+            self.sincronizar_coordenadas_float()

@@ -2,21 +2,27 @@ import pygame
 import math
 import random
 from gerenciamento.funcoes_importantes import prender_neymar_campo
-from entidades.bola import Bola
-from entidades.coletaveis import Coletavel
-from gerenciamento.constants import (LARGURA_TELA, ALTURA_TELA, VELOCIDADE_NEY, COR_NEYMAR, FORCA_CHUTE, TUPLA_LIMITES_CAMPO, DRIBLES_CONFIG)
-
+from gerenciamento.constants import *
+from animacao.ney_animado import NeymarAnimacao
 
 class Neymar(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
 
-        self.image = pygame.Surface((45, 40))
-        self.image.fill(COR_NEYMAR)
+       # INSTANCIA O NEYMAR ANIMADO
+        self.animador = NeymarAnimacao()
+
+        # DEFINE A IMAGEM DO NEYMAR COM A IMAGEM DO FRAME ATUAL
+        self.image = self.animador.obter_imagem_inicial()
+        
+        # O RECT VIRA O TAMANHO DA IMAGEM ORIGINAL
         self.rect = self.image.get_rect()
 
-        self.rect.centerx = LARGURA_TELA // 2
-        self.rect.centery = ALTURA_TELA - 100
+        self.rect.midbottom = (LARGURA_TELA // 2, ALTURA_TELA - 100)
+        
+        # HITBOX DO NEYMAR REDUZIDA PRA COLISAO COM A BOLA E COM OS COLETAVEIS
+        self.hitbox = pygame.Rect(0, 0, 40, 40)
+        self.hitbox.midbottom = self.rect.midbottom
 
         self.velocidade = VELOCIDADE_NEY
         self.barra_estrela = 0
@@ -28,39 +34,124 @@ class Neymar(pygame.sprite.Sprite):
         self.bola_em_drible = False
         self.tempo_inicio_drible = 0
         self.drible_efetivo = False
+
+        # CARACTERISTICAS DOP NEY PRIME
+        self.ney_prime = False 
+        self.tempo_prime = 0
         
         # ATRIBUINDO A CONFIANCA DO NEYMAR
         self.confianca = 0
         self.ultimo_tipo_drible = 'manual'
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
 >>>>>>> jogador-e-chute
+=======
+>>>>>>> dev
 
+        # MONITORA SE O JOGADOR ESTÁ CORRENDO OU PARADO PARA A ANIMAÇÃO
+        self.em_movimento = False
+        
+        # GUARDA PARA ONDE O NEYMAR ESTA OLHANDO
+        self.olhando_para = "frente"
 
     def mover(self, teclas, bola, grupo_zagueiros=None):
+        """
+        FUNCAO QUE MOVE O NEYMAR
+        """
+        self.em_movimento = False
+
         dx = 0
         dy = 0
 
         if teclas[pygame.K_a]:
-            dx += -self.velocidade
+            dx -= 1
+            self.em_movimento = True
+            self.olhando_para = 'esquerda'
+
         if teclas[pygame.K_d]:
-            dx += self.velocidade
+            dx += 1
+            self.em_movimento = True
+            self.olhando_para = 'direita'
+            
         if teclas[pygame.K_w]:
-            dy += -self.velocidade
+            dy -= 1
+            self.em_movimento = True 
+            self.olhando_para = "costas"
+            
+
         if teclas[pygame.K_s]:
-            dy += self.velocidade
+            dy += 1
+            self.em_movimento = True 
+            self.olhando_para = 'frente'
         
-        self.rect.x += dx
-        self.rect.y += dy
+        if dx != 0 or dy != 0:
+            # VERIFICA SE MOVEU NA DIAGONAL
+            if dx != 0 and dy != 0:
+                fator_diagonal = 0.8  # UTILIZA MATEMATICA PRA NORMALIZAR A VELOCIDADE NA DIAGONAL
+                                        # 0.8 PRA FICAR O MAXIMO PARECIDO COM O MOVIMENTO PRA OS LADOS NORMAL
+                dx *= self.velocidade * fator_diagonal
+                dy *= self.velocidade * fator_diagonal
+            else:
+                # SE NAO MOVEU NA DIAGONAL
+                dx *= self.velocidade
+                dy *= self.velocidade
+
+        # APLICA O MOVIMENTO FINAL
+        self.rect.x += int(dx)
+        self.rect.y += int(dy)
         
         # chama a funcao que prende o ney no campo
-        prender_neymar_campo(self, TUPLA_LIMITES_CAMPO)
+        prender_neymar_campo(self, TUPLA_LIMITES_CAMPO_PRA_NEYMAR)
         
         # AQUI O NEYMAR VAI TENTAR DESVIAR MANUALMENTE SEM DRIBLES
         if grupo_zagueiros and self.tem_bola and (dx != 0 or dy != 0):
             self.checar_desvio_manual(bola, grupo_zagueiros)
+        
+        # chama a funcao que prende o ney no campo
+        prender_neymar_campo(self, TUPLA_LIMITES_CAMPO_PRA_NEYMAR)
+        
+        # AQUI O NEYMAR VAI TENTAR DESVIAR MANUALMENTE SEM DRIBLES
+        if grupo_zagueiros and self.tem_bola and (dx != 0 or dy != 0):
+            self.checar_desvio_manual(bola, grupo_zagueiros)
+   
+    def desenhar_ney_com_sombra(self, tela):
+        """METODO PRA DESENHAR O NEYMAR POR CIMA DA SOMBRA DA FORMA CORRETA"""
+        # PEGA A IMAGEM DA SOMBRA CONFIGURADO NO ANIMADOR
+        sombra = self.animador.sombra_atual
+        sombra_rect = sombra.get_rect()
+        
+        # ALINHA COM OS PES
+        sombra_rect.center = self.rect.midbottom
+        
+        # AJUSTES DIFERENTES A DEPENDER DA POSICAO QUE ELE ESTIVER OLHANDO PARADO
+        if self.olhando_para in ['esquerda','direita']:
+            sombra_rect.centery -= 18
+            
+        if self.olhando_para in ['frente', 'costas']:
+            sombra_rect.centery -= 15
+            
+        # desenha primeiro a sombra
+        tela.blit(sombra, sombra_rect)
+        
+        # desenha depois o neymar
+        tela.blit(self.image, self.rect)
     
+    def update(self):
+        """ESSE UPDATE VAI SER PARA ATUALIZAR A ANIMAÇÃO"""
+        # SALVA A POSICAO DO CENTRO INICIAL
+        posicao_centro = self.rect.center
+        
+        # ATUALIZA A IMAGEM
+        self.image = self.animador.atualizar_animacao(self.em_movimento, self.olhando_para)
+        
+        # RECRIA O RECT BASEADO NA NOVA IMAGEM
+        self.rect = self.image.get_rect()
+        self.rect.center = posicao_centro
+        
+        # ATUALIZA A HITBOX DO NEYMAR
+        self.hitbox.midbottom = self.rect.midbottom
             
     # metodo pra o ney dar passe
     def dar_passe(self, bola, grupo_aliados):
@@ -100,18 +191,22 @@ class Neymar(pygame.sprite.Sprite):
         # COORDENADAS QUE VAO GUIAR OS CHUTES PRA O GOL
         centro_gol_x = 960
         centro_gol_y = 70
-
-        # CÁLCULO DA DISTÂNCIA
-        distancia = math.hypot(centro_gol_x - self.rect.centerx, centro_gol_y - self.rect.centery)
         
-        # QUANTO MAIS PERTO, MAIOR A CHANCE COM MAXIMO DE 0.95 E MINIMO DE 0.05
-        fator_distancia = max(0.05, min(0.95, 1.0 - (distancia / 1000.0)))
+        if self.ney_prime:
+            probabilidade_gol = 0.95
 
-        # CÁLCULO DA CONFIANÇA O MINIMO É ZERO E O MAXIMO É 100
-        fator_confianca = max(0.0, min(1.0, self.confianca / 100.0))
+        else:
+            # CÁLCULO DA DISTÂNCIA
+            distancia = math.hypot(centro_gol_x - self.rect.centerx, centro_gol_y - self.rect.centery)
+            
+            # QUANTO MAIS PERTO, MAIOR A CHANCE COM MAXIMO DE 0.95 E MINIMO DE 0.05
+            fator_distancia = max(0.05, min(0.95, 1.0 - (distancia / 1000.0)))
 
-        # PROBABILIDADE FINAL == UM PESO DE 60% PRA DISTANCIA E UM PESO DE 40% PRA CONFIANCA (talvez possamos mudar isso daqui)
-        probabilidade_gol = (fator_distancia * 0.6) + (fator_confianca * 0.4)
+            # CÁLCULO DA CONFIANÇA O MINIMO É ZERO E O MAXIMO É 100
+            fator_confianca = max(0.0, min(1.0, self.confianca / 100.0))
+
+            # PROBABILIDADE FINAL == UM PESO DE 60% PRA DISTANCIA E UM PESO DE 40% PRA CONFIANCA (talvez possamos mudar isso daqui)
+            probabilidade_gol = (fator_distancia * 0.7) + (fator_confianca * 0.3)
 
         # DEFINIÇÃO DO RESULTADO DO CHUTE
         # AQUI ENTRA A ALEATORIEDADE DE SE VAI SER GOL OU NAO
@@ -134,11 +229,16 @@ class Neymar(pygame.sprite.Sprite):
         """
         ATUALIZA A CONFIANÇA SEMPRE QUE ALGO ACONTECE
         """
-        self.confianca += valor
+        # SO ATUALIZA SE NAO TIVER NO NEY PRIME PRA NAO FICAR MUITA APELAÇÃO
+        if not self.ney_prime:
+            self.confianca += valor
         
         # Garante que a confiança não fique negativa
         if self.confianca < 0:
             self.confianca = 0
+            
+        if self.confianca > 100:
+            self.confianca = 100
             
     def calcular_chance_drible(self, tipo_drible):
         """APLICA A FORMULA PRA CALCULAR SE DRIBLOU OU NAO"""
@@ -147,6 +247,7 @@ class Neymar(pygame.sprite.Sprite):
         c_max = DRIBLES_CONFIG[tipo_drible]['chance_max']
         
         chance = c_ini + ((self.confianca / 100.0) * (c_max - c_ini))
+<<<<<<< HEAD
 <<<<<<< HEAD
             
         if getattr(self, 'ney_prime', False):
@@ -157,6 +258,11 @@ class Neymar(pygame.sprite.Sprite):
         if getattr(self, 'ney_prime', False):
             return 1.0
 >>>>>>> jogador-e-chute
+=======
+        
+        if getattr(self, 'ney_prime', False):
+            return 1.0
+>>>>>>> dev
         return min(chance, c_max)
         
 
@@ -173,11 +279,7 @@ class Neymar(pygame.sprite.Sprite):
             
         # ITERA SOBRE CADA ZAGUEIRO
         for zagueiro in grupo_zagueiros:
-            preparo = getattr(zagueiro, 'preparo_pro_bote', False)
-            driblado = getattr(zagueiro, 'driblado', False)
-            atordoado = getattr(zagueiro, 'atordoado_por_drible', False)
-            
-            if preparo and not driblado and not atordoado:
+            if zagueiro.preparo_pro_bote and not zagueiro.driblado and not zagueiro.atordoado_por_drible:
                 dx = zagueiro.rect.centerx - bola.rect.centerx
                 dy = zagueiro.rect.centery - bola.rect.centery
                 
@@ -189,8 +291,7 @@ class Neymar(pygame.sprite.Sprite):
                     if self.drible_efetivo:
                         break
                     
-                    if hasattr(zagueiro, 'ficar_atordoado_por_drible'):
-                        zagueiro.ficar_atordoado_por_drible(tempo=1000)
+                    zagueiro.ficar_atordoado_por_drible(tempo=1000)
                     self.bola_em_drible = True
                     self.drible_efetivo = True
                     self.tempo_inicio_drible = pygame.time.get_ticks()
@@ -206,8 +307,6 @@ class Neymar(pygame.sprite.Sprite):
             return
         
         tipo_drible = tipo_drible.lower()
-        
-        ganho_confianca = DRIBLES_CONFIG[tipo_drible]['ganho']
         
         # VERIFICA SE TODOS ESTAO EM IDLE PRA PODER EXECUTAR ALGUM DRIBLE
         todos_em_idle = all(zagueiro.esta_em_idle() for zagueiro in grupo_zagueiros)
@@ -240,16 +339,21 @@ class Neymar(pygame.sprite.Sprite):
                     chance_final = self.calcular_chance_drible(tipo_drible)
                     
                     if random.random() <= chance_final: # ISSO DAQUI RANDOMIZA A CHANCE DE DAR CERTO
-                        if hasattr(zagueiro_mais_proximo, 'ficar_atordoado_por_drible'):
-                            zagueiro_mais_proximo.ficar_atordoado_por_drible(tempo=1500) # ATORDOAMENTO DE 1.5s
+                        zagueiro_mais_proximo.ficar_atordoado_por_drible(tempo=1500) # ATORDOAMENTO DE 1.5s
                         self.bola_em_drible = True
                         self.drible_efetivo = True
                         self.tempo_inicio_drible = pygame.time.get_ticks()
                         self.ultimo_tipo_drible = tipo_drible
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> dev
                         
             
 
 
+<<<<<<< HEAD
 >>>>>>> jogador-e-chute
+=======
+>>>>>>> dev
