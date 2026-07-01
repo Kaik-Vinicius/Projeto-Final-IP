@@ -1,12 +1,15 @@
 import pygame
 from gerenciamento.constants import FORCA_LANCAMENTO_ALIADO
+from assets.animacao.aliado_animado import AliadoAnimado
 
 class Aliado(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__()
 
-        self.image = pygame.Surface((45, 40))
-        self.image.fill((100, 149, 237))
+        self.animador = AliadoAnimado()
+        
+        # Define a imagem e o retângulo nativos com base no tamanho original do sprite
+        self.image = self.animador.obter_imagem_inicial()
         self.rect = self.image.get_rect()
 
         self.rect.centerx = pos_x
@@ -15,27 +18,29 @@ class Aliado(pygame.sprite.Sprite):
         self.tem_bola = False
         self.tempo_recebeu_bola = 0
         self.tempo_reacao = 1000
-
         self.tempo_ultimo_passe = 0
 
+        # OFFSETS DA BOLA PRA MANTER ALINHADO COM O PÉ
+        self.offset_bola_x = 0   
+        self.offset_bola_y = 49
+
     def receber_bola(self):
-        """
-        ATIVA QUANDO A BOLA ENCOSTA NO ALIADO
-        """
         if not self.tem_bola:
             self.tem_bola = True
             self.tempo_recebeu_bola = pygame.time.get_ticks()
 
     def atualizar_cronometro(self, neymar, bola):
-        """
-        CHECA O TEMPO PARA DEVOLVER A BOLA
-        """
         if self.tem_bola:
+            bola.rect.centerx = self.rect.centerx + self.offset_bola_x
+            bola.rect.centery = self.rect.centery + self.offset_bola_y
+            bola.dono = self 
+
             tempo_atual = pygame.time.get_ticks()
 
             if tempo_atual - self.tempo_recebeu_bola >= self.tempo_reacao:
                 self.tem_bola = False
                 self.tempo_ultimo_passe = tempo_atual
+                bola.dono = None  
 
                 teclas = pygame.key.get_pressed()
 
@@ -50,5 +55,27 @@ class Aliado(pygame.sprite.Sprite):
                     destino_x = neymar.rect.centerx
                     destino_y = neymar.rect.centery - antecipacao
                 
-                # LANÇA A BOLA DE VOLTA PRA O NEYMAR
                 bola.lancar_em_profundidade(self.rect.centerx, self.rect.centery, destino_x, destino_y, FORCA_LANCAMENTO_ALIADO)
+
+    def desenhar_aliado_com_sombra(self, tela):
+        """MÉTODO PARA DESENHAR O ALIADO POR CIMA DA SOMBRA DA FORMA CORRETA"""
+        
+        # PEGA A SOMBRA CONFIGURADA NO ANIMADOR
+        sombra = self.animador.sombra_horizontal
+        sombra_rect = sombra.get_rect()
+        
+        # Alinha com os pés
+        sombra_rect.center = self.rect.midbottom
+        
+        # Ajuste vertical fino para encaixar embaixo do sprite (Como está sempre de frente, recua 15)
+        sombra_rect.centery -= 10
+        
+        # Desenha primeiro a sombra
+        tela.blit(sombra, sombra_rect)
+        
+        # Desenha depois o aliado
+        tela.blit(self.image, self.rect)
+
+    def update(self):
+        # Apenas atualiza qual é a imagem atual do frame de animação
+        self.image = self.animador.atualizar_animacao()

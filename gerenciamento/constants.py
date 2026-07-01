@@ -153,9 +153,9 @@ CENARIOS_TATICOS = {
         5: {
             "nome": "FÁCIL - Cobrança de Escanteio",
             "neymar_pos": (900, 410),      
-            "bola_origem": (1580, 100),      
+            "bola_origem": (1540, 110),      
             "bola_destino": (1450, 420),    
-            "aliados_pos": [(1450, 430), (1620, 120)],
+            "aliados_pos": [(1450, 430), (1620, 60)],
             "zagueiros_pos": [(650, 250), (850, 150), (1085, 350), (1120, 200)]
         }
         
@@ -172,7 +172,7 @@ CENARIOS_TATICOS = {
         2: {
             "nome": "MÉDIO - Cobrança de Falta com jogada ensaiada",
             "neymar_pos": (1220, 520),       
-            "bola_origem": (810, 620),      
+            "bola_origem": (810, 650),      
             "bola_destino": (815, 620),     
             "aliados_pos": [(815, 620)],
             "zagueiros_pos": [(1030, 210), (1200, 265), (850, 370), (912, 370)]

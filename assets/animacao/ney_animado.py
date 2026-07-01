@@ -78,7 +78,7 @@ class NeymarAnimacao:
         # VAI ANDAR PELA LISTA ATUAL
         self.lista_atual = self.frames_parado_frente
         self.frame_atual = 0
-        self.velocidade_animacao = 200 # ms
+        self.velocidade_animacao = 0 # ms
         self.ultimo_update = pygame.time.get_ticks()
 
     def obter_imagem_inicial(self):
@@ -121,7 +121,18 @@ class NeymarAnimacao:
                 self.lista_atual = self.frames_correndo_esquerda
                 self.sombra_atual = self.sombra_vertical
 
+
         # LOGICA DO RELOGIO QUE ATUALIZA OS FRAMES
+        
+        # SE FOR CORRENDO TEM QUE ATUALIZAR MAIS RAPIDO
+        if self.lista_atual == self.frames_correndo_costas or self.lista_atual == self.frames_correndo_frente or self.lista_atual == self.frames_correndo_direita or self.lista_atual == self.frames_correndo_esquerda:
+            
+            self.velocidade_animacao = 50
+        
+        # SE FOR PARADO É MAIS DEVAGAR
+        else: 
+            self.velocidade_animacao = 200
+        
         if tempo_atual - self.ultimo_update > self.velocidade_animacao:
             self.ultimo_update = tempo_atual
             self.frame_atual += 1

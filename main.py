@@ -4,6 +4,7 @@ import sys
 import ctypes 
 from gerenciamento.constants import *
 from entidades.neymar import Neymar  
+from entidades.aliado import Aliado
 from entidades.bola import Bola
 from gerenciamento.funcoes_importantes import *
 import random
@@ -222,6 +223,10 @@ def main():
             neymar.update()
             bola.atualizar_posicao(neymar)
             
+            # ATUALIZA O SPRITE DOS ALIADOS
+            for aliado in grupo_aliados:
+                aliado.update()
+            
             # ATUALIZA A POSICAO DA BOLA NO PE DO NEYMAR
             if neymar.tem_bola:
                 bola.atualizar_posicao(neymar)
@@ -398,13 +403,15 @@ def main():
             grupo_sprites.draw(tela)
 
             grupo_coletaveis.draw(tela)
-            grupo_aliados.draw(tela)
             grupo_zagueiros.draw(tela) 
             grupo_goleiro.draw(tela)
             
             # DESENHA AS ARQUIBANCADAS NA TELA
             tela.blit(arquibancada_esquerda,(CAMPO_X - LARGURA_ARQUIBANCADA, CAMPO_Y))
             tela.blit(arquibancada_direita, (CAMPO_X + LARGURA_CAMPO_JOGAVEL, CAMPO_Y))
+            
+            for aliado in grupo_aliados:
+                aliado.desenhar_aliado_com_sombra(tela)
             
             neymar.desenhar_ney_com_sombra(tela)
             tela.blit(bola.image, bola.rect)
