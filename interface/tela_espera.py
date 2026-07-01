@@ -1,7 +1,7 @@
 import pygame
 from gerenciamento.constants import *
 
-def desenhar_placar_superior(tela, fonte_pequena, chuteiras, estrelas, chances, confianca, asset_chuteira, asset_estrela, asset_brasil, asset_argentina, gols_brasil=0, gols_argentina=0):
+def desenhar_placar_superior(tela, fonte_pequena, chuteiras, estrelas, chances, confianca, asset_chuteira, asset_estrela, asset_brasil, asset_argentina, gols_brasil=0, gols_argentina=0, neymar=None):
     """
     DESENHA A BARRA TRANSLUCIDA COM AS INFORMAÇÕES DOS COLETAVEIS E DA CONFIANCA
     """
@@ -31,7 +31,6 @@ def desenhar_placar_superior(tela, fonte_pequena, chuteiras, estrelas, chances, 
     tela.blit(txt_confianca, (pos_x_confianca, 15))
 
     # BARRA DE CONFIANÇA ESTILIZADA
-
     barra_x = 500  
     barra_y = 40   
     largura_maxima = 160  
@@ -90,11 +89,11 @@ def desenhar_placar_superior(tela, fonte_pequena, chuteiras, estrelas, chances, 
     
     # RENDERIZA O TEXTO DOS GOLS INDIVIDUAIS
     txt_gols_br = fonte_pequena.render(f"{gols_brasil}", True, (255, 255, 255))
-    txt_vs = fonte_pequena.render("x", True, (150, 150, 150)) # Um 'x' cinza discreto
+    txt_vs = fonte_pequena.render("x", True, (150, 150, 150)) 
     txt_gols_arg = fonte_pequena.render(f"{gols_argentina}", True, (255, 255, 255))
     
     # RECUAMOS 650 PIXELS PRA DESENHAR O PLACAR
-    inicio_x_placar = tela.get_width() - 650
+    inicio_x_placar = tela.get_width() - 850
        
     # DESENHA O ESCUDO DO BRASIL
     tela.blit(asset_brasil, (inicio_x_placar, -5))
@@ -114,8 +113,25 @@ def desenhar_placar_superior(tela, fonte_pequena, chuteiras, estrelas, chances, 
     # DESENHA O ESCUDO DA ARGENTINA
     pos_x_escudo_arg = pos_x_gols_arg + txt_gols_arg.get_width() 
     tela.blit(asset_argentina, (pos_x_escudo_arg, -6))
-
-def desenhar_tela_espera(tela, campo_jogo, pos_campo, arquibancada_esquerda, arquibancada_direita, fonte_jogo, fonte_pequena, asset_chuteira, asset_estrela, asset_brasil, asset_argentina, chuteiras, estrelas, chances, confianca, minuto_atual, tempo_atual, botao_pause, gols_brasil=0, gols_argentina=0):
+    
+    # REGISTRO DE POSSE DE BOLA DINAMICO
+    if neymar is not None:
+        # Checa a variável interna do objeto Neymar recebido por parâmetro
+        if neymar.tem_bola:
+            texto_posse = "Tem Bola: Sim"
+            cor_posse = (255, 255, 255) 
+        else:
+            texto_posse = "Tem Bola: Não"
+            cor_posse = (255, 255, 255)
+            
+        # Renderiza o texto adaptado
+        txt_posse_renderizado = fonte_pequena.render(texto_posse, True, cor_posse)
+        
+        # Posiciona 40 pixels depois do final do escudo da Argentina
+        pos_x_posse = pos_x_escudo_arg + asset_argentina.get_width() + 40
+        tela.blit(txt_posse_renderizado, (pos_x_posse, 30))
+        
+def desenhar_tela_espera(tela, campo_jogo, pos_campo, arquibancada_esquerda, arquibancada_direita, fonte_jogo, fonte_pequena, asset_chuteira, asset_estrela, asset_brasil, asset_argentina, chuteiras, estrelas, chances, confianca, minuto_atual, tempo_atual, botao_pause, gols_brasil=0, gols_argentina=0, neymar=None):
     """
     FUNCAO QUE DESENHA TODA A TELA DE ESPERA
     """
@@ -127,7 +143,7 @@ def desenhar_tela_espera(tela, campo_jogo, pos_campo, arquibancada_esquerda, arq
     tela.blit(arquibancada_esquerda,(CAMPO_X - LARGURA_ARQUIBANCADA, CAMPO_Y))
     tela.blit(arquibancada_direita, (CAMPO_X + LARGURA_CAMPO_JOGAVEL, CAMPO_Y))
             
-    desenhar_placar_superior(tela, fonte_pequena, chuteiras, estrelas, chances, confianca, asset_chuteira, asset_estrela,asset_brasil, asset_argentina, gols_brasil, gols_argentina)
+    desenhar_placar_superior(tela, fonte_pequena, chuteiras, estrelas, chances, confianca, asset_chuteira, asset_estrela,asset_brasil, asset_argentina, gols_brasil, gols_argentina, neymar)
     
     # BARRA INFERIOR TRANSLLUCIDA DO TEMPO CONTANDO
     barra_inferior = pygame.Surface((tela.get_width(), 60), pygame.SRCALPHA)
@@ -234,3 +250,40 @@ def atualizar_logica_espera(tempo_atual, ultimo_tick_relogio, minuto_atual,
         estado_atual = "jogando"
         
     return estado_atual, minuto_atual, ultimo_tick_relogio
+
+
+def desenhar_fim_de_jogo(tela, campo_jogo, pos_campo, fonte_jogo, fonte_pequena, chuteiras, estrelas, confianca, gols_brasil, gols_argentina):
+    """
+    DESENHA A TELA DE ENCERRAMENTO LIMPA COM O RESUMO DA PARTIDA POR CIMA DO GRAMADO
+    """
+    # LIMPA O FUNDO E DESENHA APENAS O CAMPO SEM NADA
+    tela.fill((20, 20, 20))
+    tela.blit(campo_jogo, pos_campo)
+    
+    # SUPERFICIE PRETA TRANSLUCIDA
+    largura_painel = 500
+    altura_painel = 400
+    painel = pygame.Surface((largura_painel, altura_painel), pygame.SRCALPHA)
+    painel.fill((0, 0, 0, 200)) # Preto com opacidade
+    
+    pos_x_painel = (tela.get_width() // 2) - (largura_painel // 2)
+    pos_y_painel = (tela.get_height() // 2) - (altura_painel // 2)
+    tela.blit(painel, (pos_x_painel, pos_y_painel))
+    
+    # RENDERIZA OS TEXTOS
+    txt_titulo = fonte_jogo.render("FIM DE JOGO!", True, (255, 255, 0)) # Amarelo
+    txt_placar = fonte_jogo.render(f"Brasil {gols_brasil} x {gols_argentina} Argentina", True, (255, 255, 255))
+    txt_chuteiras = fonte_pequena.render(f"Chuteiras Coletadas: {chuteiras}", True, (255, 255, 255))
+    txt_estrelas = fonte_pequena.render(f"Estrelas Coletadas: {estrelas}", True, (255, 255, 255))
+    txt_conf = fonte_pequena.render(f"Confiança Final do Ney: {confianca}/100", True, (46, 204, 113))
+    txt_Aviso = fonte_pequena.render("Voltando em instantes...", True, (150, 150, 150))
+
+    # DESENHA TUDO CENTRALIZADO NA TELA
+    centro_x = tela.get_width() // 2
+    
+    tela.blit(txt_titulo, (centro_x - (txt_titulo.get_width() // 2), pos_y_painel + 30))
+    tela.blit(txt_placar, (centro_x - (txt_placar.get_width() // 2), pos_y_painel + 110))
+    tela.blit(txt_chuteiras, (centro_x - (txt_chuteiras.get_width() // 2), pos_y_painel + 200))
+    tela.blit(txt_estrelas, (centro_x - (txt_estrelas.get_width() // 2), pos_y_painel + 240))
+    tela.blit(txt_conf, (centro_x - (txt_conf.get_width() // 2), pos_y_painel + 280))
+    tela.blit(txt_Aviso, (centro_x - (txt_Aviso.get_width() // 2), pos_y_painel + 340))

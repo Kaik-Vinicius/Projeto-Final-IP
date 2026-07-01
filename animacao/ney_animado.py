@@ -33,7 +33,15 @@ class NeymarAnimacao:
             pygame.image.load("assets/jogadores/ney/ney_idle/idle_esquerda/idle_esquerda4.png").convert_alpha(),
 
         ]
-
+        
+        # CARREGA O SPRITE DA SOMBRA
+        self.sombra_horizontal = pygame.image.load("assets/jogadores/sombra_jogador_horizontal.png").convert_alpha()
+        self.sombra_vertical = pygame.image.load("assets/jogadores/sombra_jogador_vertical.png").convert_alpha()
+        
+        # ESSA É A SOMBRA QUE INICIA
+        self.sombra_atual = self.sombra_horizontal
+        
+        # VAI ANDAR PELA LISTA ATUAL
         self.lista_atual = self.frames_parado_frente
         self.frame_atual = 0
         self.velocidade_animacao = 200 # ms
@@ -50,16 +58,20 @@ class NeymarAnimacao:
         """
         tempo_atual = pygame.time.get_ticks()
         
-        # Define qual lista usar baseada no monitoramento de movimento
+        # DEFINE QUAL LISTA VAI USAR DEPENDENDO DO MONITORAMENTO DO MOVIMENTO
         if not em_movimento:
             if olhando_para == "frente":
                 self.lista_atual = self.frames_parado_frente
+                self.sombra_atual = self.sombra_horizontal
             if olhando_para == "costas":
                 self.lista_atual = self.frames_parado_costas
+                self.sombra_atual = self.sombra_horizontal
             if olhando_para == 'direita':
                 self.lista_atual = self.frames_parado_direita
+                self.sombra_atual = self.sombra_vertical
             if olhando_para == 'esquerda':
                 self.lista_atual = self.frames_parado_esquerda
+                self.sombra_atual = self.sombra_vertical
         else:
             # DEPOIS IMPLEMENTAR OS SPRITES CORRENDO AQUI
             pass

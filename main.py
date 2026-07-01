@@ -1,7 +1,6 @@
 # =-=-=-=-= ARQUIVO MAIN INTEGRADO =-=-=-=-=
 import pygame
 import sys
-import math
 import ctypes 
 from gerenciamento.constants import *
 from entidades.neymar import Neymar  
@@ -11,8 +10,7 @@ import random
 from entidades.coletaveis import Coletavel
 from interface.menu import MenuInicial, MenuDificuldade
 from interface.pause import BotaoPause, MenuPause
-from interface.tela_espera import desenhar_tela_espera, desenhar_placar_superior, atualizar_logica_espera
-
+from interface.tela_espera import *
 def main():
     # ISSO DAQUI TIRA O ZOOM DO SISTEMA NOS PC's com proporcao 16:10, MAS AINDA ASSIM NAO FICA TAO BOM
     try:
@@ -73,6 +71,7 @@ def main():
   
     # RELOGIO DO FPS DO JOGO
     relogio = pygame.time.Clock()
+    tempo_fim_jogo = 0
 
     # Crônometro para a tela de espera
     minuto_atual, minuto_proximo_ataque, ultimo_tick_relogio, intervalo_minuto_ms = 0, 0, 0, 300
@@ -90,7 +89,7 @@ def main():
     # INSTANCIA A BOLA
     bola = Bola()
     
-    #GRUPO DE SPRITES ANIMADOS
+    # GRUPO DE SPRITES ANIMADOS
     grupo_sprites = pygame.sprite.LayeredUpdates()
     
     neymar.layer = 5 
@@ -117,6 +116,13 @@ def main():
           
             # SE APERTAR EM MENU ELE ABRE O MENU DO JOGO
             if estado == "menu":
+                # AQUI ELE CHAMA A FUNCAO QUE LIMPA TUDO NO CAMPO QUANDO O JOGO VOLTA PRA O MENU
+                (chuteiras_coletadas, 
+                estrelas_coletadas, 
+                gols_brasil, 
+                gols_argentina, 
+                tempo_ultimo_drible_registrado) = limpar_campo(neymar, grupo_aliados, grupo_zagueiros, grupo_coletaveis)
+                
                 acao = menu_inicial.tratar_eventos(evento)
                 if acao == "jogar":
                     estado = "dificuldade"
@@ -192,17 +198,11 @@ def main():
             
             # SE O JOGO ACABAR ELE FINALIZA E VOLTA PRA O MENU
             if minuto_atual >= 90:
-                
-                # AQUI ELE CHAMA A FUNCAO QUE LIMPA TUDO NO CAMPO QUANDO O JOGO TERMINA
-                (chuteiras_coletadas, 
-                estrelas_coletadas, 
-                gols_brasil, 
-                gols_argentina, 
-                tempo_ultimo_drible_registrado) = limpar_campo(neymar, grupo_aliados, grupo_zagueiros, grupo_coletaveis)
-
-                estado = 'menu'
+                # VAI PRA MOSTRAR A TELA DE FIM DE JOGO
+                tempo_fim_jogo = tempo_atual
+                estado = 'fim_jogo'
                 continue
-            
+        
             # INICIA A NOVA OPORTUNIDADE DE ATAQUE
             if proximo_estado == "jogando" and oportunidades_restantes > 0:
                 
@@ -319,7 +319,7 @@ def main():
                     neymar.bola_em_drible = False
                     neymar.drible_efetivo = False
 
-            # DETECTA A CONFIANÇA 100% E GERA A ESTRELA (SISTEMA TEMPORÁRIO QUE DEPOIS VAI SER MUDADO)
+            # DETECTA A CONFIANÇA 100% E GERA A ESTRELA
             if getattr(neymar, 'confianca', 0) >= META_ESTRELA:
                 if not any(i.tipo == 'estrela' for i in grupo_coletaveis) and not getattr(neymar, 'ney_prime', False):
                     grupo_coletaveis.add(Coletavel('estrela', pos_jogador=neymar.rect.center))
@@ -366,7 +366,14 @@ def main():
                     minuto_inicio_bloco = bloco_atual * tamanho_bloco
                     minuto_fim_bloco = minuto_inicio_bloco + tamanho_bloco
                     minuto_proximo_ataque = random.randint(minuto_inicio_bloco + 2, minuto_fim_bloco - 2)
-                    
+        
+        # LIMPA O CAMPO QUANDO É FIM DE JOGO
+        elif estado == 'fim_jogo':
+            if tempo_atual - tempo_fim_jogo >= 10000:
+                (chuteiras_coletadas, estrelas_coletadas, gols_brasil, gols_argentina, tempo_ultimo_drible_registrado) = limpar_campo(neymar, grupo_aliados, grupo_zagueiros, grupo_coletaveis)
+                neymar.confianca = 0
+                estado = "menu"
+                
         elif estado == "pause":
             acao_menu_pause = menu_pause.tratar_eventos(evento)
             if acao_menu_pause == "retomar":
@@ -374,7 +381,7 @@ def main():
             elif acao_menu_pause == "menu_inicial":
                 estado = "menu"
 
-        # RENDERIZAÇÃO (DESENHO DOS ELEMENTOS GRÁFICOS)
+        # RENDERIZAÇÃO DOS DESENHOS
         if estado == "menu":
             menu_inicial.desenhar(tela)
 
@@ -382,7 +389,7 @@ def main():
             menu_dificuldade.desenhar(tela)
 
         elif estado == "espera":
-            desenhar_tela_espera(tela, campo_jogo, (CAMPO_X, CAMPO_Y), arquibancada_esquerda, arquibancada_direita, fonte_jogo, fonte_pequena, asset_chuteira_placar, asset_estrela_placar,asset_placar_brasil, asset_placar_argentina, chuteiras_coletadas, estrelas_coletadas, oportunidades_restantes,neymar.confianca, minuto_atual, tempo_atual, botao_pause, gols_brasil, gols_argentina)
+            desenhar_tela_espera(tela, campo_jogo, (CAMPO_X, CAMPO_Y), arquibancada_esquerda, arquibancada_direita, fonte_jogo, fonte_pequena, asset_chuteira_placar, asset_estrela_placar,asset_placar_brasil, asset_placar_argentina, chuteiras_coletadas, estrelas_coletadas, oportunidades_restantes,neymar.confianca, minuto_atual, tempo_atual, botao_pause, gols_brasil, gols_argentina, neymar)
 
         elif estado == "jogando":
            
@@ -399,17 +406,19 @@ def main():
             tela.blit(arquibancada_esquerda,(CAMPO_X - LARGURA_ARQUIBANCADA, CAMPO_Y))
             tela.blit(arquibancada_direita, (CAMPO_X + LARGURA_CAMPO_JOGAVEL, CAMPO_Y))
             
-            
+            neymar.desenhar_ney_com_sombra(tela)
             tela.blit(bola.image, bola.rect)
             tela.blit(neymar.image, neymar.rect)
 
-            desenhar_placar_superior(tela, fonte_pequena, chuteiras_coletadas, estrelas_coletadas, oportunidades_restantes, neymar.confianca, asset_chuteira_placar, asset_estrela_placar, asset_placar_brasil, asset_placar_argentina, gols_brasil, gols_argentina)
+            desenhar_placar_superior(tela, fonte_pequena, chuteiras_coletadas, estrelas_coletadas, oportunidades_restantes, neymar.confianca, asset_chuteira_placar, asset_estrela_placar, asset_placar_brasil, asset_placar_argentina, gols_brasil, gols_argentina, neymar)
             
-
             botao_pause.desenhar(tela)
 
         elif estado == "pause":
             menu_pause.desenhar(tela)
+        
+        elif estado == "fim_jogo":
+            desenhar_fim_de_jogo(tela, campo_jogo, (CAMPO_X, CAMPO_Y),fonte_jogo, fonte_pequena, chuteiras_coletadas, estrelas_coletadas, neymar.confianca, gols_brasil, gols_argentina)
       
         pygame.display.flip()
         relogio.tick(FPS)

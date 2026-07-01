@@ -2,7 +2,6 @@ import pygame
 import math
 import random
 from gerenciamento.funcoes_importantes import prender_neymar_campo
-from entidades.coletaveis import Coletavel
 from gerenciamento.constants import *
 from animacao.ney_animado import NeymarAnimacao
 
@@ -85,10 +84,32 @@ class Neymar(pygame.sprite.Sprite):
         # AQUI O NEYMAR VAI TENTAR DESVIAR MANUALMENTE SEM DRIBLES
         if grupo_zagueiros and self.tem_bola and (dx != 0 or dy != 0):
             self.checar_desvio_manual(bola, grupo_zagueiros)
+   
+    def desenhar_ney_com_sombra(self, tela):
+        """METODO PRA DESENHAR O NEYMAR POR CIMA DA SOMBRA DA FORMA CORRETA"""
+        # PEGA A IMAGEM DA SOMBRA CONFIGURADO NO ANIMADOR
+        sombra = self.animador.sombra_atual
+        sombra_rect = sombra.get_rect()
+        
+        # ALINHA COM OS PES
+        sombra_rect.center = self.rect.midbottom
+        
+        # AJUSTES DIFERENTES A DEPENDER DA POSICAO QUE ELE ESTIVER OLHANDO PARADO
+        if self.olhando_para in ['esquerda','direita']:
+            sombra_rect.centery -= 18
+            
+        if self.olhando_para in ['frente', 'costas']:
+            sombra_rect.centery -= 15
+            
+        # desenha primeiro a sombra
+        tela.blit(sombra, sombra_rect)
+        
+        # desenha depois o neymar
+        tela.blit(self.image, self.rect)
     
     def update(self):
         """ESSE UPDATE VAI SER PARA ATUALIZAR A ANIMAÇÃO"""
-        # SALVA A POSICAOP DO CENTRO INICIAL
+        # SALVA A POSICAO DO CENTRO INICIAL
         posicao_centro = self.rect.center
         
         # ATUALIZA A IMAGEM
@@ -241,8 +262,6 @@ class Neymar(pygame.sprite.Sprite):
             return
         
         tipo_drible = tipo_drible.lower()
-        
-        ganho_confianca = DRIBLES_CONFIG[tipo_drible]['ganho']
         
         # VERIFICA SE TODOS ESTAO EM IDLE PRA PODER EXECUTAR ALGUM DRIBLE
         todos_em_idle = all(zagueiro.esta_em_idle() for zagueiro in grupo_zagueiros)
