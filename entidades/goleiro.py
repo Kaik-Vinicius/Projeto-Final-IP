@@ -35,13 +35,20 @@ class Goleiro (pygame.sprite.Sprite):
             self.rect.x -= (norma_x * self.velocidade)
 
         # MANTER DENTRO DA ÁREA DO GOL
-        self.rect.clamp_ip(pygame.Rect(900, 75, 120, 100))
+        self.rect.clamp_ip(pygame.Rect(900, 80, 120, 0))
 
-    def pular_na_bola(self, bola):
+    def pular_na_bola(self, bola, distancia_bola):
         alvo = bola.alvo_x
+
+        if alvo > 1060:
+            alvo = 1060
+        elif alvo < 860:
+            alvo = 860
 
         # CALCULA A DISTANCIA E DIREÇÃO NO EIXO X
         dist_x = self.rect.centerx - alvo
+
+        velocidade = abs(8 - (min(distancia_bola, 200) / 200) * 10)
 
         # 2 PARA NAO FICAR TREMENDO
         if abs(dist_x) > 2:
@@ -50,12 +57,12 @@ class Goleiro (pygame.sprite.Sprite):
 
             # MOVE O GOLEIRO APENAS NO EIXO X
             if bola.resultado_chute == 'gol':
-                self.rect.x -= (norma_x * self.velocidade) * 0.75
+                self.rect.x -= (norma_x * velocidade) * 0.75
             else:
-                self.rect.x -= (norma_x * self.velocidade) * 1.25
+                self.rect.x -= norma_x * velocidade
 
         # MANTER DENTRO DA ÁREA DO GOL
-        self.rect.clamp_ip(pygame.Rect(860, 75, 200, 100))
+        self.rect.clamp_ip(pygame.Rect(860, 80, 200, 0))
          
     def att_gol(self, neymar, bola):
         pos_goleiro = pygame.math.Vector2(self.rect.center)
@@ -66,8 +73,8 @@ class Goleiro (pygame.sprite.Sprite):
 
         # Se o Neymar estiver dentro do raio de ativação (entre 10 e 250 pixels)
         if bola.foi_chutada:
-            if distancia_bola <= 150:
-                self.pular_na_bola(bola)
+            if distancia_bola <= 200:
+                self.pular_na_bola(bola, distancia_bola)
 
-        if 30 < distancia_neymar < 450:
+        if 30 < distancia_neymar < 250:
             self.perseguir_neymar(neymar)

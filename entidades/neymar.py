@@ -42,13 +42,6 @@ class Neymar(pygame.sprite.Sprite):
         # ATRIBUINDO A CONFIANCA DO NEYMAR
         self.confianca = 0
         self.ultimo_tipo_drible = 'manual'
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
->>>>>>> jogador-e-chute
-=======
->>>>>>> dev
 
         # MONITORA SE O JOGADOR ESTÁ CORRENDO OU PARADO PARA A ANIMAÇÃO
         self.em_movimento = False
@@ -247,22 +240,9 @@ class Neymar(pygame.sprite.Sprite):
         c_max = DRIBLES_CONFIG[tipo_drible]['chance_max']
         
         chance = c_ini + ((self.confianca / 100.0) * (c_max - c_ini))
-<<<<<<< HEAD
-<<<<<<< HEAD
-            
-        if getattr(self, 'ney_prime', False):
-            return 1.0
-
-=======
         
         if getattr(self, 'ney_prime', False):
             return 1.0
->>>>>>> jogador-e-chute
-=======
-        
-        if getattr(self, 'ney_prime', False):
-            return 1.0
->>>>>>> dev
         return min(chance, c_max)
         
 
@@ -344,16 +324,7 @@ class Neymar(pygame.sprite.Sprite):
                         self.drible_efetivo = True
                         self.tempo_inicio_drible = pygame.time.get_ticks()
                         self.ultimo_tipo_drible = tipo_drible
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> dev
                         
             
 
 
-<<<<<<< HEAD
->>>>>>> jogador-e-chute
-=======
->>>>>>> dev
