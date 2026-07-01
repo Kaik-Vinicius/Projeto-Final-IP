@@ -1,7 +1,6 @@
 import pygame
 from gerenciamento.constants import (LARGURA_TELA, ALTURA_TELA, VELOCIDADE_ZAG)
 from assets.animacao.zag_animado import ZagueiroAnimacao
-from types import SimpleNamespace
 
 # FIZ ALGUMAS MUDANÇAS NA CLASSE DO ZAGUEIRO, PRINCIPALMENTE PRA NAO BUGAR A POSICAO DE SPAWN DE CADA UM
 
