@@ -67,8 +67,8 @@ class Bola(pygame.sprite.Sprite):
             "movimento": {
                 "frente":   (32, 95),
                 "costas":   (32, 78),
-                "esquerda": (18, 75),
-                "direita":  (42, 75)
+                "esquerda": (5, 75),
+                "direita":  (54, 75)
             }
         }
 
@@ -86,7 +86,11 @@ class Bola(pygame.sprite.Sprite):
 
     def animar(self):
         centro_atual = self.rect.center
-        if not self.em_movimento:
+        
+        dono_correndo = self.dono is not None and getattr(self.dono, 'em_movimento', False)
+        
+        # A BOLA SO É ANIMADA SE O DONON TIVER CORRENDO OU SE ELA TIVER EM MOVIMENTO
+        if not self.em_movimento and not dono_correndo:
             self.frame_atual = 0
             self.image = self.frames_bola[self.frame_atual]
             self.rect = self.image.get_rect(center=centro_atual)
@@ -95,8 +99,10 @@ class Bola(pygame.sprite.Sprite):
         tempo_atual = pygame.time.get_ticks()
         if tempo_atual - self.tempo_ultima_animacao > self.intervalo_animacao:
             self.tempo_ultima_animacao = tempo_atual
-            if self.velocidade_x < 0: self.frame_atual -= 1
-            else: self.frame_atual += 1
+            if self.velocidade_x < 0: 
+                self.frame_atual -= 1
+            else: 
+                self.frame_atual += 1
             self.frame_atual %= len(self.frames_bola)
             self.image = self.frames_bola[self.frame_atual]
             self.rect = self.image.get_rect(center=centro_atual)
@@ -121,18 +127,17 @@ class Bola(pygame.sprite.Sprite):
 
     def _colar_no_pe_do_dono(self):
         if self.dono is not None:
-            # Identifica a direção ("frente", "costas", etc.)
+            # IDENTIFICA A DIRECAO
             direcao = getattr(self.dono, 'olhando_para', 'frente')
             
-            # Identifica o estado do jogador ("movimento" ou "parado")
-            # Caso o jogador não tenha esse atributo, assume "parado" por segurança
+            # IDENTIFICA O ESTADO DO JOGADOR
             estado = "movimento" if getattr(self.dono, 'em_movimento', False) else "parado"
             
-            # Busca primeiro a tabela do estado (parado/movimento) e depois a direção
+            # BUSCA PELO DICIONARIO DE ESTADOS
             tabela_estado = self.offsets_posse.get(estado, self.offsets_posse['parado'])
             offset_x, offset_y = tabela_estado.get(direcao, tabela_estado['frente'])
 
-            # Aplica a posição final da bola
+            # APLICA NA POSICAO FINAL DA BOLA
             self.rect.x = self.dono.rect.x + offset_x
             self.rect.y = self.dono.rect.y + offset_y
 
