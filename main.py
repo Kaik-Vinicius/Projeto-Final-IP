@@ -414,6 +414,8 @@ def main():
                 aliado.desenhar_aliado_com_sombra(tela)
             
             neymar.desenhar_ney_com_sombra(tela)
+            for zagueiro in grupo_zagueiros:
+                zagueiro.desenhar_zag_com_sombra(tela)
             tela.blit(bola.image, bola.rect)
             tela.blit(neymar.image, neymar.rect)
 

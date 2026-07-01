@@ -190,5 +190,5 @@ def preparar_nova_oportunidade(dificuldade, indice_lance, neymar, bola, grupo_za
         grupo_aliados.add(novo_aliado)
 
     grupo_goleiro.empty()
-    goleiro = Goleiro(960, 70)
+    goleiro = Goleiro(960, 80)
     grupo_goleiro.add(goleiro)
