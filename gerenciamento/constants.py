@@ -104,9 +104,8 @@ CONFIANCA_POR_DIFICULDADE = {
 }
 
 DRIBLES_CONFIG = {
-    'pedalada': {'ganho': 15, 'chance_inicial': 0.70, 'chance_max': 0.95},
-    '360': {'ganho': 25, 'chance_inicial': 0.65, 'chance_max': 0.85},
-    'lambreta': {'ganho': 40, 'chance_inicial': 0.60, 'chance_max': 0.75}
+    'pedalada': {'ganho': 20, 'chance_inicial': 0.70, 'chance_max': 0.95},
+    '360': {'ganho': 30, 'chance_inicial': 0.60, 'chance_max': 0.85}
 }
 
 # CONFIGURAÇÃO DE CENÁRIOS TÁTICOS (DIFICULDADE FÁCIL - BOLA EM ESPAÇO VAZIO)

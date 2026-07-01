@@ -176,8 +176,6 @@ def main():
                         neymar.driblar("pedalada", bola, grupo_zagueiros) 
                     elif evento.key == pygame.K_k:
                         neymar.driblar("360", bola, grupo_zagueiros)
-                    elif evento.key == pygame.K_l:
-                        neymar.driblar("lambreta", bola, grupo_zagueiros)
 
                 acao_pause = botao_pause.tratar_eventos(evento)
                 if acao_pause == "pause":
@@ -296,13 +294,11 @@ def main():
                     ultimo_drible = getattr(neymar, 'ultimo_tipo_drible', 'manual')
                     
                     if ultimo_drible == 'manual':
-                        ganho_futuro = 5
+                        ganho_futuro = 10
                     elif ultimo_drible == 'pedalada':
-                        ganho_futuro = 15
+                        ganho_futuro = 20
                     elif ultimo_drible == '360':
-                        ganho_futuro = 25
-                    elif ultimo_drible == 'lambreta':
-                        ganho_futuro = 40
+                        ganho_futuro = 30
                     else:
                         ganho_futuro = 10 
 
