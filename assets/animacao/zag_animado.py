@@ -39,19 +39,17 @@ class ZagueiroAnimacao:
             pygame.image.load('assets/jogadores/zagueiro_arg/correndo/frente/frente3.png').convert_alpha(),
         ]
         
-        """self.frames_correndo_esquerda = [
-            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_esquerda/correndo_esquerda1.png').convert_alpha(),
-            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_esquerda/correndo_esquerda2.png').convert_alpha(),
-            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_esquerda/correndo_esquerda3.png').convert_alpha(),
-            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_esquerda/correndo_esquerda4.png').convert_alpha(),
+        self.frames_correndo_esquerda = [
+            pygame.image.load('assets/jogadores/zagueiro_arg/correndo/esquerda/esquerda1.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/zagueiro_arg/correndo/esquerda/esquerda2.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/zagueiro_arg/correndo/esquerda/esquerda3.png').convert_alpha(),
         ]
         
         self.frames_correndo_direita = [
-            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_direita/correndo_direita1.png').convert_alpha(),
-            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_direita/correndo_direita2.png').convert_alpha(),
-            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_direita/correndo_direita3.png').convert_alpha(),
-            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_direita/correndo_direita4.png').convert_alpha(),
-        ]"""
+            pygame.image.load('assets/jogadores/zagueiro_arg/correndo/direita/direita1.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/zagueiro_arg/correndo/direita/direita2.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/zagueiro_arg/correndo/direita/direita3.png').convert_alpha(),
+        ]
         
         # CARREGA O SPRITE DA SOMBRA
         self.sombra_horizontal = pygame.image.load("assets/jogadores/sombra_jogador_horizontal.png").convert_alpha()
@@ -93,12 +91,12 @@ class ZagueiroAnimacao:
             if olhando_para == "frente":
                 self.lista_atual = self.frames_correndo_frente
                 self.sombra_atual = self.sombra_horizontal
-            #elif olhando_para == "direita":
-            #    self.lista_atual = self.frames_correndo_direita
-            #    self.sombra_atual = self.sombra_vertical
-            #elif olhando_para == "esquerda":
-            #    self.lista_atual = self.frames_correndo_esquerda
-            #    self.sombra_atual = self.sombra_vertical
+            elif olhando_para == "direita":
+                self.lista_atual = self.frames_correndo_direita
+                self.sombra_atual = self.sombra_vertical
+            elif olhando_para == "esquerda":
+                self.lista_atual = self.frames_correndo_esquerda
+                self.sombra_atual = self.sombra_vertical
 
         # LOGICA DO RELOGIO QUE ATUALIZA OS FRAMES
         if tempo_atual - self.ultimo_update > self.velocidade_animacao:
