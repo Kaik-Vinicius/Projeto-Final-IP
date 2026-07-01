@@ -2,6 +2,11 @@ import pygame
 
 class NeymarAnimacao:
     def __init__(self):
+        
+        # =====================
+        # FRAMES DELE PARADO
+        # ====================
+        
         # CARREGA OS FRAMES DE FRENTE
         self.frames_parado_frente = [
             pygame.image.load("assets/jogadores/ney/ney_idle/idle_frente/idle_frente1.png").convert_alpha(),
@@ -32,6 +37,9 @@ class NeymarAnimacao:
             pygame.image.load("assets/jogadores/ney/ney_idle/idle_esquerda/idle_esquerda4.png").convert_alpha(),
         ]
         
+        # ============================
+        # FRAMES ANIMADOS DELE CORRENDO 
+        # ============================
         self.frames_correndo_frente = [
             pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_frente/correndo_frente1.png').convert_alpha(),
             pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_frente/correndo_frente2.png').convert_alpha(),
@@ -39,6 +47,26 @@ class NeymarAnimacao:
             pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_frente/correndo_frente4.png').convert_alpha(),
         ]
         
+        self.frames_correndo_costas = [
+            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_costas/correndo_costas1.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_costas/correndo_costas2.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_costas/correndo_costas3.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_costas/correndo_costas4.png').convert_alpha(),
+        ]
+        
+        self.frames_correndo_esquerda = [
+            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_esquerda/correndo_esquerda1.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_esquerda/correndo_esquerda2.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_esquerda/correndo_esquerda3.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_esquerda/correndo_esquerda4.png').convert_alpha(),
+        ]
+        
+        self.frames_correndo_direita = [
+            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_direita/correndo_direita1.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_direita/correndo_direita2.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_direita/correndo_direita3.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_direita/correndo_direita4.png').convert_alpha(),
+        ]
         
         # CARREGA O SPRITE DA SOMBRA
         self.sombra_horizontal = pygame.image.load("assets/jogadores/sombra_jogador_horizontal.png").convert_alpha()
@@ -83,18 +111,15 @@ class NeymarAnimacao:
             if olhando_para == "frente":
                 self.lista_atual = self.frames_correndo_frente
                 self.sombra_atual = self.sombra_horizontal
-            # Caso queira deixar os parados como padrão provisório para os outros lados:
             elif olhando_para == "costas":
-                self.lista_atual = self.frames_parado_costas
+                self.lista_atual = self.frames_correndo_costas
                 self.sombra_atual = self.sombra_horizontal
             elif olhando_para == "direita":
-                self.lista_atual = self.frames_parado_direita
+                self.lista_atual = self.frames_correndo_direita
                 self.sombra_atual = self.sombra_vertical
             elif olhando_para == "esquerda":
-                self.lista_atual = self.frames_parado_esquerda
+                self.lista_atual = self.frames_correndo_esquerda
                 self.sombra_atual = self.sombra_vertical
-            
-            pass
 
         # LOGICA DO RELOGIO QUE ATUALIZA OS FRAMES
         if tempo_atual - self.ultimo_update > self.velocidade_animacao:

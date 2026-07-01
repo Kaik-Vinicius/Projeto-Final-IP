@@ -3,7 +3,7 @@ import math
 import random
 from gerenciamento.funcoes_importantes import prender_neymar_campo
 from gerenciamento.constants import *
-from animacao.ney_animado import NeymarAnimacao
+from assets.animacao.ney_animado import NeymarAnimacao
 
 class Neymar(pygame.sprite.Sprite):
     def __init__(self):
@@ -73,11 +73,18 @@ class Neymar(pygame.sprite.Sprite):
             self.em_movimento = True 
             self.olhando_para = "costas"
             
-
         if teclas[pygame.K_s]:
             dy += 1
             self.em_movimento = True 
             self.olhando_para = 'frente'
+            
+        # CASO ELE COMECE A CORRER NA DIAGONAL
+        if (teclas[pygame.K_w] or teclas[pygame.K_s]) and teclas[pygame.K_a]:
+            self.olhando_para = 'esquerda'
+        
+        if (teclas[pygame.K_w] or teclas[pygame.K_s]) and teclas[pygame.K_d]:
+            self.olhando_para = 'direita'
+            
         
         if dx != 0 or dy != 0:
             # VERIFICA SE MOVEU NA DIAGONAL
