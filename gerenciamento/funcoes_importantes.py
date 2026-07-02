@@ -99,14 +99,22 @@ def atualizar_ia_zagueiros(grupo_zagueiros, neymar, bola, grupo_aliados):
 
 def verificar_desarme_zagueiros(grupo_zagueiros, bola, bola_tocou_jogador_continua):
     """
-    VERIFICA SE ALGUM ZAGUEIRO EM CARRINHO CONSEGUIU DESARMAR A BOLA
+    VERIFICA SE ALGUM ZAGUEIRO EM CARRINHO CONSEGUIU DESARMAR A BOLA NO MOMENTO DO IMPACTO
     """
     for zag in grupo_zagueiros:
-        # SE O ZAGUEIRO ESTA EM CARRINHO E SE A COLISAO DELE ESTA ATIVA
+        # Só tenta o desarme se o zagueiro estiver no dash E a colisão estiver liberada (frames finais)
         if zag.frames_do_dash > 0 and zag.colisao_ativa():
-            # SE COLIDIU COM A BOLA
+            
+            # Executa a checagem física de colisão com a bola
             if bola_tocou_jogador_continua(bola, zag) or bola.rect.colliderect(zag.rect):
                 print("TRAVOU! Um dos zagueiros desarmou o Neymar com um carrinho perfeito!")
+                
+                # GARANTIA: Remove a posse da bola imediatamente antes de mudar de fase/resetar
+                if bola.dono:
+                    if hasattr(bola.dono, 'tem_bola'):
+                        bola.dono.tem_bola = False
+                bola.ficar_no_chao() 
+                
                 return True
                 
     return False

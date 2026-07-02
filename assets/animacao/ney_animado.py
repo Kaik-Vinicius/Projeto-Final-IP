@@ -69,7 +69,6 @@ class NeymarAnimacao:
             pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_direita/correndo_direita4.png').convert_alpha(),
         ]
         
-        
         # ==================
         # FRAMES DOS DRIBLES DELE
         # ===================
@@ -93,8 +92,20 @@ class NeymarAnimacao:
             pygame.image.load('assets/jogadores/ney/ney_driblando/360/360_2.png').convert_alpha(),
             pygame.image.load('assets/jogadores/ney/ney_driblando/360/360_3.png').convert_alpha(),
             pygame.image.load('assets/jogadores/ney/ney_driblando/360/360_4.png').convert_alpha(),
-            
         ]
+        
+        # ===============
+        # FRAMES DA COROA 
+        # ===============
+        self.frames_coroa = [
+            pygame.image.load("assets/jogadores/ney/prime/coroa_prime1.png").convert_alpha(),
+            pygame.image.load("assets/jogadores/ney/prime/coroa_prime2.png").convert_alpha(),
+            pygame.image.load("assets/jogadores/ney/prime/coroa_prime3.png").convert_alpha(),
+        ]
+
+        self.frame_coroa_atual = 0
+        self.ultimo_update_coroa = pygame.time.get_ticks()
+        self.velocidade_coroa = 150 # Velocidade do "brilho" da coroa em ms
         
         # CARREGA O SPRITE DA SOMBRA
         self.sombra_horizontal = pygame.image.load("assets/jogadores/sombra_jogador_horizontal.png").convert_alpha()
@@ -145,6 +156,16 @@ class NeymarAnimacao:
         
         self.lista_atual = self.giro_360
         self.sombra_atual = self.sombra_vertical 
+        
+    def atualizar_animacao_coroa(self):
+        """ATUALIZA A ANIMAÇÃO DA COROA"""
+        tempo_atual = pygame.time.get_ticks()
+        if tempo_atual - self.ultimo_update_coroa > self.velocidade_coroa:
+            self.ultimo_update_coroa = tempo_atual
+            self.frame_coroa_atual = (self.frame_coroa_atual + 1) % len(self.frames_coroa)
+        
+        return self.frames_coroa[self.frame_coroa_atual]
+    
     
     def obter_imagem_inicial(self):
         """RETORNA O PRIMEIRO FRAME PRA O SETUP DA ANIMAÇÃO"""
