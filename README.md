@@ -20,6 +20,24 @@ Trabalhe em equipe fazendo passes rápidos para seus aliados, desvie de botes ag
 
 ---
 
+## 🏆 Mecânica de Coletáveis e Itens do Jogo
+
+O ciclo de jogabilidade (*gameplay loop*) de **Neymar Jr: The Last Dance** gira em torno do controle da bola e da coleta de itens estratégicos que surgem no campo após a execução de dribles de efeito. Cada item possui uma função crucial para o sucesso da jogada:
+
+### ⚽ A Bola
+* **Função Principal:** O elemento central do jogo. O objetivo é dominá-la, trocar passes dinâmicos com os aliados para furar as linhas de zaga e finalizar com precisão no gol. 
+* **Física Dedicada:** Possui lógica de colisão contínua para recepção, gerenciamento de posse por meio de *offsets* nos pés dos jogadores e vetores de força para lançamentos em profundidade.
+
+### 👟 A Chuteira (Confiança)
+* **Função Principal:** Recompensa de pontuação e evolução. Sempre que você executa um drible com sucesso (Pedalada ou 360), uma chuteira é gerada no campo.
+* **Impacto no Jogo:** Coletar a chuteira aumenta instantaneamente a barra de **Confiança** do Neymar. Quanto mais complexo e audacioso for o drible realizado, maior será o valor de recompensa do item gerado.
+
+### ⭐ A Estrela (Modo Ney Prime)
+* **Função Principal:** O ápice do poder no jogo (*Power-up*). Ela é gerada automaticamente no campo assim que o jogador atinge 100% da sua barra de Confiança.
+* **Impacto no Jogo:** Ao coletar a Estrela, o modo **Ney Prime** é ativado por 7 segundos. Nesse estado, a confiança é resetada para abrir espaço para um novo ciclo, mas o Neymar ganha um bônus massivo de velocidade (`VELOCIDADE_NEY_PRIME`), tornando-se praticamente imparável contra os carrinhos dos zagueiros.
+
+---
+
 # 📸 Capturas de Tela - Imagens do Software em Funcionamento
 
 <img width="1905" height="1067" alt="image" src="https://github.com/user-attachments/assets/f179d27d-e3ff-422c-b74b-a847e4250efc" />
