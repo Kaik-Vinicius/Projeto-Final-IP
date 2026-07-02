@@ -154,7 +154,7 @@ class Zagueiro(pygame.sprite.Sprite):
         #NORMATIZA O VETOR E PREPARA O CARRINHO/DASH
         if direcao.length() > 0: #PRA NAO CRASHR SE O VETOR FOR 0
             self.direcao_dash = direcao.normalize()
-            self.frames_do_dash = 3  # O dash vai durar exatamente 3 frames
+            self.frames_do_dash = 6  # O dash vai durar exatamente x frames
         else:
            self.frames_do_dash = 0
 
@@ -169,6 +169,11 @@ class Zagueiro(pygame.sprite.Sprite):
         """METODO PRA VERIFICAR SE HOUVE COLISAO COM A BOLA OU NAO"""
         if self.driblado or self.atordoado_por_drible:
             return False
+
+        # NOVO: Se ele estiver dando o carrinho, só ativa a colisão física nos frames finais do impacto
+        if self.frames_do_dash > 4:
+            return False
+        
         return True
 
     def desenhar_zag_com_sombra(self, tela):
@@ -246,7 +251,7 @@ class Zagueiro(pygame.sprite.Sprite):
             return
 
         if self.frames_do_dash > 0:
-            passo = self.forca_total_dash / 3
+            passo = self.forca_total_dash / 4
             self.rect.centerx += int(self.direcao_dash.x * passo)
             self.rect.centery += int(self.direcao_dash.y * passo)
             self.rect.clamp_ip(pygame.Rect(0, 0, LARGURA_TELA, ALTURA_TELA))
