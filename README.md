@@ -53,7 +53,22 @@ O ciclo de jogabilidade (*gameplay loop*) de **Neymar Jr: The Last Dance** gira 
 <img width="1901" height="1062" alt="image" src="https://github.com/user-attachments/assets/735765a6-33a7-420b-9be4-8a7f65c8d775" />
 ⚔️ Imagem da tela de espera aguardando oportunidade de gol
 
+---
 
+<img width="1876" height="1057" alt="Captura de tela 2026-07-01 223552" src="https://github.com/user-attachments/assets/2c8e3d80-b99c-4f51-9e5e-aef89dac08a6" />
+⚔️ Imagem de panorama geral do campo
+
+---
+
+<img width="520" height="616" alt="Captura de tela 2026-07-02 000750" src="https://github.com/user-attachments/assets/ce748cc2-2149-4186-918c-73575eba2e6f" />
+⚔️ Imagem do Neymar alguns zagueiros e a chuteira coletável
+
+---
+
+<img width="800" height="671" alt="Captura de tela 2026-07-02 000848" src="https://github.com/user-attachments/assets/51aaa739-04c1-4a23-bb02-3be11624b202" />
+⚔️ Imagem do Neymar e outras entidades juntos com a estrela coletável
+
+---
 
 ## 🏗️ Arquitetura do Projeto e Organização do Código
 O projeto foi estruturado utilizando o padrão de arquitetura orientada a objetos (POO) e divisão de responsabilidades em componentes, garantindo que a lógica de renderização, física e estados dos personagens ficassem isoladas.
