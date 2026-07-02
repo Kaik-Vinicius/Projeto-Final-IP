@@ -54,55 +54,63 @@ class Zagueiro(pygame.sprite.Sprite):
         self.direcao_dash = pygame.math.Vector2(0, 0)
         self.forca_total_dash = 100
         
-    def perseguir_bola(self, bola):
-        # RECEBE A POSICAO X E Y DA BOLA
-        bola_x = bola.rect.centerx
-        bola_y = bola.rect.centery
+    def perseguir_bola(self, bola, distancia):
+        if distancia != 0:
+            # RECEBE A POSICAO X E Y DA BOLA
+            bola_x = bola.rect.centerx
+            bola_y = bola.rect.centery
 
-        # CALCULA A DISTANCIA DO ZAGUEIRO PARA A BOLA
-        dist_x = self.rect.centerx - bola_x
-        dist_y = self.rect.centery - bola_y
+            # CALCULA A DISTANCIA DO ZAGUEIRO PARA A BOLA
+            dist_x = self.rect.centerx - bola_x
+            dist_y = self.rect.centery - bola_y
 
-        dist_total = ((dist_x ** 2) + (dist_y ** 2)) ** 0.5
+            dist_total = ((dist_x ** 2) + (dist_y ** 2)) ** 0.5
 
-        # NORMATIZA A DISTANCIA PARA UMA PERSGUICAO MAIS FLUIDA, EU ACHO
-        norma_x = dist_x / dist_total
-        norma_y = dist_y / dist_total
+            # NORMATIZA A DISTANCIA PARA UMA PERSGUICAO MAIS FLUIDA, EU ACHO
+            norma_x = dist_x / dist_total
+            norma_y = dist_y / dist_total
 
-        # MOVE O ZAGUEIRO
-        self.rect.x -= (norma_x * self.velocidade)
-        self.rect.y -= (norma_y * self.velocidade)
+            # MOVE O ZAGUEIRO
+            self.rect.x -= (norma_x * self.velocidade)
+            self.rect.y -= (norma_y * self.velocidade)
 
-        # MANTER DENTRO DA TELA
-        self.rect.clamp_ip(pygame.Rect(0, 0, LARGURA_TELA, ALTURA_TELA))
+            # MANTER DENTRO DA TELA
+            self.rect.clamp_ip(pygame.Rect(0, 0, LARGURA_TELA, ALTURA_TELA))
 
-        return bola
-
-
-    def perseguir_neymar(self, neymar):
-        # RECEBE A POSICAO X E Y DO NEYMAR
-        neymar_x = neymar.rect.centerx
-        neymar_y = neymar.rect.centery
-
-        # CALCULA A DISTANCIA DO ZAGUEIRO PARA O NEYMAR
-        dist_x = self.rect.centerx - neymar_x
-        dist_y = self.rect.centery - neymar_y
-
-        dist_total = ((dist_x ** 2) + (dist_y ** 2)) ** 0.5
+            print('segue bola')
+            return bola
+        else:
+            return bola
 
 
-        # NORMATIZA A DISTANCIA PARA UMA PERSGUICAO MAIS FLUIDA, EU ACHO
-        norma_x = dist_x / dist_total
-        norma_y = dist_y / dist_total
+    def perseguir_neymar(self, neymar, distancia):
+        if distancia != 0:
+            # RECEBE A POSICAO X E Y DO NEYMAR
+            neymar_x = neymar.rect.centerx
+            neymar_y = neymar.rect.centery
 
-        # MOVE O ZAGUEIRO
-        self.rect.x -= (norma_x * self.velocidade)
-        self.rect.y -= (norma_y * self.velocidade)
+            # CALCULA A DISTANCIA DO ZAGUEIRO PARA O NEYMAR
+            dist_x = self.rect.centerx - neymar_x
+            dist_y = self.rect.centery - neymar_y
 
-        # MANTER DENTRO DA TELA
-        self.rect.clamp_ip(pygame.Rect(0, 0, LARGURA_TELA, ALTURA_TELA))
+            dist_total = ((dist_x ** 2) + (dist_y ** 2)) ** 0.5
 
-        return neymar
+
+            # NORMATIZA A DISTANCIA PARA UMA PERSGUICAO MAIS FLUIDA, EU ACHO
+            norma_x = dist_x / dist_total
+            norma_y = dist_y / dist_total
+
+            # MOVE O ZAGUEIRO
+            self.rect.x -= (norma_x * self.velocidade)
+            self.rect.y -= (norma_y * self.velocidade)
+
+            # MANTER DENTRO DA TELA
+            self.rect.clamp_ip(pygame.Rect(0, 0, LARGURA_TELA, ALTURA_TELA))
+
+            print('segue ney')
+            return neymar
+        else:
+            return neymar
 
     def idle(self, neymar):
         # MUDANÇA FEITA PRA ATUALIZAR AS VARIAVEIS DE SPAWN DE CADA ZAGUEIRO INDIVIDUALMENTE
@@ -274,15 +282,15 @@ class Zagueiro(pygame.sprite.Sprite):
             self.preparo_pro_bote = True
         elif distancia_bola < 80 and neymar.tem_bola:#carrinho na bola com neymar
             self.preparo_pro_bote = True
-        elif distancia_bola < 200 and distancia_bola > 0 and bola.em_movimento:#perseguir bola em movimento
+        elif distancia_bola < 200 and bola.em_movimento:#perseguir bola em movimento
             self.em_movimento = True
-            alvo = self.perseguir_bola(bola)
-        elif distancia_bola > 0 and distancia_bola < 250 and alguem_com_bola:#ir pra cima do aliado quando ele tiver a bola
+            alvo = self.perseguir_bola(bola, distancia_bola)
+        elif distancia_bola < 250 and alguem_com_bola:#ir pra cima do aliado quando ele tiver a bola
             self.em_movimento = True
-            alvo = self.perseguir_bola(bola)
-        elif distancia_neymar < 250 and distancia_neymar > 0:
+            alvo = self.perseguir_bola(bola, distancia_bola)
+        elif distancia_neymar < 250:
             self.em_movimento = True
-            alvo = self.perseguir_neymar(neymar)
+            alvo = self.perseguir_neymar(neymar, distancia_neymar)
         else:
             alvo = self.idle(neymar)
 
