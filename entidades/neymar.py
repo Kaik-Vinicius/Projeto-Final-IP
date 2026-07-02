@@ -137,10 +137,31 @@ class Neymar(pygame.sprite.Sprite):
         
         # desenha depois o neymar
         tela.blit(self.image, self.rect)
-    
+        
+        if getattr(self, 'ney_prime', False):
+            # PEGA O FRAME ATUAL DA COROA
+            sprite_coroa = self.animador.atualizar_animacao_coroa()
+            coroa_rect = sprite_coroa.get_rect()
+            
+            # CENTRALIZA A COROA NA CABEÇA DELE
+            coroa_rect.midbottom = self.rect.midtop
+            
+            # SOBE ALGUNS PIXELS
+            coroa_rect.y -= 1
+            
+            tela.blit(sprite_coroa, coroa_rect)
+        
     def update(self):
         """ESSE UPDATE VAI SER PARA ATUALIZAR A ANIMAÇÃO"""
         # SALVA A POSICAO DO CENTRO INICIAL
+        
+        # VERIFICA SE ELE AINDA TA NO PRIME
+        if self.ney_prime:
+            tempo_atual = pygame.time.get_ticks()
+            if tempo_atual - self.tempo_prime >= 7000:
+                self.ney_prime = False
+                self.velocidade = VELOCIDADE_NEY
+                
         posicao_centro = self.rect.center
         
         # ATUALIZA A IMAGEM
