@@ -295,7 +295,7 @@ def main():
                     elif ultimo_drible == '360':
                         ganho_futuro = 30
                     else:
-                        ganho_futuro = 10 
+                        ganho_futuro = 10
 
                     confianca_atual = getattr(neymar, 'confianca', 0)
                     
