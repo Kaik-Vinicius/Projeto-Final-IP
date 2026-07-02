@@ -1,6 +1,6 @@
 import pygame
 
-class ZagueiroAnimacao:
+class GoleiroAnimacao:
     def __init__(self):
         
         # =====================
@@ -9,48 +9,24 @@ class ZagueiroAnimacao:
         
         # CARREGA OS FRAMES DE FRENTE
         self.frames_parado_frente = [
-            pygame.image.load("assets/jogadores/zagueiro_arg/idle/frente/frente1.png").convert_alpha(),
-            pygame.image.load("assets/jogadores/zagueiro_arg/idle/frente/frente2.png").convert_alpha(),
-            pygame.image.load("assets/jogadores/zagueiro_arg/idle/frente/frente3.png").convert_alpha(),
-            pygame.image.load("assets/jogadores/zagueiro_arg/idle/frente/frente4.png").convert_alpha(),
+            pygame.image.load("assets/jogadores/goleiro/goleiro_idle.png").convert_alpha(),
         ]
         
         # CARREGA OS FRAMES DE COSTAS
-        self.frames_parado_esquerda = [
+        self.frames_pulando_esquerda = [
             pygame.image.load("assets/jogadores/zagueiro_arg/idle/esquerda/esquerda1.png").convert_alpha(),
             pygame.image.load("assets/jogadores/zagueiro_arg/idle/esquerda/esquerda2.png").convert_alpha(),
             pygame.image.load("assets/jogadores/zagueiro_arg/idle/esquerda/esquerda3.png").convert_alpha(),
             pygame.image.load("assets/jogadores/zagueiro_arg/idle/esquerda/esquerda4.png").convert_alpha(),
         ]
 
-        self.frames_parado_direita = [
+        self.frames_pulando_direita = [
             pygame.image.load("assets/jogadores/zagueiro_arg/idle/direita/direita1.png").convert_alpha(),
             pygame.image.load("assets/jogadores/zagueiro_arg/idle/direita/direita2.png").convert_alpha(),
             pygame.image.load("assets/jogadores/zagueiro_arg/idle/direita/direita3.png").convert_alpha(),
             pygame.image.load("assets/jogadores/zagueiro_arg/idle/direita/direita4.png").convert_alpha(),
         ]
 
-        # ============================
-        # FRAMES ANIMADOS DELE CORRENDO 
-        # ============================
-        self.frames_correndo_frente = [
-            pygame.image.load('assets/jogadores/zagueiro_arg/correndo/frente/frente1.png').convert_alpha(),
-            pygame.image.load('assets/jogadores/zagueiro_arg/correndo/frente/frente2.png').convert_alpha(),
-            pygame.image.load('assets/jogadores/zagueiro_arg/correndo/frente/frente3.png').convert_alpha(),
-        ]
-        
-        self.frames_correndo_esquerda = [
-            pygame.image.load('assets/jogadores/zagueiro_arg/correndo/esquerda/esquerda1.png').convert_alpha(),
-            pygame.image.load('assets/jogadores/zagueiro_arg/correndo/esquerda/esquerda2.png').convert_alpha(),
-            pygame.image.load('assets/jogadores/zagueiro_arg/correndo/esquerda/esquerda3.png').convert_alpha(),
-        ]
-        
-        self.frames_correndo_direita = [
-            pygame.image.load('assets/jogadores/zagueiro_arg/correndo/direita/direita1.png').convert_alpha(),
-            pygame.image.load('assets/jogadores/zagueiro_arg/correndo/direita/direita2.png').convert_alpha(),
-            pygame.image.load('assets/jogadores/zagueiro_arg/correndo/direita/direita3.png').convert_alpha(),
-        ]
-        
         # CARREGA O SPRITE DA SOMBRA
         self.sombra_horizontal = pygame.image.load("assets/jogadores/sombra_jogador_horizontal.png").convert_alpha()
         self.sombra_vertical = pygame.image.load("assets/jogadores/sombra_jogador_vertical.png").convert_alpha()
@@ -74,8 +50,6 @@ class ZagueiroAnimacao:
         e atualiza a imagem correspondente.
         """
         tempo_atual = pygame.time.get_ticks()
-
-        lista_anterior = self.lista_atual
         
         # DEFINE QUAL LISTA VAI USAR DEPENDENDO DO MONITORAMENTO DO MOVIMENTO
         if not em_movimento:
@@ -100,20 +74,13 @@ class ZagueiroAnimacao:
                 self.lista_atual = self.frames_correndo_esquerda
                 self.sombra_atual = self.sombra_vertical
 
-        if self.lista_atual != lista_anterior:
-            self.frame_atual = 0
-
         # LOGICA DO RELOGIO QUE ATUALIZA OS FRAMES
         if tempo_atual - self.ultimo_update > self.velocidade_animacao:
             self.ultimo_update = tempo_atual
             self.frame_atual += 1
             
-            if self.frame_atual >= len(self.lista_atual) or self.frame_atual < 0:
+            if self.frame_atual >= len(self.lista_atual):
                 self.frame_atual = 0
                 
         # RETORNA A IMAGEM QUE DEVE SER DESENHADA NESSE FRAME
-        try:
-            return self.lista_atual[self.frame_atual]
-        except IndexError:
-            self.frame_atual = 0
-            return self.lista_atual[0]
+        return self.lista_atual[self.frame_atual]

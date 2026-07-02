@@ -1,13 +1,18 @@
 import pygame
-from gerenciamento.constants import (COR_GOLEIRO)
+from gerenciamento.constants import (LARGURA_TELA, ALTURA_TELA)
+from assets.animacao.goleiro_animado import GoleiroAnimacao
 
 class Goleiro (pygame.sprite.Sprite):
     def __init__(self, pos_inicial_x, pos_inicial_y):
         super().__init__()
       
-        # DEFININDO O RETANGULO DO ZAGUEIRO
-        self.image = pygame.Surface((45,40))
-        self.image.fill(COR_GOLEIRO)
+        # INSTANCIA O ZAGUEIRO ANIMADO
+        self.animador = GoleiroAnimacao()
+
+        # DEFINE A IMAGEM DO NEYMAR COM A IMAGEM DO FRAME ATUAL
+        self.image = self.animador.obter_imagem_inicial()
+        
+        # O RECT VIRA O TAMANHO DA IMAGEM ORIGINAL
         self.rect = self.image.get_rect()
       
         # ONDE ELE VAI SPAWNAR
@@ -19,6 +24,8 @@ class Goleiro (pygame.sprite.Sprite):
         self.spawn_y = pos_inicial_y
       
         self.velocidade = 2 # A VELOCIDADE QUE ELE VAI ANDAR
+
+        self.dist_x = 0
 
     def perseguir_neymar(self, neymar):
         neymar_x = neymar.rect.centerx
@@ -46,14 +53,14 @@ class Goleiro (pygame.sprite.Sprite):
             alvo = 860
 
         # CALCULA A DISTANCIA E DIREÇÃO NO EIXO X
-        dist_x = self.rect.centerx - alvo
+        self.dist_x = self.rect.centerx - alvo
 
-        velocidade = abs(8 - (min(distancia_bola, 200) / 200) * 10)
+        velocidade = abs(8 - (1 - (min(distancia_bola, 200) / 200)) * 10)
 
         # 2 PARA NAO FICAR TREMENDO
-        if abs(dist_x) > 2:
+        if abs(self.dist_x) > 2:
             # NORMTIZA O VETOR NO EIXO X
-            norma_x = dist_x / abs(dist_x)
+            norma_x = self.dist_x / abs(self.dist_x)
 
             # MOVE O GOLEIRO APENAS NO EIXO X
             if bola.resultado_chute == 'gol':
