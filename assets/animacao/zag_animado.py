@@ -50,6 +50,18 @@ class ZagueiroAnimacao:
             pygame.image.load('assets/jogadores/zagueiro_arg/correndo/direita/direita2.png').convert_alpha(),
             pygame.image.load('assets/jogadores/zagueiro_arg/correndo/direita/direita3.png').convert_alpha(),
         ]
+
+        self.frames_bote_esquerda = [
+            pygame.image.load('assets/jogadores/zagueiro_arg/bote/bote_esquerda/bote_esquerda1.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/zagueiro_arg/bote/bote_esquerda/bote_esquerda2.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/zagueiro_arg/bote/bote_esquerda/bote_esquerda3.png').convert_alpha(),
+        ]
+
+        self.frames_bote_direita = [
+            pygame.image.load('assets/jogadores/zagueiro_arg/bote/bote_direita/bote1.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/zagueiro_arg/bote/bote_direita/bote2.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/zagueiro_arg/bote/bote_direita/bote3.png').convert_alpha(),
+        ]
         
         # CARREGA O SPRITE DA SOMBRA
         self.sombra_horizontal = pygame.image.load("assets/jogadores/sombra_jogador_horizontal.png").convert_alpha()
@@ -68,50 +80,74 @@ class ZagueiroAnimacao:
         """Retorna o primeiro frame para o setup do sprite"""
         return self.lista_atual[self.frame_atual]
 
-    def atualizar_animacao(self, em_movimento, olhando_para):
-        """
-        Recebe o estado atual do Neymar monitorado na movimentação 
-        e atualiza a imagem correspondente.
-        """
+    def atualizar_animacao(self, em_movimento, olhando_para, em_preparo=False, em_dash=False, atordoado=False):
         tempo_atual = pygame.time.get_ticks()
-
         lista_anterior = self.lista_atual
-        
-        # DEFINE QUAL LISTA VAI USAR DEPENDENDO DO MONITORAMENTO DO MOVIMENTO
-        if not em_movimento:
-            if olhando_para == "frente":
-                self.lista_atual = self.frames_parado_frente
-                self.sombra_atual = self.sombra_horizontal
-            if olhando_para == 'direita':
-                self.lista_atual = self.frames_parado_direita
-                self.sombra_atual = self.sombra_vertical
+
+        # 1. ESTADOS DE BOTE (PREPARO, DASH OU ATORDOADO)
+        if em_preparo or em_dash or atordoado:
+            # Força a lista de bote baseada na direção (se for frente, escolhe direita como padrão)
             if olhando_para == 'esquerda':
-                self.lista_atual = self.frames_parado_esquerda
-                self.sombra_atual = self.sombra_vertical
-        else:
-            # ATIVA A ANIMAÇÃO DE CORRENDO PRA FRENTE
-            if olhando_para == "frente":
-                self.lista_atual = self.frames_correndo_frente
-                self.sombra_atual = self.sombra_horizontal
-            elif olhando_para == "direita":
-                self.lista_atual = self.frames_correndo_direita
-                self.sombra_atual = self.sombra_vertical
-            elif olhando_para == "esquerda":
-                self.lista_atual = self.frames_correndo_esquerda
-                self.sombra_atual = self.sombra_vertical
+                self.lista_atual = self.frames_bote_esquerda
+            else:
+                self.lista_atual = self.frames_bote_direita
+                
+            self.sombra_atual = self.sombra_vertical
 
-        if self.lista_atual != lista_anterior:
-            self.frame_atual = 0
+            # Se for PREPARO, roda a animação dos 3 sprites
+            if em_preparo:
+                if self.lista_atual != lista_anterior:
+                    self.frame_atual = 0
+                    self.ultimo_update = tempo_atual
 
-        # LOGICA DO RELOGIO QUE ATUALIZA OS FRAMES
-        if tempo_atual - self.ultimo_update > self.velocidade_animacao:
-            self.ultimo_update = tempo_atual
-            self.frame_atual += 1
+                if tempo_atual - self.ultimo_update > 166:
+                    self.ultimo_update = tempo_atual
+                    self.frame_atual += 1
+                
+                if self.frame_atual > 2:
+                    self.frame_atual = 2
             
-            if self.frame_atual >= len(self.lista_atual) or self.frame_atual < 0:
+            # Se for DASH ou ATORDOADO, trava estritamente no último frame (2)
+            else:
+                self.frame_atual = 2
+
+        # 2. MOVIMENTAÇÃO PADRÃO (CORRIDA / IDLE)
+        else:
+            if not em_movimento:
+                if olhando_para == "frente":
+                    self.lista_atual = self.frames_parado_frente
+                    self.sombra_atual = self.sombra_horizontal
+                elif olhando_para == 'direita':
+                    self.lista_atual = self.frames_parado_direita
+                    self.sombra_atual = self.sombra_vertical
+                elif olhando_para == 'esquerda':
+                    self.lista_atual = self.frames_parado_esquerda
+                    self.sombra_atual = self.sombra_vertical
+            else:
+                if olhando_para == "frente":
+                    self.lista_atual = self.frames_correndo_frente
+                    self.sombra_atual = self.sombra_horizontal
+                elif olhando_para == "direita":
+                    self.lista_atual = self.frames_correndo_direita
+                    self.sombra_atual = self.sombra_vertical
+                elif olhando_para == "esquerda":
+                    self.lista_atual = self.frames_correndo_esquerda
+                    self.sombra_atual = self.sombra_vertical
+
+            if self.lista_atual != lista_anterior:
+                self.frame_atual = 0
+
+            if tempo_atual - self.ultimo_update > self.velocidade_animacao:
+                self.ultimo_update = tempo_atual
+                self.frame_atual += 1
+
+        # Validação final de segurança para o índice
+        if self.frame_atual >= len(self.lista_atual) or self.frame_atual < 0:
+            if em_dash or atordoado:
+                self.frame_atual = 2
+            else:
                 self.frame_atual = 0
                 
-        # RETORNA A IMAGEM QUE DEVE SER DESENHADA NESSE FRAME
         try:
             return self.lista_atual[self.frame_atual]
         except IndexError:

@@ -193,37 +193,52 @@ class Zagueiro(pygame.sprite.Sprite):
         # desenha depois o neymar
         tela.blit(self.image, self.rect)
     
-    def update_anim(self, alvo):
-        """ESSE UPDATE VAI SER PARA ATUALIZAR A ANIMAÇÃO"""
-        # SALVA A POSICAO DO CENTRO INICIAL
+    def update_anim(self, alvo, tempo_atual=0):
         posicao_centro = self.rect.center
-        posicao_alvo_x = alvo.rect.centerx
-        posicao_alvo_y = alvo.rect.centery
 
-        dist_y = abs(posicao_centro[1] - posicao_alvo_y)
-        dist_x = posicao_centro[0] - posicao_alvo_x
-        abs_dist_x = abs(dist_x)
+        if alvo is None:
+            alvo = self
 
-        if dist_y > abs_dist_x:
-            self.olhando_para = "frente"
-        else:
-            if dist_x > 0:
-                self.olhando_para = "esquerda"
-            elif dist_x < 0:
-                self.olhando_para = "direita"
-        
-        # ATUALIZA A IMAGEM
-        self.image = self.animador.atualizar_animacao(self.em_movimento, self.olhando_para)
+        if not self.preparo_pro_bote and self.frames_do_dash == 0 and not self.atordoamento_bote:
+            posicao_alvo_x = alvo.rect.centerx
+            posicao_alvo_y = alvo.rect.centery
+
+            dist_y = abs(posicao_centro[1] - posicao_alvo_y)
+            dist_x = posicao_centro[0] - posicao_alvo_x
+            abs_dist_x = abs(dist_x)
+
+            if dist_y > abs_dist_x:
+                self.olhando_para = "frente"
+            else:
+                if dist_x > 0:
+                    self.olhando_para = "esquerda"
+                elif dist_x < 0:
+                    self.olhando_para = "direita"
+
+        # Calcula há quanto tempo ele está na animação de preparo
+        tempo_preparo_passado = 0
+        if self.preparo_pro_bote and self.pausa:
+            tempo_preparo_passado = tempo_atual - self.tempo_pausa
+
+        # ATUALIZA A IMAGEM PASSANDO OS NOVOS PARÂMETROS DE BOTE
+        self.image = self.animador.atualizar_animacao(
+            self.em_movimento, 
+            self.olhando_para,
+            em_preparo=self.preparo_pro_bote,
+            em_dash=(self.frames_do_dash > 0),
+            atordoado=self.atordoamento_bote,
+        )
         
         # RECRIA O RECT BASEADO NA NOVA IMAGEM
         self.rect = self.image.get_rect()
         self.rect.center = posicao_centro
         
-        # ATUALIZA A HITBOX DO NEYMAR
+        # ATUALIZA A HITBOX DO ZAGUEIRO
         self.hitbox.midbottom = self.rect.midbottom
 
     def atualizar(self, neymar, bola, distancia_neymar, distancia_bola, alguem_com_bola):
         tempo_atual = pygame.time.get_ticks()
+        alvo = None 
         
         if self.atordoado_por_drible:
             if tempo_atual >= self.tempo_atordoado_drible:
@@ -231,38 +246,31 @@ class Zagueiro(pygame.sprite.Sprite):
             return
 
         if self.frames_do_dash > 0:
-            # DIVIDE O COMPRIMENTO DO DASH PELA QUANTIDADE FIXA DE FRAMES (3)
             passo = self.forca_total_dash / 3
-          
-            # MOVE 1/3 DA DISTANCIA DO DASH EM CADA FRAME
             self.rect.centerx += int(self.direcao_dash.x * passo)
             self.rect.centery += int(self.direcao_dash.y * passo)
             self.rect.clamp_ip(pygame.Rect(0, 0, LARGURA_TELA, ALTURA_TELA))
+            self.frames_do_dash -= 1 
           
-            self.frames_do_dash -= 1 #CONTABILIZANDO OS FRAMES
-          
-            # ACABOU O DASH, GUARDA O TEMPO EM QUE O DASH ACABOU
             if self.frames_do_dash == 0:
                 if self.driblado:
-                    # SE FOI DRIBLADO O TEMPO DE 1.5s começa agora
                     self.atordoado_por_drible = True
                     self.tempo_atordoado_drible = pygame.time.get_ticks() + self.tempo_pos_drible
-                    self.driblado = False  #RESETA A VARIAVEL PRA O PROXIMO LANCE
+                    self.driblado = False  
                 else:
-                    # SE NAO FOI DRIBLADO, DÁ O BOTE MAS FICA ATORDOADO POR 1s só
                     self.atordoamento_bote = True
                     self.tempo_pausa = pygame.time.get_ticks()
+            
+            self.update_anim(alvo) # Atualiza a animação durante o dash
             return
 
-
-        # FICA PARADO POR 1 SEGUNDO DEPOIS DO DASH
         if self.atordoamento_bote:
             if tempo_atual - self.tempo_pausa >= 1000:
                 self.atordoamento_bote = False
-            return #GARANTIR QUE NADA MAIS ACONTEÇA
+            
+            self.update_anim(alvo) # Atualiza a animação durante o atordoamento
+            return 
 
-
-        # PREPARO DO DASH, 1 SEGUNDO PARADO PRA COMEÇAR
         if self.preparo_pro_bote:
             if not self.pausa:
                 self.pausa = True
@@ -271,21 +279,19 @@ class Zagueiro(pygame.sprite.Sprite):
                 if tempo_atual - self.tempo_pausa >= 500:
                     self.pausa = False
                     self.preparo_pro_bote = False
-                  
-                    #CHAMA O INÍCIO DO DASH/CARRINHO
                     self.iniciar_carrinho(bola)
+            
+            self.update_anim(alvo) # Atualiza a animação rodando o relógio de 166ms
             return
 
-
-        # CONTROLE MOVIMENTAÇÃO BÁSICA DO ZAGUEIRO
-        if distancia_bola < 80 and bola.no_chao_esperando:#carrinho na bola no chão
+        if distancia_bola < 80 and bola.no_chao_esperando:
             self.preparo_pro_bote = True
-        elif distancia_bola < 80 and neymar.tem_bola:#carrinho na bola com neymar
+        elif distancia_bola < 80 and neymar.tem_bola:
             self.preparo_pro_bote = True
-        elif distancia_bola < 200 and bola.em_movimento:#perseguir bola em movimento
+        elif distancia_bola < 200 and bola.em_movimento:
             self.em_movimento = True
             alvo = self.perseguir_bola(bola, distancia_bola)
-        elif distancia_bola < 250 and alguem_com_bola:#ir pra cima do aliado quando ele tiver a bola
+        elif distancia_bola < 250 and alguem_com_bola:
             self.em_movimento = True
             alvo = self.perseguir_bola(bola, distancia_bola)
         elif distancia_neymar < 250:
