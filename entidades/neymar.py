@@ -289,8 +289,8 @@ class Neymar(pygame.sprite.Sprite):
         """
         RECEBE COMO PARAMETRO O TIPO DE DRIBLE QUE O NEY EXECUTOU E O GRUPO DE ZAGUEIROS QUE VAI SER PERCORRIDO
         """
-        # SE NAO TIVER A BOLA OU SE JA TIVER EM UM DRIBLE EFETIVO, ELE BLOQUEIA
-        if not self.tem_bola or self.drible_efetivo:
+        # [ALTERAÇÃO]: Bloqueia se já estiver na animação de drible para não resetar os frames no meio
+        if not self.tem_bola or self.bola_em_drible or getattr(self.animador, 'em_drible', False):
             return
         
         tipo_drible = tipo_drible.lower()
@@ -318,19 +318,31 @@ class Neymar(pygame.sprite.Sprite):
             self.drible_efetivo = False # A FIRULA NAO É CONSIDERADA UM DRIBLE EFETIVO
             self.tempo_inicio_drible = pygame.time.get_ticks()
             self.ultimo_tipo_drible = 'firula'
+
+            # PEDALADA E 360 NO VENTO
+            if tipo_drible == 'pedalada':
+                self.animador.iniciar_animacao_pedalada(self.olhando_para)
+            elif tipo_drible == '360':
+                self.animador.iniciar_animacao_360()
             return
         
-        # AQUI ELE VAI TENTAR DRIBLAR O ZAGUEIRO CASO ELE ESTEJA PREPARADO PRA UMM BOTE
+        # AQUI ELE VAI TENTAR DRIBLAR O ZAGUEIRO CASO ELE ESTEJA PREPARADO PRA UM BOTE
         elif zagueiro_mais_proximo and dist_min <= 110:
-                if zagueiro_mais_proximo.preparo_pro_bote: # SO FAZ O DRIBLE SE O ZAGUEIRO MAIS PROXIMO TIVER PREPARADO PRO BOTE
-                    chance_final = self.calcular_chance_drible(tipo_drible)
-                    
-                    if random.random() <= chance_final: # ISSO DAQUI RANDOMIZA A CHANCE DE DAR CERTO
-                        zagueiro_mais_proximo.ficar_atordoado_por_drible(tempo=1500) # ATORDOAMENTO DE 1.5s
-                        self.bola_em_drible = True
-                        self.drible_efetivo = True
-                        self.tempo_inicio_drible = pygame.time.get_ticks()
-                        self.ultimo_tipo_drible = tipo_drible
+            if zagueiro_mais_proximo.preparo_pro_bote: # SO FAZ O DRIBLE SE O ZAGUEIRO MAIS PROXIMO TIVER PREPARADO PRO BOTE
+                chance_final = self.calcular_chance_drible(tipo_drible)
+                
+                if random.random() <= chance_final: # ISSO DAQUI RANDOMIZA A CHANCE DE DAR CERTO
+                    zagueiro_mais_proximo.ficar_atordoado_por_drible(tempo=1500) # ATORDOAMENTO DE 1.5s
+                    self.bola_em_drible = True
+                    self.drible_efetivo = True
+                    self.tempo_inicio_drible = pygame.time.get_ticks()
+                    self.ultimo_tipo_drible = tipo_drible
+
+                    # ATIVA A ANIMAÇÃO DE PEDALADA E DO 360
+                    if tipo_drible == 'pedalada':
+                        self.animador.iniciar_animacao_pedalada(self.olhando_para)
+                    elif tipo_drible == '360':
+                        self.animador.iniciar_animacao_360()
                         
             
 

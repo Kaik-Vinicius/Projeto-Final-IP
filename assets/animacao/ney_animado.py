@@ -1,4 +1,5 @@
 import pygame
+import random
 
 class NeymarAnimacao:
     def __init__(self):
@@ -68,9 +69,41 @@ class NeymarAnimacao:
             pygame.image.load('assets/jogadores/ney/ney_correndo/correndo_direita/correndo_direita4.png').convert_alpha(),
         ]
         
+        
+        # ==================
+        # FRAMES DOS DRIBLES DELE
+        # ===================
+        
+        # FRAMES DA PEDALADA
+        self.frames_pedalada_direita = [
+            pygame.image.load('assets/jogadores/ney/ney_driblando/pedalada/pedalada_direita/pedaladadireita1.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/ney/ney_driblando/pedalada/pedalada_direita/pedaladadireita2.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/ney/ney_driblando/pedalada/pedalada_direita/pedaladadireita3.png').convert_alpha(),
+        ]
+        
+        self.frames_pedalada_esquerda = [
+            pygame.image.load('assets/jogadores/ney/ney_driblando/pedalada/pedalada_esquerda/pedaladaesquerda1.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/ney/ney_driblando/pedalada/pedalada_esquerda/pedaladaesquerda2.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/ney/ney_driblando/pedalada/pedalada_esquerda/pedaladaesquerda3.png').convert_alpha(),
+        ]
+        
+        # GIRO 360
+        self.giro_360 = [
+            pygame.image.load('assets/jogadores/ney/ney_driblando/360/360_1.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/ney/ney_driblando/360/360_2.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/ney/ney_driblando/360/360_3.png').convert_alpha(),
+            pygame.image.load('assets/jogadores/ney/ney_driblando/360/360_4.png').convert_alpha(),
+            
+        ]
+        
         # CARREGA O SPRITE DA SOMBRA
         self.sombra_horizontal = pygame.image.load("assets/jogadores/sombra_jogador_horizontal.png").convert_alpha()
         self.sombra_vertical = pygame.image.load("assets/jogadores/sombra_jogador_vertical.png").convert_alpha()
+        
+        
+        # ATRIBUTOS DOS DRIBLES
+        self.em_drible = False
+        self.drible_encerrado = False
         
         # ESSA É A SOMBRA QUE INICIA
         self.sombra_atual = self.sombra_horizontal
@@ -80,17 +113,62 @@ class NeymarAnimacao:
         self.frame_atual = 0
         self.velocidade_animacao = 0 # ms
         self.ultimo_update = pygame.time.get_ticks()
+    
+    def iniciar_animacao_pedalada(self, olhando_para):
+        """ATIVA A ANIMAÇÃO DA PEDALADA"""
+        self.em_drible = True
+        self.drible_encerrado = False
+        self.frame_atual = 0
+        self.ultimo_update = pygame.time.get_ticks()
+        self.velocidade_animacao = 80
 
+        if olhando_para in ['direita', 'esquerda']:
+            direcao_final = olhando_para
+        else:
+            # SE NAO ESTIVER OLHANDO PRA OS LADOS ESCOLHE ALEATORIAMENTE
+            direcao_final = random.choice(['direita', 'esquerda'])
+
+        if direcao_final == 'direita':
+            self.lista_atual = self.frames_pedalada_direita
+            self.sombra_atual = self.sombra_vertical
+        else:
+            self.lista_atual = self.frames_pedalada_esquerda
+            self.sombra_atual = self.sombra_vertical
+    
+    def iniciar_animacao_360(self):
+        """ATIVA OS FRAMES DA ANIMAÇÃO DO 360"""
+        self.em_drible = True
+        self.drible_encerrado = False
+        self.frame_atual = 0
+        self.ultimo_update = pygame.time.get_ticks()
+        self.velocidade_animacao = 80 
+        
+        self.lista_atual = self.giro_360
+        self.sombra_atual = self.sombra_vertical 
+    
     def obter_imagem_inicial(self):
-        """Retorna o primeiro frame para o setup do sprite"""
+        """RETORNA O PRIMEIRO FRAME PRA O SETUP DA ANIMAÇÃO"""
         return self.lista_atual[self.frame_atual]
 
     def atualizar_animacao(self, em_movimento, olhando_para):
         """
-        Recebe o estado atual do Neymar monitorado na movimentação 
-        e atualiza a imagem correspondente.
+        RECEBE O ESTADO ATUAL DO NEYMAR MONITORANDO SUA MOVIMENTAÇÃO
         """
         tempo_atual = pygame.time.get_ticks()
+        
+        # SE ESTIVER EM DRIBLE, IGNORA A MOVIMENTAÇÃO PADRÃO ATÉ ACABAR OS FRAMES
+        if self.em_drible:
+            if tempo_atual - self.ultimo_update > self.velocidade_animacao:
+                self.ultimo_update = tempo_atual
+                self.frame_atual += 1
+                
+                # SE PASSOU DO ULTIMO FRAME ENCERRA A PEDALADA
+                if self.frame_atual >= len(self.lista_atual):
+                    self.frame_atual = 0
+                    self.em_drible = False
+                    self.drible_encerrado = True
+            
+            return self.lista_atual[self.frame_atual]
         
         # DEFINE QUAL LISTA VAI USAR DEPENDENDO DO MONITORAMENTO DO MOVIMENTO
         if not em_movimento:

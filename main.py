@@ -91,11 +91,6 @@ def main():
     bola = Bola()
     
     # GRUPO DE SPRITES ANIMADOS
-    grupo_sprites = pygame.sprite.LayeredUpdates()
-    
-    neymar.layer = 5 
-    grupo_sprites.add(neymar)
-    grupo_sprites.add(bola)
 
     # GRUPOS DOS JOGADORES TÁTICOS
     grupo_zagueiros = pygame.sprite.Group()
@@ -396,7 +391,6 @@ def main():
            
             tela.fill((20, 20, 20))
             tela.blit(campo_jogo, (CAMPO_X, CAMPO_Y))
-            grupo_sprites.draw(tela)
 
             grupo_coletaveis.draw(tela)
             grupo_zagueiros.draw(tela) 
@@ -410,9 +404,13 @@ def main():
                 aliado.desenhar_aliado_com_sombra(tela)
             
             neymar.desenhar_ney_com_sombra(tela)
+            
+            if not neymar.animador.em_drible:
+                tela.blit(bola.image, bola.rect)
+                
             for zagueiro in grupo_zagueiros:
                 zagueiro.desenhar_zag_com_sombra(tela)
-            tela.blit(bola.image, bola.rect)
+
             tela.blit(neymar.image, neymar.rect)
 
             desenhar_placar_superior(tela, fonte_pequena, chuteiras_coletadas, estrelas_coletadas, oportunidades_restantes, neymar.confianca, asset_chuteira_placar, asset_estrela_placar, asset_placar_brasil, asset_placar_argentina, gols_brasil, gols_argentina, neymar)
