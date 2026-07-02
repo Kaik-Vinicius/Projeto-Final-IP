@@ -40,35 +40,46 @@ O ciclo de jogabilidade (*gameplay loop*) de **Neymar Jr: The Last Dance** gira 
 
 # 📸 Capturas de Tela - Imagens do Software em Funcionamento
 
-<img width="1905" height="1067" alt="image" src="https://github.com/user-attachments/assets/f179d27d-e3ff-422c-b74b-a847e4250efc" />
-⚔️ Imagem inicial de abertura do jogo
+<div align="center">
+  <img width="1905" height="1067" alt="image" src="https://github.com/user-attachments/assets/f179d27d-e3ff-422c-b74b-a847e4250efc" />
+  <p>⚔️ Imagem inicial de abertura do jogo</p>
+</div>
 
 ---
 
-<img width="1907" height="1062" alt="image" src="https://github.com/user-attachments/assets/1dd0dd19-020b-42df-a1c7-24f57a80159c" />
-⚔️ Imagem do menu de dificuldade
+<div align="center">
+  <img width="1907" height="1062" alt="image" src="https://github.com/user-attachments/assets/1dd0dd19-020b-42df-a1c7-24f57a80159c" />
+  <p>⚔️ Imagem do menu de dificuldade</p>
+</div>
 
 ---
 
-<img width="1901" height="1062" alt="image" src="https://github.com/user-attachments/assets/735765a6-33a7-420b-9be4-8a7f65c8d775" />
-⚔️ Imagem da tela de espera aguardando oportunidade de gol
+<div align="center">
+  <img width="1901" height="1062" alt="image" src="https://github.com/user-attachments/assets/735765a6-33a7-420b-9be4-8a7f65c8d775" />
+  <p>⚔️ Imagem da tela de espera aguardando oportunidade de gol</p>
+</div>
 
 ---
 
-<img width="1876" height="1057" alt="Captura de tela 2026-07-01 223552" src="https://github.com/user-attachments/assets/2c8e3d80-b99c-4f51-9e5e-aef89dac08a6" />
-⚔️ Imagem de panorama geral do campo
+<div align="center">
+  <img width="1876" height="1057" alt="Captura de tela 2026-07-01 223552" src="https://github.com/user-attachments/assets/2c8e3d80-b99c-4f51-9e5e-aef89dac08a6" />
+  <p>⚔️ Imagem de panorama geral do campo</p>
+</div>
 
 ---
 
-<img width="520" height="616" alt="Captura de tela 2026-07-02 000750" src="https://github.com/user-attachments/assets/ce748cc2-2149-4186-918c-73575eba2e6f" />
-⚔️ Imagem do Neymar alguns zagueiros e a chuteira coletável
+<div align="center">
+  <img width="520" height="616" alt="Captura de tela 2026-07-02 000750" src="https://github.com/user-attachments/assets/ce748cc2-2149-4186-918c-73575eba2e6f" />
+  <p>⚔️ Imagem do Neymar alguns zagueiros e a chuteira coletável</p>
+</div>
 
 ---
 
-<img width="800" height="671" alt="Captura de tela 2026-07-02 000848" src="https://github.com/user-attachments/assets/51aaa739-04c1-4a23-bb02-3be11624b202" />
-⚔️ Imagem do Neymar e outras entidades juntos com a estrela coletável
+<div align="center">
+  <img width="800" height="671" alt="Captura de tela 2026-07-02 000848" src="https://github.com/user-attachments/assets/51aaa739-04c1-4a23-bb02-3be11624b202" />
+  <p>⚔️ Imagem do Neymar e outras entidades juntos com a estrela coletável</p>
+</div>
 
----
 
 ## 🏗️ Arquitetura do Projeto e Organização do Código
 O projeto foi estruturado utilizando o padrão de arquitetura orientada a objetos (POO) e divisão de responsabilidades em componentes, garantindo que a lógica de renderização, física e estados dos personagens ficassem isoladas.
